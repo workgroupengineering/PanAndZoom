@@ -176,6 +176,107 @@ To constrain pan offset use `MinOffsetX`, `MaxOffsetX`, `MinOffsetY` and `MaxOff
 
 To enable or disable constrains use `EnableConstrains` flag.
 
+## Advanced Features
+
+### Animation Support
+
+Enable smooth animations for zoom and pan operations:
+
+```csharp
+zoomBorder.EnableAnimations = true;
+zoomBorder.AnimationDuration = TimeSpan.FromMilliseconds(300);
+```
+
+### Double-Click to Zoom
+
+Configure double-click zoom behavior:
+
+```csharp
+zoomBorder.EnableDoubleClickZoom = true;
+zoomBorder.DoubleClickZoomMode = DoubleClickZoomMode.ZoomInOut; // ZoomIn, ZoomOut, ZoomInOut, ZoomToFit, None
+zoomBorder.DoubleClickZoomFactor = 2.0;
+```
+
+### Content Bounds Restriction
+
+Prevent panning beyond content boundaries:
+
+```csharp
+zoomBorder.BoundsMode = ContentBoundsMode.KeepContentVisible; // Unrestricted, KeepContentVisible, FillViewport, KeepCentered, Custom
+zoomBorder.BoundsPadding = new Thickness(10);
+zoomBorder.MinimumVisibleContentPercentage = 0.1; // 10% of content must remain visible
+```
+
+**Bounds Modes:**
+- **Unrestricted**: No bounds checking (default)
+- **KeepContentVisible**: Ensures minimum percentage of content stays visible
+- **FillViewport**: Centers small content and prevents empty space for large content
+- **KeepCentered**: Always keeps content centered
+- **Custom**: Override `GetContentBounds()` and `ValidateTransform()` for custom logic
+
+### Resize Behavior
+
+Control how the view adjusts when the control is resized:
+
+```csharp
+zoomBorder.ResizeBehavior = ResizeBehaviorMode.MaintainCenter; // None, MaintainCenter, MaintainTopLeft, MaintainZoom, ReapplyStretch, Custom
+```
+
+**Resize Modes:**
+- **None**: No special handling (default)
+- **MaintainCenter**: Keeps the center point stable during resize
+- **MaintainTopLeft**: Keeps the top-left position stable
+- **MaintainZoom**: Maintains zoom level and adjusts position proportionally
+- **ReapplyStretch**: Reapplies the current stretch mode (calls AutoFit)
+- **Custom**: Override `OnResized(Size oldSize, Size newSize)` for custom logic
+
+### Configurable Wheel Behavior
+
+Customize mouse wheel behavior with modifier key support:
+
+```csharp
+zoomBorder.WheelBehavior = WheelBehaviorMode.Zoom; // Zoom, PanVertical, PanHorizontal, None
+zoomBorder.WheelWithCtrl = WheelBehaviorMode.Zoom;
+zoomBorder.WheelWithShift = WheelBehaviorMode.PanHorizontal;
+zoomBorder.WheelZoomSensitivity = 1.0;
+zoomBorder.WheelPanSensitivity = 1.0;
+```
+
+**Wheel Modes:**
+- **Zoom**: Zoom in/out (default)
+- **PanVertical**: Pan up/down
+- **PanHorizontal**: Pan left/right
+- **None**: Disable wheel
+
+**Example:** By default, `Shift`+`Wheel` pans horizontally while regular wheel zooms.
+
+### Virtual Methods for Custom Behavior
+
+Override these methods to implement custom logic:
+
+```csharp
+public class CustomZoomBorder : ZoomBorder
+{
+    protected override Rect GetContentBounds()
+    {
+        // Return custom content bounds for Custom BoundsMode
+        return base.GetContentBounds();
+    }
+
+    protected override bool ValidateTransform(Matrix newMatrix)
+    {
+        // Validate proposed transform matrix
+        return base.ValidateTransform(newMatrix);
+    }
+
+    protected override void OnResized(Size oldSize, Size newSize)
+    {
+        // Custom resize handling for Custom ResizeBehavior
+        base.OnResized(oldSize, newSize);
+    }
+}
+```
+
 ## License
 
 PanAndZoom is licensed under the [MIT license](LICENSE.TXT).
