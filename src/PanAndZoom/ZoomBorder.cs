@@ -88,7 +88,7 @@ public partial class ZoomBorder : Border
         DetachedFromVisualTree += PanAndZoom_DetachedFromVisualTree;
 
         this.GetObservable(ChildProperty).Subscribe(new AnonymousObserver<Control?>(ChildChanged));
-        this.GetObservable(BoundsProperty).Subscribe(new AnonymousObserver<Rect>(BoundsChanged));
+        this.GetObservable(BoundsProperty).Subscribe(new AnonymousObserver<Rect>(BoundsChangedHandler));
         
         // Initialize gesture recognizers
         _pinchGestureRecognizer = new PinchGestureRecognizer();
@@ -191,6 +191,7 @@ public partial class ZoomBorder : Border
         PointerReleased += Border_PointerReleased;
         PointerMoved += Border_PointerMoved;
         PointerCaptureLost += Border_PointerCaptureLost;
+        DoubleTapped += Border_DoubleTapped;
         
         // Add gesture event handlers
         AddHandler(Gestures.PinchEvent, Border_PinchGesture);
@@ -220,6 +221,7 @@ public partial class ZoomBorder : Border
         PointerReleased -= Border_PointerReleased;
         PointerMoved -= Border_PointerMoved;
         PointerCaptureLost -= Border_PointerCaptureLost;
+        DoubleTapped -= Border_DoubleTapped;
         
         // Remove gesture event handlers
         RemoveHandler(Gestures.PinchEvent, Border_PinchGesture);
@@ -352,16 +354,94 @@ public partial class ZoomBorder : Border
 
     private void Border_PointerWheelChanged(object? sender, PointerWheelEventArgs e)
     {
-        if (CanZoomOnPointerWheel(e))
+        var behavior = GetWheelBehavior(e.KeyModifiers);
+
+        switch (behavior)
         {
-            Wheel(e);
-            e.Handled = true;
+            case WheelBehaviorMode.Zoom:
+                if (EnableZoom)
+                {
+                    Wheel(e, WheelZoomSensitivity);
+                    e.Handled = true;
+                }
+                break;
+
+            case WheelBehaviorMode.PanVertical:
+                if (EnablePan)
+                {
+                    PanDelta(0, 10 * e.Delta.Y * WheelPanSensitivity);
+                    e.Handled = true;
+                }
+                break;
+
+            case WheelBehaviorMode.PanHorizontal:
+                if (EnablePan)
+                {
+                    PanDelta(10 * e.Delta.X * WheelPanSensitivity, 0);
+                    e.Handled = true;
+                }
+                break;
+
+            case WheelBehaviorMode.None:
+                break;
         }
-        else if (CanPanOnPointerWheel(e))
+    }
+
+    private WheelBehaviorMode GetWheelBehavior(KeyModifiers modifiers)
+    {
+        if (modifiers.HasFlag(KeyModifiers.Control))
         {
-            PanDelta(10 * e.Delta.X, 10 * e.Delta.Y);
-            e.Handled = true;
+            return WheelWithCtrl;
         }
+
+        if (modifiers.HasFlag(KeyModifiers.Shift))
+        {
+            return WheelWithShift;
+        }
+
+        return WheelBehavior;
+    }
+
+    private void Border_DoubleTapped(object? sender, TappedEventArgs e)
+    {
+        if (!EnableDoubleClickZoom || _element == null)
+            return;
+
+        var point = e.GetPosition(_element);
+
+        switch (DoubleClickZoomMode)
+        {
+            case DoubleClickZoomMode.ZoomIn:
+                ZoomTo(DoubleClickZoomFactor, point.X, point.Y, ShouldAnimate());
+                break;
+
+            case DoubleClickZoomMode.ZoomOut:
+                ZoomTo(1.0 / DoubleClickZoomFactor, point.X, point.Y, ShouldAnimate());
+                break;
+
+            case DoubleClickZoomMode.ZoomInOut:
+                // Toggle between zoom in and zoom out based on current zoom level
+                if (_zoomX >= _doubleClickZoomThreshold)
+                {
+                    // Zoom out or reset
+                    ResetMatrix(ShouldAnimate());
+                }
+                else
+                {
+                    // Zoom in
+                    ZoomTo(DoubleClickZoomFactor, point.X, point.Y, ShouldAnimate());
+                }
+                break;
+
+            case DoubleClickZoomMode.ZoomToFit:
+                AutoFit(ShouldAnimate());
+                break;
+
+            case DoubleClickZoomMode.None:
+                return;
+        }
+
+        e.Handled = true;
     }
 
     private void Border_PointerPressed(object? sender, PointerPressedEventArgs e)
@@ -393,10 +473,95 @@ public partial class ZoomBorder : Border
         }
     }
 
-    private void BoundsChanged(Rect bounds)
+    private void BoundsChangedHandler(Rect bounds)
     {
         // Log($"[BoundsChanged] {bounds}");
         InvalidateScrollable();
+        HandleResizeBehavior(bounds);
+    }
+
+    private void HandleResizeBehavior(Rect newBounds)
+    {
+        if (_element == null || _sizeBeforeResize == default(Size) || _sizeBeforeResize.Width == 0 || _sizeBeforeResize.Height == 0)
+        {
+            _sizeBeforeResize = newBounds.Size;
+            return;
+        }
+
+        var oldSize = _sizeBeforeResize;
+        var newSize = newBounds.Size;
+
+        if (oldSize == newSize)
+        {
+            return;
+        }
+
+        switch (ResizeBehavior)
+        {
+            case ResizeBehaviorMode.None:
+                break;
+
+            case ResizeBehaviorMode.MaintainCenter:
+                MaintainCenterOnResize(oldSize, newSize);
+                break;
+
+            case ResizeBehaviorMode.MaintainTopLeft:
+                // Default behavior - do nothing
+                break;
+
+            case ResizeBehaviorMode.MaintainZoom:
+                MaintainZoomOnResize(oldSize, newSize);
+                break;
+
+            case ResizeBehaviorMode.ReapplyStretch:
+                AutoFit(skipTransitions: true);
+                break;
+
+            case ResizeBehaviorMode.Custom:
+                OnResized(oldSize, newSize);
+                break;
+        }
+
+        _sizeBeforeResize = newSize;
+    }
+
+    /// <summary>
+    /// Virtual method called when control is resized in Custom resize behavior mode.
+    /// </summary>
+    /// <param name="oldSize">The previous size.</param>
+    /// <param name="newSize">The new size.</param>
+    protected virtual void OnResized(Size oldSize, Size newSize)
+    {
+    }
+
+    private void MaintainCenterOnResize(Size oldSize, Size newSize)
+    {
+        if (_element == null)
+            return;
+
+        var oldCenterX = (oldSize.Width / 2.0 - _offsetX) / _zoomX;
+        var oldCenterY = (oldSize.Height / 2.0 - _offsetY) / _zoomY;
+
+        var newOffsetX = newSize.Width / 2.0 - oldCenterX * _zoomX;
+        var newOffsetY = newSize.Height / 2.0 - oldCenterY * _zoomY;
+
+        _matrix = MatrixHelper.ScaleAndTranslate(_zoomX, _zoomY, newOffsetX, newOffsetY);
+        Invalidate(skipTransitions: true);
+    }
+
+    private void MaintainZoomOnResize(Size oldSize, Size newSize)
+    {
+        if (_element == null)
+            return;
+
+        var scaleX = newSize.Width / oldSize.Width;
+        var scaleY = newSize.Height / oldSize.Height;
+
+        var newOffsetX = _offsetX * scaleX;
+        var newOffsetY = _offsetY * scaleY;
+
+        _matrix = MatrixHelper.ScaleAndTranslate(_zoomX, _zoomY, newOffsetX, newOffsetY);
+        Invalidate(skipTransitions: true);
     }
 
     private void ChildChanged(Control? element)
@@ -438,14 +603,19 @@ public partial class ZoomBorder : Border
         _element = null;
     }
 
-    private void Wheel(PointerWheelEventArgs e)
+    private void Wheel(PointerWheelEventArgs e, double sensitivity = 1.0)
     {
         if (_element == null || _captured)
         {
             return;
         }
         var point = e.GetPosition(_element);
-        ZoomDeltaTo(e.Delta.Y, point.X, point.Y);
+        ZoomDeltaTo(e.Delta.Y * sensitivity, point.X, point.Y);
+    }
+
+    private bool ShouldAnimate()
+    {
+        return EnableAnimations && AnimationDuration > TimeSpan.Zero;
     }
 
     private void Pressed(PointerPressedEventArgs e)
@@ -548,6 +718,145 @@ public partial class ZoomBorder : Border
         var offsetX = ClampValue(_matrix.M31, MinOffsetX, MaxOffsetX);
         var offsetY = ClampValue(_matrix.M32, MinOffsetY, MaxOffsetY);
         _matrix = new Matrix(zoomX, 0.0, 0.0, zoomY, offsetX, offsetY);
+
+        // Apply content bounds restriction
+        ApplyContentBoundsRestriction();
+    }
+
+    private void ApplyContentBoundsRestriction()
+    {
+        if (BoundsMode == ContentBoundsMode.Unrestricted || _element == null)
+            return;
+
+        switch (BoundsMode)
+        {
+            case ContentBoundsMode.KeepContentVisible:
+                ApplyKeepContentVisible();
+                break;
+
+            case ContentBoundsMode.FillViewport:
+                ApplyFillViewport();
+                break;
+
+            case ContentBoundsMode.KeepCentered:
+                ApplyKeepCentered();
+                break;
+
+            case ContentBoundsMode.Custom:
+                var customBounds = GetContentBounds();
+                ApplyCustomBounds(customBounds);
+                break;
+        }
+    }
+
+    /// <summary>
+    /// Virtual method to get custom content bounds.
+    /// </summary>
+    /// <returns>The content bounds rectangle.</returns>
+    protected virtual Rect GetContentBounds()
+    {
+        return _element?.Bounds ?? new Rect();
+    }
+
+    /// <summary>
+    /// Virtual method to validate transform matrix.
+    /// </summary>
+    /// <param name="newMatrix">The proposed new matrix.</param>
+    /// <returns>True if the matrix is valid, false otherwise.</returns>
+    protected virtual bool ValidateTransform(Matrix newMatrix)
+    {
+        return true;
+    }
+
+    private void ApplyKeepContentVisible()
+    {
+        if (_element == null)
+            return;
+
+        var contentWidth = _element.Bounds.Width * _matrix.M11;
+        var contentHeight = _element.Bounds.Height * _matrix.M22;
+        var viewportWidth = Bounds.Width;
+        var viewportHeight = Bounds.Height;
+
+        var minVisibleWidth = contentWidth * MinimumVisibleContentPercentage;
+        var minVisibleHeight = contentHeight * MinimumVisibleContentPercentage;
+
+        var offsetX = _matrix.M31;
+        var offsetY = _matrix.M32;
+
+        // Apply padding
+        var padding = BoundsPadding;
+
+        // Constrain X
+        var maxOffsetX = viewportWidth - minVisibleWidth + padding.Right;
+        var minOffsetX = -contentWidth + minVisibleWidth - padding.Left;
+        offsetX = ClampValue(offsetX, minOffsetX, maxOffsetX);
+
+        // Constrain Y
+        var maxOffsetY = viewportHeight - minVisibleHeight + padding.Bottom;
+        var minOffsetY = -contentHeight + minVisibleHeight - padding.Top;
+        offsetY = ClampValue(offsetY, minOffsetY, maxOffsetY);
+
+        _matrix = new Matrix(_matrix.M11, 0.0, 0.0, _matrix.M22, offsetX, offsetY);
+    }
+
+    private void ApplyFillViewport()
+    {
+        if (_element == null)
+            return;
+
+        var contentWidth = _element.Bounds.Width * _matrix.M11;
+        var contentHeight = _element.Bounds.Height * _matrix.M22;
+        var viewportWidth = Bounds.Width;
+        var viewportHeight = Bounds.Height;
+
+        var offsetX = _matrix.M31;
+        var offsetY = _matrix.M32;
+
+        // If content is smaller than viewport, center it
+        if (contentWidth <= viewportWidth)
+        {
+            offsetX = (viewportWidth - contentWidth) / 2.0;
+        }
+        else
+        {
+            // Constrain so no empty space is visible
+            offsetX = ClampValue(offsetX, viewportWidth - contentWidth, 0);
+        }
+
+        if (contentHeight <= viewportHeight)
+        {
+            offsetY = (viewportHeight - contentHeight) / 2.0;
+        }
+        else
+        {
+            // Constrain so no empty space is visible
+            offsetY = ClampValue(offsetY, viewportHeight - contentHeight, 0);
+        }
+
+        _matrix = new Matrix(_matrix.M11, 0.0, 0.0, _matrix.M22, offsetX, offsetY);
+    }
+
+    private void ApplyKeepCentered()
+    {
+        if (_element == null)
+            return;
+
+        var contentWidth = _element.Bounds.Width * _matrix.M11;
+        var contentHeight = _element.Bounds.Height * _matrix.M22;
+        var viewportWidth = Bounds.Width;
+        var viewportHeight = Bounds.Height;
+
+        var offsetX = (viewportWidth - contentWidth) / 2.0;
+        var offsetY = (viewportHeight - contentHeight) / 2.0;
+
+        _matrix = new Matrix(_matrix.M11, 0.0, 0.0, _matrix.M22, offsetX, offsetY);
+    }
+
+    private void ApplyCustomBounds(Rect customBounds)
+    {
+        // Subclasses can override GetContentBounds and ValidateTransform
+        // for custom bounds logic
     }
 
     /// <summary>

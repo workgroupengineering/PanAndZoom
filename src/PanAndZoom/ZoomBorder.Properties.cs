@@ -165,6 +165,90 @@ public partial class ZoomBorder
     public static readonly StyledProperty<bool> EnableGesturesProperty =
         AvaloniaProperty.Register<ZoomBorder, bool>(nameof(EnableGestures), true, false, BindingMode.TwoWay);
 
+    /// <summary>
+    /// Identifies the <seealso cref="AnimationDuration"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<TimeSpan> AnimationDurationProperty =
+        AvaloniaProperty.Register<ZoomBorder, TimeSpan>(nameof(AnimationDuration), TimeSpan.FromMilliseconds(300), false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="EnableAnimations"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<bool> EnableAnimationsProperty =
+        AvaloniaProperty.Register<ZoomBorder, bool>(nameof(EnableAnimations), false, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="EnableDoubleClickZoom"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<bool> EnableDoubleClickZoomProperty =
+        AvaloniaProperty.Register<ZoomBorder, bool>(nameof(EnableDoubleClickZoom), true, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="DoubleClickZoomMode"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<DoubleClickZoomMode> DoubleClickZoomModeProperty =
+        AvaloniaProperty.Register<ZoomBorder, DoubleClickZoomMode>(nameof(DoubleClickZoomMode), DoubleClickZoomMode.ZoomInOut, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="DoubleClickZoomFactor"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<double> DoubleClickZoomFactorProperty =
+        AvaloniaProperty.Register<ZoomBorder, double>(nameof(DoubleClickZoomFactor), 2.0, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="BoundsMode"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<ContentBoundsMode> BoundsModeProperty =
+        AvaloniaProperty.Register<ZoomBorder, ContentBoundsMode>(nameof(BoundsMode), ContentBoundsMode.Unrestricted, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="BoundsPadding"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<Thickness> BoundsPaddingProperty =
+        AvaloniaProperty.Register<ZoomBorder, Thickness>(nameof(BoundsPadding), new Thickness(0), false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="MinimumVisibleContentPercentage"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<double> MinimumVisibleContentPercentageProperty =
+        AvaloniaProperty.Register<ZoomBorder, double>(nameof(MinimumVisibleContentPercentage), 0.1, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="ResizeBehavior"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<ResizeBehaviorMode> ResizeBehaviorProperty =
+        AvaloniaProperty.Register<ZoomBorder, ResizeBehaviorMode>(nameof(ResizeBehavior), ResizeBehaviorMode.None, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="WheelBehavior"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<WheelBehaviorMode> WheelBehaviorProperty =
+        AvaloniaProperty.Register<ZoomBorder, WheelBehaviorMode>(nameof(WheelBehavior), WheelBehaviorMode.Zoom, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="WheelWithCtrl"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<WheelBehaviorMode> WheelWithCtrlProperty =
+        AvaloniaProperty.Register<ZoomBorder, WheelBehaviorMode>(nameof(WheelWithCtrl), WheelBehaviorMode.Zoom, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="WheelWithShift"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<WheelBehaviorMode> WheelWithShiftProperty =
+        AvaloniaProperty.Register<ZoomBorder, WheelBehaviorMode>(nameof(WheelWithShift), WheelBehaviorMode.PanHorizontal, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="WheelZoomSensitivity"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<double> WheelZoomSensitivityProperty =
+        AvaloniaProperty.Register<ZoomBorder, double>(nameof(WheelZoomSensitivity), 1.0, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="WheelPanSensitivity"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<double> WheelPanSensitivityProperty =
+        AvaloniaProperty.Register<ZoomBorder, double>(nameof(WheelPanSensitivity), 1.0, false, BindingMode.TwoWay);
+
     static ZoomBorder()
     {
         AffectsArrange<ZoomBorder>(
@@ -199,6 +283,8 @@ public partial class ZoomBorder
     private double _offsetX = 0.0;
     private double _offsetY = 0.0;
     private bool _captured = false;
+    private Size _sizeBeforeResize;
+    private double _doubleClickZoomThreshold = 1.5;
 
     /// <summary>
     /// Zoom changed event.
@@ -468,5 +554,131 @@ public partial class ZoomBorder
     {
         get => GetValue(EnableGesturesProperty);
         set => SetValue(EnableGesturesProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the duration of animations for zoom and pan operations.
+    /// </summary>
+    public TimeSpan AnimationDuration
+    {
+        get => GetValue(AnimationDurationProperty);
+        set => SetValue(AnimationDurationProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets flag indicating whether animations are enabled for zoom and pan operations.
+    /// </summary>
+    public bool EnableAnimations
+    {
+        get => GetValue(EnableAnimationsProperty);
+        set => SetValue(EnableAnimationsProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets flag indicating whether double-click zoom is enabled.
+    /// </summary>
+    public bool EnableDoubleClickZoom
+    {
+        get => GetValue(EnableDoubleClickZoomProperty);
+        set => SetValue(EnableDoubleClickZoomProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the double-click zoom behavior mode.
+    /// </summary>
+    public DoubleClickZoomMode DoubleClickZoomMode
+    {
+        get => GetValue(DoubleClickZoomModeProperty);
+        set => SetValue(DoubleClickZoomModeProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the zoom factor for double-click zoom operations.
+    /// </summary>
+    public double DoubleClickZoomFactor
+    {
+        get => GetValue(DoubleClickZoomFactorProperty);
+        set => SetValue(DoubleClickZoomFactorProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the content bounds restriction mode.
+    /// </summary>
+    public ContentBoundsMode BoundsMode
+    {
+        get => GetValue(BoundsModeProperty);
+        set => SetValue(BoundsModeProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the padding around content bounds.
+    /// </summary>
+    public Thickness BoundsPadding
+    {
+        get => GetValue(BoundsPaddingProperty);
+        set => SetValue(BoundsPaddingProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the minimum percentage of content that must remain visible.
+    /// </summary>
+    public double MinimumVisibleContentPercentage
+    {
+        get => GetValue(MinimumVisibleContentPercentageProperty);
+        set => SetValue(MinimumVisibleContentPercentageProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the behavior when the control is resized.
+    /// </summary>
+    public ResizeBehaviorMode ResizeBehavior
+    {
+        get => GetValue(ResizeBehaviorProperty);
+        set => SetValue(ResizeBehaviorProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the default mouse wheel behavior (no modifiers).
+    /// </summary>
+    public WheelBehaviorMode WheelBehavior
+    {
+        get => GetValue(WheelBehaviorProperty);
+        set => SetValue(WheelBehaviorProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the mouse wheel behavior when Ctrl key is pressed.
+    /// </summary>
+    public WheelBehaviorMode WheelWithCtrl
+    {
+        get => GetValue(WheelWithCtrlProperty);
+        set => SetValue(WheelWithCtrlProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the mouse wheel behavior when Shift key is pressed.
+    /// </summary>
+    public WheelBehaviorMode WheelWithShift
+    {
+        get => GetValue(WheelWithShiftProperty);
+        set => SetValue(WheelWithShiftProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the zoom sensitivity for mouse wheel operations.
+    /// </summary>
+    public double WheelZoomSensitivity
+    {
+        get => GetValue(WheelZoomSensitivityProperty);
+        set => SetValue(WheelZoomSensitivityProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the pan sensitivity for mouse wheel operations.
+    /// </summary>
+    public double WheelPanSensitivity
+    {
+        get => GetValue(WheelPanSensitivityProperty);
+        set => SetValue(WheelPanSensitivityProperty, value);
     }
 }
