@@ -364,6 +364,13 @@ public partial class ZoomBorder : Border
                     Wheel(e, WheelZoomSensitivity);
                     e.Handled = true;
                 }
+                else if (EnablePan && e.KeyModifiers == KeyModifiers.None)
+                {
+                    // Backward compatibility: If zoom is disabled but pan is enabled,
+                    // fall back to panning with the wheel (old behavior)
+                    PanDelta(10 * e.Delta.X * WheelPanSensitivity, 10 * e.Delta.Y * WheelPanSensitivity);
+                    e.Handled = true;
+                }
                 break;
 
             case WheelBehaviorMode.PanVertical:
