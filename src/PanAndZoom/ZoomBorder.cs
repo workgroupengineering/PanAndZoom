@@ -1169,7 +1169,6 @@ public partial class ZoomBorder : Border
                 UniformToFill(panelWidth, panelHeight, elementWidth, elementHeight, skipTransitions);
                 break;
             case StretchMode.None:
-                None(panelWidth, panelHeight, elementWidth, elementHeight, skipTransitions);
                 break;
         }
     }
