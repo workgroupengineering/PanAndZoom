@@ -410,6 +410,103 @@ public class CustomZoomBorder : ZoomBorder
 }
 ```
 
+### Zoom to Rectangle
+
+Zoom to fit or exactly match specific content rectangles:
+
+```csharp
+// Zoom to fit a rectangle in the viewport
+var contentRect = new Rect(100, 100, 200, 150);
+zoomBorder.ZoomToRectangle(contentRect);
+
+// Zoom with padding
+zoomBorder.ZoomToRectangle(contentRect, padding: new Thickness(20));
+
+// Zoom to exact viewport dimensions
+var viewportRect = new Rect(50, 50, 300, 200);
+zoomBorder.ZoomToRectangleExact(contentRect, viewportRect);
+```
+
+### Saved Views
+
+Save and restore named view states for quick navigation:
+
+```csharp
+// Save the current view
+zoomBorder.SaveView("DetailView", "Close-up of the detail section");
+
+// Restore a saved view
+bool restored = zoomBorder.RestoreView("DetailView");
+
+// Get saved view information
+SavedView? view = zoomBorder.GetSavedView("DetailView");
+if (view.HasValue)
+{
+    Console.WriteLine($"Name: {view.Value.Name}");
+    Console.WriteLine($"Description: {view.Value.Description}");
+    Console.WriteLine($"Saved at: {view.Value.Timestamp}");
+}
+
+// List all saved views
+string[] viewNames = zoomBorder.GetSavedViewNames();
+var allViews = zoomBorder.GetSavedViews();
+
+// Delete a saved view
+zoomBorder.DeleteSavedView("DetailView");
+
+// Clear all saved views
+zoomBorder.ClearSavedViews();
+```
+
+### Discrete Zoom Levels
+
+Enable predefined zoom levels for consistent, predictable zooming:
+
+```csharp
+// Enable discrete zoom levels
+zoomBorder.EnableDiscreteZoomLevels = true;
+
+// Use default levels: 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0
+// Or set custom levels
+zoomBorder.DiscreteZoomLevels = new[] { 0.5, 1.0, 2.0, 4.0, 8.0 };
+
+// Navigate between levels
+double nextLevel = zoomBorder.GetNextDiscreteZoomLevel();
+double previousLevel = zoomBorder.GetPreviousDiscreteZoomLevel();
+double nearestLevel = zoomBorder.GetNearestDiscreteZoomLevel(1.3); // Returns 1.0
+
+// Zoom to specific level
+zoomBorder.ZoomToLevel(2.0, centerX: 100, centerY: 75);
+```
+
+When `EnableDiscreteZoomLevels` is enabled, all zoom operations will snap to the nearest discrete level.
+
+### Viewport Culling Support
+
+Query visibility for performance optimization and UI updates:
+
+```csharp
+// Check if a rectangle is visible in the viewport
+var rect = new Rect(100, 100, 50, 50);
+bool isVisible = zoomBorder.IsRectangleVisible(rect);
+
+// Check if a point is visible
+var point = new Point(150, 150);
+bool isPointVisible = zoomBorder.IsPointVisible(point);
+
+// Get the visible portion of a rectangle
+Rect visiblePortion = zoomBorder.GetVisiblePortion(rect);
+
+// Example: Conditionally render items based on visibility
+foreach (var item in items)
+{
+    if (zoomBorder.IsRectangleVisible(item.Bounds))
+    {
+        RenderItem(item);
+    }
+}
+```
+
 ## License
 
 PanAndZoom is licensed under the [MIT license](LICENSE.TXT).
