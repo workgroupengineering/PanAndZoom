@@ -1391,6 +1391,105 @@ public partial class ZoomBorder : Border
     }
 
     /// <summary>
+    /// Calculates automatic zoom limits based on content and viewport size.
+    /// </summary>
+    /// <returns>A tuple containing the minimum and maximum zoom values.</returns>
+    protected virtual (double minZoom, double maxZoom) CalculateAutoZoomLimits()
+    {
+        if (_element == null)
+            return (double.NegativeInfinity, double.PositiveInfinity);
+
+        var minZoom = double.NegativeInfinity;
+        var maxZoom = double.PositiveInfinity;
+
+        var contentWidth = _element.Bounds.Width;
+        var contentHeight = _element.Bounds.Height;
+        var viewportWidth = Bounds.Width;
+        var viewportHeight = Bounds.Height;
+
+        if (AutoCalculateMinZoom && contentWidth > 0 && contentHeight > 0 && viewportWidth > 0 && viewportHeight > 0)
+        {
+            // Min zoom is when the entire content fits in the viewport
+            var zoomX = viewportWidth / contentWidth;
+            var zoomY = viewportHeight / contentHeight;
+            minZoom = Math.Min(zoomX, zoomY);
+        }
+
+        if (AutoCalculateMaxZoom && contentWidth > 0 && contentHeight > 0)
+        {
+            // Max zoom is based on pixel size (1 content pixel = MaxZoomPixelSize screen pixels)
+            maxZoom = MaxZoomPixelSize;
+        }
+
+        return (minZoom, maxZoom);
+    }
+
+    /// <summary>
+    /// Gets the zoom indicator text based on the current zoom level.
+    /// </summary>
+    /// <returns>The formatted zoom indicator text.</returns>
+    public string GetZoomIndicatorText()
+    {
+        var zoomValue = _zoomX; // Assuming uniform zoom for display
+        return string.Format(ZoomIndicatorFormat, zoomValue);
+    }
+
+    /// <summary>
+    /// Gets the position for the zoom indicator based on the configured position.
+    /// </summary>
+    /// <returns>A point representing the indicator position.</returns>
+    protected virtual Point GetZoomIndicatorPosition()
+    {
+        const double margin = 10.0;
+        const double indicatorWidth = 80.0;
+        const double indicatorHeight = 30.0;
+
+        return ZoomIndicatorPosition switch
+        {
+            ZoomIndicatorPosition.TopLeft => new Point(margin, margin),
+            ZoomIndicatorPosition.TopRight => new Point(Bounds.Width - indicatorWidth - margin, margin),
+            ZoomIndicatorPosition.BottomLeft => new Point(margin, Bounds.Height - indicatorHeight - margin),
+            ZoomIndicatorPosition.BottomRight => new Point(Bounds.Width - indicatorWidth - margin, Bounds.Height - indicatorHeight - margin),
+            _ => new Point(Bounds.Width - indicatorWidth - margin, Bounds.Height - indicatorHeight - margin)
+        };
+    }
+
+    /// <summary>
+    /// Snaps a value to the nearest grid point.
+    /// </summary>
+    /// <param name="value">The value to snap.</param>
+    /// <returns>The snapped value.</returns>
+    public double SnapToGrid(double value)
+    {
+        if (!EnableSnapToGrid || GridSize <= 0)
+            return value;
+
+        return Math.Round(value / GridSize) * GridSize;
+    }
+
+    /// <summary>
+    /// Snaps a point to the nearest grid point.
+    /// </summary>
+    /// <param name="point">The point to snap.</param>
+    /// <returns>The snapped point.</returns>
+    public Point SnapToGrid(Point point)
+    {
+        return new Point(SnapToGrid(point.X), SnapToGrid(point.Y));
+    }
+
+    /// <summary>
+    /// Snaps a rectangle to the nearest grid points.
+    /// </summary>
+    /// <param name="rect">The rectangle to snap.</param>
+    /// <returns>The snapped rectangle.</returns>
+    public Rect SnapToGrid(Rect rect)
+    {
+        var topLeft = SnapToGrid(new Point(rect.X, rect.Y));
+        var bottomRight = SnapToGrid(new Point(rect.Right, rect.Bottom));
+        return new Rect(topLeft, bottomRight);
+    }
+
+    /// <summary>
     /// Raises <see cref="ZoomChanged"/> event.
     /// </summary>
     /// <param name="e">Zoom changed event arguments.</param>
@@ -1407,8 +1506,31 @@ public partial class ZoomBorder : Border
 
     private void Constrain()
     {
-        var zoomX = ClampValue(_matrix.M11, MinZoomX, MaxZoomX);
-        var zoomY = ClampValue(_matrix.M22, MinZoomY, MaxZoomY);
+        // Get effective zoom limits (considering auto-calculation)
+        var effectiveMinZoomX = MinZoomX;
+        var effectiveMaxZoomX = MaxZoomX;
+        var effectiveMinZoomY = MinZoomY;
+        var effectiveMaxZoomY = MaxZoomY;
+
+        if (AutoCalculateMinZoom || AutoCalculateMaxZoom)
+        {
+            var (autoMinZoom, autoMaxZoom) = CalculateAutoZoomLimits();
+
+            if (AutoCalculateMinZoom && !double.IsNegativeInfinity(autoMinZoom))
+            {
+                effectiveMinZoomX = Math.Max(effectiveMinZoomX, autoMinZoom);
+                effectiveMinZoomY = Math.Max(effectiveMinZoomY, autoMinZoom);
+            }
+
+            if (AutoCalculateMaxZoom && !double.IsPositiveInfinity(autoMaxZoom))
+            {
+                effectiveMaxZoomX = Math.Min(effectiveMaxZoomX, autoMaxZoom);
+                effectiveMaxZoomY = Math.Min(effectiveMaxZoomY, autoMaxZoom);
+            }
+        }
+
+        var zoomX = ClampValue(_matrix.M11, effectiveMinZoomX, effectiveMaxZoomX);
+        var zoomY = ClampValue(_matrix.M22, effectiveMinZoomY, effectiveMaxZoomY);
         var offsetX = ClampValue(_matrix.M31, MinOffsetX, MaxOffsetX);
         var offsetY = ClampValue(_matrix.M32, MinOffsetY, MaxOffsetY);
         _matrix = new Matrix(zoomX, 0.0, 0.0, zoomY, offsetX, offsetY);
@@ -2452,5 +2574,4 @@ public partial class ZoomBorder : Border
     {
         GestureEnded?.Invoke(this, args);
     }
-
 }

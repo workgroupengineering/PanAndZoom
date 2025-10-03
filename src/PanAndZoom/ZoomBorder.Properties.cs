@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Input;
 using Avalonia.Data;
+using Avalonia.Media;
 using Avalonia.Media.Transformation;
 
 namespace Avalonia.Controls.PanAndZoom;
@@ -298,6 +299,102 @@ public partial class ZoomBorder
     /// </summary>
     public static readonly StyledProperty<double[]?> DiscreteZoomLevelsProperty =
         AvaloniaProperty.Register<ZoomBorder, double[]?>(nameof(DiscreteZoomLevels), new[] { 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0 }, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="AutoCalculateMinZoom"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<bool> AutoCalculateMinZoomProperty =
+        AvaloniaProperty.Register<ZoomBorder, bool>(nameof(AutoCalculateMinZoom), false, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="AutoCalculateMaxZoom"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<bool> AutoCalculateMaxZoomProperty =
+        AvaloniaProperty.Register<ZoomBorder, bool>(nameof(AutoCalculateMaxZoom), false, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="MaxZoomPixelSize"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<double> MaxZoomPixelSizeProperty =
+        AvaloniaProperty.Register<ZoomBorder, double>(nameof(MaxZoomPixelSize), 4.0, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="ShowZoomIndicator"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<bool> ShowZoomIndicatorProperty =
+        AvaloniaProperty.Register<ZoomBorder, bool>(nameof(ShowZoomIndicator), false, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="ZoomIndicatorPosition"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<ZoomIndicatorPosition> ZoomIndicatorPositionProperty =
+        AvaloniaProperty.Register<ZoomBorder, ZoomIndicatorPosition>(nameof(ZoomIndicatorPosition), ZoomIndicatorPosition.BottomRight, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="ZoomIndicatorFormat"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<string> ZoomIndicatorFormatProperty =
+        AvaloniaProperty.Register<ZoomBorder, string>(nameof(ZoomIndicatorFormat), "{0:P0}", false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="ZoomIndicatorAutoHideDuration"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<TimeSpan> ZoomIndicatorAutoHideDurationProperty =
+        AvaloniaProperty.Register<ZoomBorder, TimeSpan>(nameof(ZoomIndicatorAutoHideDuration), TimeSpan.FromSeconds(2), false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="ShowGrid"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<bool> ShowGridProperty =
+        AvaloniaProperty.Register<ZoomBorder, bool>(nameof(ShowGrid), false, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="EnableSnapToGrid"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<bool> EnableSnapToGridProperty =
+        AvaloniaProperty.Register<ZoomBorder, bool>(nameof(EnableSnapToGrid), false, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="GridSize"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<double> GridSizeProperty =
+        AvaloniaProperty.Register<ZoomBorder, double>(nameof(GridSize), 50.0, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="GridBrush"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<IBrush?> GridBrushProperty =
+        AvaloniaProperty.Register<ZoomBorder, IBrush?>(nameof(GridBrush), null, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="GridThickness"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<double> GridThicknessProperty =
+        AvaloniaProperty.Register<ZoomBorder, double>(nameof(GridThickness), 1.0, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="GridOpacity"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<double> GridOpacityProperty =
+        AvaloniaProperty.Register<ZoomBorder, double>(nameof(GridOpacity), 0.3, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="MajorGridInterval"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<int> MajorGridIntervalProperty =
+        AvaloniaProperty.Register<ZoomBorder, int>(nameof(MajorGridInterval), 5, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="MajorGridBrush"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<IBrush?> MajorGridBrushProperty =
+        AvaloniaProperty.Register<ZoomBorder, IBrush?>(nameof(MajorGridBrush), null, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="MajorGridThickness"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<double> MajorGridThicknessProperty =
+        AvaloniaProperty.Register<ZoomBorder, double>(nameof(MajorGridThickness), 2.0, false, BindingMode.TwoWay);
 
     static ZoomBorder()
     {
@@ -823,6 +920,150 @@ public partial class ZoomBorder
     {
         get => GetValue(DiscreteZoomLevelsProperty);
         set => SetValue(DiscreteZoomLevelsProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to automatically calculate minimum zoom.
+    /// </summary>
+    public bool AutoCalculateMinZoom
+    {
+        get => GetValue(AutoCalculateMinZoomProperty);
+        set => SetValue(AutoCalculateMinZoomProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to automatically calculate maximum zoom.
+    /// </summary>
+    public bool AutoCalculateMaxZoom
+    {
+        get => GetValue(AutoCalculateMaxZoomProperty);
+        set => SetValue(AutoCalculateMaxZoomProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the maximum zoom pixel size (1 content pixel = N screen pixels).
+    /// </summary>
+    public double MaxZoomPixelSize
+    {
+        get => GetValue(MaxZoomPixelSizeProperty);
+        set => SetValue(MaxZoomPixelSizeProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to show the zoom indicator.
+    /// </summary>
+    public bool ShowZoomIndicator
+    {
+        get => GetValue(ShowZoomIndicatorProperty);
+        set => SetValue(ShowZoomIndicatorProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the position of the zoom indicator.
+    /// </summary>
+    public ZoomIndicatorPosition ZoomIndicatorPosition
+    {
+        get => GetValue(ZoomIndicatorPositionProperty);
+        set => SetValue(ZoomIndicatorPositionProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the format string for the zoom indicator.
+    /// </summary>
+    public string ZoomIndicatorFormat
+    {
+        get => GetValue(ZoomIndicatorFormatProperty);
+        set => SetValue(ZoomIndicatorFormatProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the auto-hide duration for the zoom indicator.
+    /// </summary>
+    public TimeSpan ZoomIndicatorAutoHideDuration
+    {
+        get => GetValue(ZoomIndicatorAutoHideDurationProperty);
+        set => SetValue(ZoomIndicatorAutoHideDurationProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to show the grid.
+    /// </summary>
+    public bool ShowGrid
+    {
+        get => GetValue(ShowGridProperty);
+        set => SetValue(ShowGridProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to enable snap to grid.
+    /// </summary>
+    public bool EnableSnapToGrid
+    {
+        get => GetValue(EnableSnapToGridProperty);
+        set => SetValue(EnableSnapToGridProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the grid size.
+    /// </summary>
+    public double GridSize
+    {
+        get => GetValue(GridSizeProperty);
+        set => SetValue(GridSizeProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the grid brush.
+    /// </summary>
+    public IBrush? GridBrush
+    {
+        get => GetValue(GridBrushProperty);
+        set => SetValue(GridBrushProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the grid thickness.
+    /// </summary>
+    public double GridThickness
+    {
+        get => GetValue(GridThicknessProperty);
+        set => SetValue(GridThicknessProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the grid opacity.
+    /// </summary>
+    public double GridOpacity
+    {
+        get => GetValue(GridOpacityProperty);
+        set => SetValue(GridOpacityProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the major grid interval.
+    /// </summary>
+    public int MajorGridInterval
+    {
+        get => GetValue(MajorGridIntervalProperty);
+        set => SetValue(MajorGridIntervalProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the major grid brush.
+    /// </summary>
+    public IBrush? MajorGridBrush
+    {
+        get => GetValue(MajorGridBrushProperty);
+        set => SetValue(MajorGridBrushProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the major grid thickness.
+    /// </summary>
+    public double MajorGridThickness
+    {
+        get => GetValue(MajorGridThicknessProperty);
+        set => SetValue(MajorGridThicknessProperty, value);
     }
 
     /// <summary>

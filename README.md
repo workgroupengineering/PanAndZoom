@@ -507,6 +507,89 @@ foreach (var item in items)
 }
 ```
 
+### Dynamic Zoom Limits
+
+Automatically calculate zoom limits based on content and viewport size:
+
+```csharp
+// Enable auto-calculation of minimum zoom (prevents zooming out beyond content fit)
+zoomBorder.AutoCalculateMinZoom = true;
+
+// Enable auto-calculation of maximum zoom (prevents excessive zoom-in)
+zoomBorder.AutoCalculateMaxZoom = true;
+
+// Set maximum zoom pixel size (1 content pixel = N screen pixels)
+zoomBorder.MaxZoomPixelSize = 4.0; // Default is 4.0
+
+// The effective zoom limits will be automatically calculated and applied
+// MinZoom will be set to fit the content in the viewport
+// MaxZoom will be set to MaxZoomPixelSize
+```
+
+**Benefits:**
+- Content-aware zoom constraints
+- Prevents over-zooming and under-zooming
+- Better default behavior for varying content sizes
+
+### Scale Indicator
+
+Display current zoom level with helper methods for custom indicators:
+
+```csharp
+// Enable zoom indicator (note: rendering must be implemented separately)
+zoomBorder.ShowZoomIndicator = true;
+
+// Configure indicator position
+zoomBorder.ZoomIndicatorPosition = ZoomIndicatorPosition.BottomRight; // TopLeft, TopRight, BottomLeft, BottomRight, Custom
+
+// Set display format
+zoomBorder.ZoomIndicatorFormat = "{0:P0}"; // "100%" (default)
+zoomBorder.ZoomIndicatorFormat = "{0:F1}x"; // "1.5x"
+
+// Configure auto-hide duration
+zoomBorder.ZoomIndicatorAutoHideDuration = TimeSpan.FromSeconds(2);
+
+// Get formatted zoom indicator text
+string zoomText = zoomBorder.GetZoomIndicatorText();
+```
+
+**Note:** The `ShowZoomIndicator` property provides the configuration, but rendering must be implemented using adorners or custom controls that call `GetZoomIndicatorText()`.
+
+### Grid and Snap
+
+Enable grid display and snap-to-grid functionality:
+
+```csharp
+// Show grid overlay (note: rendering must be implemented separately)
+zoomBorder.ShowGrid = true;
+
+// Enable snap-to-grid for positioning
+zoomBorder.EnableSnapToGrid = true;
+
+// Configure grid
+zoomBorder.GridSize = 50.0; // Grid spacing in content coordinates
+zoomBorder.GridBrush = Brushes.LightGray;
+zoomBorder.GridThickness = 1.0;
+zoomBorder.GridOpacity = 0.3;
+
+// Configure major grid lines (every N grid units)
+zoomBorder.MajorGridInterval = 5;
+zoomBorder.MajorGridBrush = Brushes.Gray;
+zoomBorder.MajorGridThickness = 2.0;
+
+// Use snap-to-grid methods
+double snappedValue = zoomBorder.SnapToGrid(123.5); // Returns 100.0 or 150.0
+Point snappedPoint = zoomBorder.SnapToGrid(new Point(123.5, 67.3));
+Rect snappedRect = zoomBorder.SnapToGrid(new Rect(10, 20, 100, 80));
+```
+
+**Note:** The `ShowGrid` property provides the configuration, but grid rendering must be implemented using adorners or custom rendering that uses the grid properties and coordinate conversion methods.
+
+**Snap Methods:**
+- `SnapToGrid(double)` - Snap a single value to the nearest grid point
+- `SnapToGrid(Point)` - Snap a point to the nearest grid intersection
+- `SnapToGrid(Rect)` - Snap a rectangle's corners to the nearest grid points
+
 ## License
 
 PanAndZoom is licensed under the [MIT license](LICENSE.TXT).
