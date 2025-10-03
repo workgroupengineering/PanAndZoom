@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:paz="using:Avalonia.Controls.PanAndZoom"
+             xmlns:vm="using:AvaloniaDemo.ViewModels"
+             x:Class="AvaloniaDemo.Views.CoordinateConversionView"
+             x:DataType="vm:CoordinateConversionViewModel">
+
+  <Grid ColumnDefinitions="250,*">
+    <!-- Controls -->
+    <StackPanel Grid.Column="0" Margin="12" Spacing="8">
+      <TextBlock Text="Coordinate Conversion Demo" FontWeight="Bold" FontSize="16" />
+      <TextBlock Text="Convert between source and element coordinates" TextWrapping="Wrap" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Source Point:" />
+      <StackPanel>
+        <TextBlock Text="X:" />
+        <TextBox Text="{Binding SourceX}" />
+        <TextBlock Text="Y:" Margin="0,4,0,0" />
+        <TextBox Text="{Binding SourceY}" />
+      </StackPanel>
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Conversions:" FontWeight="SemiBold" />
+      <TextBlock Text="{Binding ElementPoint}" TextWrapping="Wrap" />
+      <TextBlock Text="{Binding SourcePoint}" TextWrapping="Wrap" />
+
+      <Button Content="Update Conversions" Click="UpdateConversions_Click" Margin="0,8,0,0" />
+    </StackPanel>
+
+    <!-- ZoomBorder -->
+    <Border Grid.Column="1" Margin="12" BorderBrush="Gray" BorderThickness="1">
+      <paz:ZoomBorder x:Name="ZoomBorder"
+                      Stretch="None"
+                      ZoomSpeed="1.2"
+                      Background="SlateBlue"
+                      ClipToBounds="True">
+        <Canvas Width="300" Height="300" Background="LightGray">
+          <Ellipse Width="10" Height="10" Fill="Red"
+                   Canvas.Left="{Binding SourceX}"
+                   Canvas.Top="{Binding SourceY}"
+                   ZIndex="1" />
+          <TextBlock Canvas.Left="10" Canvas.Top="10"
+                     Text="Source coordinate system (300x300)"
+                     FontSize="14" FontWeight="Bold" />
+          <Line StartPoint="0,150" EndPoint="300,150" Stroke="DarkGray" StrokeThickness="1" />
+          <Line StartPoint="150,0" EndPoint="150,300" Stroke="DarkGray" StrokeThickness="1" />
+        </Canvas>
+      </paz:ZoomBorder>
+    </Border>
+  </Grid>
+
+</UserControl>

@@ -1,0 +1,73 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:paz="using:Avalonia.Controls.PanAndZoom"
+             x:Class="AvaloniaDemo.Views.InertiaGesturesView">
+
+  <Grid ColumnDefinitions="250,*">
+    <!-- Controls -->
+    <StackPanel Grid.Column="0" Margin="12" Spacing="8">
+      <TextBlock Text="Inertia &amp; Gestures Demo" FontWeight="Bold" FontSize="16" />
+      <TextBlock Text="Smooth panning with inertia and multi-touch gestures" TextWrapping="Wrap" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Gesture Settings:" FontWeight="SemiBold" />
+      <CheckBox Content="Enable Gestures" IsChecked="{Binding ZoomBorder.EnableGestures}" />
+      <CheckBox Content="Enable Gesture Rotation" IsChecked="{Binding ZoomBorder.EnableGestureRotation}" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Multi-Touch:" FontWeight="SemiBold" />
+      <CheckBox Content="Simultaneous Pan/Zoom" IsChecked="{Binding ZoomBorder.EnableSimultaneousPanZoom}" />
+      <TextBlock Text="Min Touch Points:" />
+      <TextBox Text="{Binding ZoomBorder.MinimumTouchPoints}" />
+      <TextBlock Text="Max Touch Points:" />
+      <TextBox Text="{Binding ZoomBorder.MaximumTouchPoints}" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Instructions:" FontSize="11" TextWrapping="Wrap">
+        Use gestures to pan and zoom. On touch devices, use multi-touch gestures for rotation and zoom. The simultaneous pan/zoom option allows both operations at once.
+      </TextBlock>
+    </StackPanel>
+
+    <!-- ZoomBorder -->
+    <Border Grid.Column="1" Margin="12" BorderBrush="Gray" BorderThickness="1">
+      <paz:ZoomBorder x:Name="ZoomBorder"
+                      Stretch="None"
+                      ZoomSpeed="1.2"
+                      Background="SlateBlue"
+                      ClipToBounds="True"
+                      EnableGestures="True"
+                      EnableGestureRotation="True"
+                      EnableSimultaneousPanZoom="True">
+        <Canvas Width="1200" Height="800" Background="LightGray">
+          <TextBlock Canvas.Left="20" Canvas.Top="20" Text="Inertia &amp; Gesture Demo" FontSize="28" FontWeight="Bold" />
+
+          <TextBlock Canvas.Left="20" Canvas.Top="70" TextWrapping="Wrap" Width="500" FontSize="14">
+            Drag quickly and release to experience smooth inertia panning. On touch devices, use pinch gestures to zoom and rotate.
+          </TextBlock>
+
+          <Rectangle Fill="Red" Width="150" Height="150" Canvas.Left="100" Canvas.Top="150" />
+          <Rectangle Fill="Blue" Width="150" Height="150" Canvas.Left="300" Canvas.Top="150" />
+          <Rectangle Fill="Green" Width="150" Height="150" Canvas.Left="500" Canvas.Top="150" />
+          <Rectangle Fill="Orange" Width="150" Height="150" Canvas.Left="700" Canvas.Top="150" />
+          <Rectangle Fill="Purple" Width="150" Height="150" Canvas.Left="900" Canvas.Top="150" />
+
+          <Rectangle Fill="Cyan" Width="150" Height="150" Canvas.Left="100" Canvas.Top="350" />
+          <Rectangle Fill="Magenta" Width="150" Height="150" Canvas.Left="300" Canvas.Top="350" />
+          <Rectangle Fill="Yellow" Width="150" Height="150" Canvas.Left="500" Canvas.Top="350" />
+          <Rectangle Fill="Lime" Width="150" Height="150" Canvas.Left="700" Canvas.Top="350" />
+          <Rectangle Fill="Pink" Width="150" Height="150" Canvas.Left="900" Canvas.Top="350" />
+
+          <Rectangle Fill="Brown" Width="150" Height="150" Canvas.Left="100" Canvas.Top="550" />
+          <Rectangle Fill="Navy" Width="150" Height="150" Canvas.Left="300" Canvas.Top="550" />
+          <Rectangle Fill="Teal" Width="150" Height="150" Canvas.Left="500" Canvas.Top="550" />
+          <Rectangle Fill="Olive" Width="150" Height="150" Canvas.Left="700" Canvas.Top="550" />
+          <Rectangle Fill="Maroon" Width="150" Height="150" Canvas.Left="900" Canvas.Top="550" />
+        </Canvas>
+      </paz:ZoomBorder>
+    </Border>
+  </Grid>
+
+</UserControl>
