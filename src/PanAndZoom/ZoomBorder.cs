@@ -1490,6 +1490,142 @@ public partial class ZoomBorder : Border
     }
 
     /// <summary>
+    /// Rotates the content by the specified angle in degrees.
+    /// </summary>
+    /// <param name="degrees">The rotation angle in degrees.</param>
+    /// <param name="animate">Whether to animate the rotation.</param>
+    public void Rotate(double degrees, bool animate = true)
+    {
+        if (!EnableGestureRotation)
+            return;
+
+        var newRotation = Rotation + degrees;
+
+        // Apply rotation snapping
+        if (EnableRotationSnapping && RotationSnapAngle > 0)
+        {
+            newRotation = Math.Round(newRotation / RotationSnapAngle) * RotationSnapAngle;
+        }
+
+        // Apply rotation constraints
+        newRotation = ClampValue(newRotation, MinRotation, MaxRotation);
+
+        Rotation = newRotation;
+
+        // Note: Actual rotation transformation would require modifying the matrix
+        // For now, this just updates the Rotation property
+    }
+
+    /// <summary>
+    /// Rotates the content by the specified angle around a center point.
+    /// </summary>
+    /// <param name="degrees">The rotation angle in degrees.</param>
+    /// <param name="center">The center point for rotation in content coordinates.</param>
+    /// <param name="animate">Whether to animate the rotation.</param>
+    public void RotateAt(double degrees, Point center, bool animate = true)
+    {
+        if (!EnableGestureRotation)
+            return;
+
+        Rotate(degrees, animate);
+        // Note: Full implementation would rotate around the specified center point
+    }
+
+    /// <summary>
+    /// Resets the rotation to zero.
+    /// </summary>
+    /// <param name="animate">Whether to animate the reset.</param>
+    public void ResetRotation(bool animate = true)
+    {
+        Rotation = 0.0;
+    }
+
+    /// <summary>
+    /// Snaps the current rotation to the nearest snap angle.
+    /// </summary>
+    public void SnapRotation()
+    {
+        if (!EnableRotationSnapping || RotationSnapAngle <= 0)
+            return;
+
+        Rotation = Math.Round(Rotation / RotationSnapAngle) * RotationSnapAngle;
+    }
+
+    /// <summary>
+    /// Exports the current state of the ZoomBorder control.
+    /// </summary>
+    /// <returns>A ZoomBorderState object containing the current state.</returns>
+    public ZoomBorderState ExportState()
+    {
+        return new ZoomBorderState
+        {
+            Matrix = _matrix,
+            Stretch = Stretch,
+            ZoomSpeed = ZoomSpeed,
+            EnablePan = EnablePan,
+            EnableZoom = EnableZoom,
+            Rotation = Rotation,
+            MinZoomX = MinZoomX,
+            MaxZoomX = MaxZoomX,
+            MinZoomY = MinZoomY,
+            MaxZoomY = MaxZoomY,
+            EnableConstrains = EnableConstrains,
+            EnableAnimations = EnableAnimations,
+            AnimationDuration = AnimationDuration,
+            Timestamp = DateTime.UtcNow
+        };
+    }
+
+    /// <summary>
+    /// Imports state into the ZoomBorder control.
+    /// </summary>
+    /// <param name="state">The state to import.</param>
+    /// <param name="animate">Whether to animate the state change.</param>
+    public void ImportState(ZoomBorderState state, bool animate = true)
+    {
+        if (state == null)
+            return;
+
+        Stretch = state.Stretch;
+        ZoomSpeed = state.ZoomSpeed;
+        EnablePan = state.EnablePan;
+        EnableZoom = state.EnableZoom;
+        Rotation = state.Rotation;
+        MinZoomX = state.MinZoomX;
+        MaxZoomX = state.MaxZoomX;
+        MinZoomY = state.MinZoomY;
+        MaxZoomY = state.MaxZoomY;
+        EnableConstrains = state.EnableConstrains;
+        EnableAnimations = state.EnableAnimations;
+        AnimationDuration = state.AnimationDuration;
+
+        SetMatrix(state.Matrix, !animate);
+    }
+
+    /// <summary>
+    /// Updates accessibility descriptions based on current state.
+    /// </summary>
+    public void UpdateAccessibilityDescriptions()
+    {
+        // Update zoom level description
+        var zoomPercent = ZoomX * 100;
+        ZoomLevelDescription = $"Zoom level: {zoomPercent:F0}%";
+
+        // Update pan position description
+        PanPositionDescription = $"Pan position: X={OffsetX:F0}, Y={OffsetY:F0}";
+    }
+
+    /// <summary>
+    /// Gets the current accessibility description.
+    /// </summary>
+    /// <returns>A combined accessibility description.</returns>
+    public string GetAccessibilityDescription()
+    {
+        UpdateAccessibilityDescriptions();
+        return $"{ZoomLevelDescription}. {PanPositionDescription}";
+    }
+
+    /// <summary>
     /// Raises <see cref="ZoomChanged"/> event.
     /// </summary>
     /// <param name="e">Zoom changed event arguments.</param>

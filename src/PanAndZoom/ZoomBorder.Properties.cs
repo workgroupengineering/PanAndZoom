@@ -396,6 +396,78 @@ public partial class ZoomBorder
     public static readonly StyledProperty<double> MajorGridThicknessProperty =
         AvaloniaProperty.Register<ZoomBorder, double>(nameof(MajorGridThickness), 2.0, false, BindingMode.TwoWay);
 
+    /// <summary>
+    /// Identifies the <seealso cref="Rotation"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<double> RotationProperty =
+        AvaloniaProperty.Register<ZoomBorder, double>(nameof(Rotation), 0.0, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="MinRotation"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<double> MinRotationProperty =
+        AvaloniaProperty.Register<ZoomBorder, double>(nameof(MinRotation), -180.0, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="MaxRotation"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<double> MaxRotationProperty =
+        AvaloniaProperty.Register<ZoomBorder, double>(nameof(MaxRotation), 180.0, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="EnableRotationSnapping"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<bool> EnableRotationSnappingProperty =
+        AvaloniaProperty.Register<ZoomBorder, bool>(nameof(EnableRotationSnapping), false, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="RotationSnapAngle"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<double> RotationSnapAngleProperty =
+        AvaloniaProperty.Register<ZoomBorder, double>(nameof(RotationSnapAngle), 45.0, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="EnableSimultaneousPanZoom"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<bool> EnableSimultaneousPanZoomProperty =
+        AvaloniaProperty.Register<ZoomBorder, bool>(nameof(EnableSimultaneousPanZoom), true, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="MinimumTouchPoints"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<int> MinimumTouchPointsProperty =
+        AvaloniaProperty.Register<ZoomBorder, int>(nameof(MinimumTouchPoints), 1, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="MaximumTouchPoints"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<int> MaximumTouchPointsProperty =
+        AvaloniaProperty.Register<ZoomBorder, int>(nameof(MaximumTouchPoints), 2, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="GestureRecognitionDelay"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<TimeSpan> GestureRecognitionDelayProperty =
+        AvaloniaProperty.Register<ZoomBorder, TimeSpan>(nameof(GestureRecognitionDelay), TimeSpan.FromMilliseconds(50), false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="ZoomLevelDescription"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<string> ZoomLevelDescriptionProperty =
+        AvaloniaProperty.Register<ZoomBorder, string>(nameof(ZoomLevelDescription), string.Empty, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="PanPositionDescription"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<string> PanPositionDescriptionProperty =
+        AvaloniaProperty.Register<ZoomBorder, string>(nameof(PanPositionDescription), string.Empty, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="UseHighContrastMode"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<bool> UseHighContrastModeProperty =
+        AvaloniaProperty.Register<ZoomBorder, bool>(nameof(UseHighContrastMode), false, false, BindingMode.TwoWay);
+
     static ZoomBorder()
     {
         AffectsArrange<ZoomBorder>(
@@ -1067,6 +1139,114 @@ public partial class ZoomBorder
     }
 
     /// <summary>
+    /// Gets or sets the current rotation angle in degrees.
+    /// </summary>
+    public double Rotation
+    {
+        get => GetValue(RotationProperty);
+        set => SetValue(RotationProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the minimum rotation angle in degrees.
+    /// </summary>
+    public double MinRotation
+    {
+        get => GetValue(MinRotationProperty);
+        set => SetValue(MinRotationProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the maximum rotation angle in degrees.
+    /// </summary>
+    public double MaxRotation
+    {
+        get => GetValue(MaxRotationProperty);
+        set => SetValue(MaxRotationProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether rotation snapping is enabled.
+    /// </summary>
+    public bool EnableRotationSnapping
+    {
+        get => GetValue(EnableRotationSnappingProperty);
+        set => SetValue(EnableRotationSnappingProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the rotation snap angle in degrees.
+    /// </summary>
+    public double RotationSnapAngle
+    {
+        get => GetValue(RotationSnapAngleProperty);
+        set => SetValue(RotationSnapAngleProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether simultaneous pan and zoom is enabled.
+    /// </summary>
+    public bool EnableSimultaneousPanZoom
+    {
+        get => GetValue(EnableSimultaneousPanZoomProperty);
+        set => SetValue(EnableSimultaneousPanZoomProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the minimum number of touch points.
+    /// </summary>
+    public int MinimumTouchPoints
+    {
+        get => GetValue(MinimumTouchPointsProperty);
+        set => SetValue(MinimumTouchPointsProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the maximum number of touch points.
+    /// </summary>
+    public int MaximumTouchPoints
+    {
+        get => GetValue(MaximumTouchPointsProperty);
+        set => SetValue(MaximumTouchPointsProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the gesture recognition delay.
+    /// </summary>
+    public TimeSpan GestureRecognitionDelay
+    {
+        get => GetValue(GestureRecognitionDelayProperty);
+        set => SetValue(GestureRecognitionDelayProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the zoom level description for accessibility.
+    /// </summary>
+    public string ZoomLevelDescription
+    {
+        get => GetValue(ZoomLevelDescriptionProperty);
+        set => SetValue(ZoomLevelDescriptionProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the pan position description for accessibility.
+    /// </summary>
+    public string PanPositionDescription
+    {
+        get => GetValue(PanPositionDescriptionProperty);
+        set => SetValue(PanPositionDescriptionProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether to use high contrast mode.
+    /// </summary>
+    public bool UseHighContrastMode
+    {
+        get => GetValue(UseHighContrastModeProperty);
+        set => SetValue(UseHighContrastModeProperty, value);
+    }
+
+    /// <summary>
     /// Gets a value indicating whether the control can navigate back in view history.
     /// </summary>
     public bool CanNavigateBack => EnableViewHistory && _viewHistoryIndex > 0;
@@ -1175,6 +1355,82 @@ public struct SavedView
 
     /// <summary>
     /// Gets or sets the timestamp when this view was saved.
+    /// </summary>
+    public DateTime Timestamp { get; set; }
+}
+
+/// <summary>
+/// Represents the complete state of a ZoomBorder control for serialization.
+/// </summary>
+public class ZoomBorderState
+{
+    /// <summary>
+    /// Gets or sets the transformation matrix.
+    /// </summary>
+    public Matrix Matrix { get; set; }
+
+    /// <summary>
+    /// Gets or sets the stretch mode.
+    /// </summary>
+    public StretchMode Stretch { get; set; }
+
+    /// <summary>
+    /// Gets or sets the zoom speed.
+    /// </summary>
+    public double ZoomSpeed { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether pan is enabled.
+    /// </summary>
+    public bool EnablePan { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether zoom is enabled.
+    /// </summary>
+    public bool EnableZoom { get; set; }
+
+    /// <summary>
+    /// Gets or sets the rotation angle in degrees.
+    /// </summary>
+    public double Rotation { get; set; }
+
+    /// <summary>
+    /// Gets or sets the minimum zoom X value.
+    /// </summary>
+    public double MinZoomX { get; set; }
+
+    /// <summary>
+    /// Gets or sets the maximum zoom X value.
+    /// </summary>
+    public double MaxZoomX { get; set; }
+
+    /// <summary>
+    /// Gets or sets the minimum zoom Y value.
+    /// </summary>
+    public double MinZoomY { get; set; }
+
+    /// <summary>
+    /// Gets or sets the maximum zoom Y value.
+    /// </summary>
+    public double MaxZoomY { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether constrains are enabled.
+    /// </summary>
+    public bool EnableConstrains { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether animations are enabled.
+    /// </summary>
+    public bool EnableAnimations { get; set; }
+
+    /// <summary>
+    /// Gets or sets the animation duration.
+    /// </summary>
+    public TimeSpan AnimationDuration { get; set; }
+
+    /// <summary>
+    /// Gets or sets the timestamp when this state was captured.
     /// </summary>
     public DateTime Timestamp { get; set; }
 }

@@ -590,6 +590,116 @@ Rect snappedRect = zoomBorder.SnapToGrid(new Rect(10, 20, 100, 80));
 - `SnapToGrid(Point)` - Snap a point to the nearest grid intersection
 - `SnapToGrid(Rect)` - Snap a rectangle's corners to the nearest grid points
 
+### Rotation Support
+
+Enable rotation support with constraints and snapping:
+
+```csharp
+// Enable rotation gesture
+zoomBorder.EnableGestureRotation = true;
+
+// Set rotation constraints
+zoomBorder.MinRotation = -180.0;
+zoomBorder.MaxRotation = 180.0;
+
+// Enable rotation snapping
+zoomBorder.EnableRotationSnapping = true;
+zoomBorder.RotationSnapAngle = 45.0; // Snap to 45° increments
+
+// Rotate content
+zoomBorder.Rotate(45.0); // Rotate by 45 degrees
+zoomBorder.RotateAt(90.0, new Point(100, 100)); // Rotate around a point
+
+// Reset rotation
+zoomBorder.ResetRotation();
+
+// Snap current rotation to nearest angle
+zoomBorder.SnapRotation();
+
+// Get current rotation
+double currentRotation = zoomBorder.Rotation;
+```
+
+**Note:** The current implementation provides rotation state management and constraints. Full rotation transformation would require additional matrix modifications.
+
+### Multi-Touch Configuration
+
+Configure multi-touch gesture behavior:
+
+```csharp
+// Enable simultaneous pan and zoom
+zoomBorder.EnableSimultaneousPanZoom = true; // Default: true
+
+// Configure touch point limits
+zoomBorder.MinimumTouchPoints = 1;
+zoomBorder.MaximumTouchPoints = 2;
+
+// Set gesture recognition delay
+zoomBorder.GestureRecognitionDelay = TimeSpan.FromMilliseconds(50);
+```
+
+### Accessibility Support
+
+Provide screen reader support and accessibility descriptions:
+
+```csharp
+// Update accessibility descriptions
+zoomBorder.UpdateAccessibilityDescriptions();
+
+// Get accessibility description
+string description = zoomBorder.GetAccessibilityDescription();
+// Returns: "Zoom level: 100%. Pan position: X=0, Y=0"
+
+// Access individual descriptions
+string zoomInfo = zoomBorder.ZoomLevelDescription;
+string panInfo = zoomBorder.PanPositionDescription;
+
+// Enable high contrast mode support
+zoomBorder.UseHighContrastMode = true;
+```
+
+**Accessibility Features:**
+- Automatic zoom level descriptions for screen readers
+- Pan position descriptions
+- High contrast mode support
+- Custom accessibility text via properties
+
+### State Serialization
+
+Export and import complete control state for persistence or sharing:
+
+```csharp
+// Export current state
+ZoomBorderState state = zoomBorder.ExportState();
+
+// State includes:
+// - Transformation matrix
+// - Stretch mode
+// - Zoom speed
+// - Enable flags (pan, zoom)
+// - Rotation angle
+// - Zoom limits
+// - Animation settings
+// - Timestamp
+
+// Import state
+zoomBorder.ImportState(state, animate: true);
+
+// Serialize to JSON (requires System.Text.Json or Newtonsoft.Json)
+string json = JsonSerializer.Serialize(state);
+
+// Deserialize from JSON
+ZoomBorderState restoredState = JsonSerializer.Deserialize<ZoomBorderState>(json);
+zoomBorder.ImportState(restoredState);
+```
+
+**Use Cases:**
+- Save/load view configurations
+- Share view states between users
+- Persist user preferences
+- Implement undo/redo functionality
+- Session state management
+
 ## License
 
 PanAndZoom is licensed under the [MIT license](LICENSE.TXT).
