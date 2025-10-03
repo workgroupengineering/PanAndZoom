@@ -1,6 +1,8 @@
 // Copyright (c) Wiesław Šoltés. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 using System;
+using System.Collections.Generic;
+using System.Windows.Input;
 using Avalonia.Data;
 using Avalonia.Media.Transformation;
 
@@ -249,6 +251,42 @@ public partial class ZoomBorder
     public static readonly StyledProperty<double> WheelPanSensitivityProperty =
         AvaloniaProperty.Register<ZoomBorder, double>(nameof(WheelPanSensitivity), 1.0, false, BindingMode.TwoWay);
 
+    /// <summary>
+    /// Identifies the <seealso cref="EnableKeyboardNavigation"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<bool> EnableKeyboardNavigationProperty =
+        AvaloniaProperty.Register<ZoomBorder, bool>(nameof(EnableKeyboardNavigation), true, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="KeyboardPanStep"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<double> KeyboardPanStepProperty =
+        AvaloniaProperty.Register<ZoomBorder, double>(nameof(KeyboardPanStep), 50.0, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="KeyboardZoomStep"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<double> KeyboardZoomStepProperty =
+        AvaloniaProperty.Register<ZoomBorder, double>(nameof(KeyboardZoomStep), 1.1, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="EnableViewHistory"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<bool> EnableViewHistoryProperty =
+        AvaloniaProperty.Register<ZoomBorder, bool>(nameof(EnableViewHistory), true, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="ViewHistorySize"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<int> ViewHistorySizeProperty =
+        AvaloniaProperty.Register<ZoomBorder, int>(nameof(ViewHistorySize), 50, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="CenterPadding"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<Thickness> CenterPaddingProperty =
+        AvaloniaProperty.Register<ZoomBorder, Thickness>(nameof(CenterPadding), new Thickness(0), false, BindingMode.TwoWay);
+
     static ZoomBorder()
     {
         AffectsArrange<ZoomBorder>(
@@ -285,11 +323,31 @@ public partial class ZoomBorder
     private bool _captured = false;
     private Size _sizeBeforeResize;
     private double _doubleClickZoomThreshold = 1.5;
+    private List<ViewState> _viewHistory = new List<ViewState>();
+    private int _viewHistoryIndex = -1;
+    private bool _isNavigating = false;
+
+    // Commands
+    private ICommand? _zoomInCommand;
+    private ICommand? _zoomOutCommand;
+    private ICommand? _resetCommand;
+    private ICommand? _fitCommand;
+    private ICommand? _fillCommand;
+    private ICommand? _uniformCommand;
+    private ICommand? _uniformToFillCommand;
+    private ICommand? _navigateBackCommand;
+    private ICommand? _navigateForwardCommand;
+    private ICommand? _toggleStretchCommand;
 
     /// <summary>
     /// Zoom changed event.
     /// </summary>
     public event ZoomChangedEventHandler? ZoomChanged;
+
+    /// <summary>
+    /// View history changed event.
+    /// </summary>
+    public event EventHandler? ViewHistoryChanged;
 
     /// <summary>
     /// Pan started event.
@@ -681,4 +739,139 @@ public partial class ZoomBorder
         get => GetValue(WheelPanSensitivityProperty);
         set => SetValue(WheelPanSensitivityProperty, value);
     }
+
+    /// <summary>
+    /// Gets or sets flag indicating whether keyboard navigation is enabled.
+    /// </summary>
+    public bool EnableKeyboardNavigation
+    {
+        get => GetValue(EnableKeyboardNavigationProperty);
+        set => SetValue(EnableKeyboardNavigationProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the pan step distance for keyboard navigation.
+    /// </summary>
+    public double KeyboardPanStep
+    {
+        get => GetValue(KeyboardPanStepProperty);
+        set => SetValue(KeyboardPanStepProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the zoom step factor for keyboard navigation.
+    /// </summary>
+    public double KeyboardZoomStep
+    {
+        get => GetValue(KeyboardZoomStepProperty);
+        set => SetValue(KeyboardZoomStepProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets flag indicating whether view history is enabled.
+    /// </summary>
+    public bool EnableViewHistory
+    {
+        get => GetValue(EnableViewHistoryProperty);
+        set => SetValue(EnableViewHistoryProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the maximum number of view states to store in history.
+    /// </summary>
+    public int ViewHistorySize
+    {
+        get => GetValue(ViewHistorySizeProperty);
+        set => SetValue(ViewHistorySizeProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the padding to apply when centering on a point or element.
+    /// </summary>
+    public Thickness CenterPadding
+    {
+        get => GetValue(CenterPaddingProperty);
+        set => SetValue(CenterPaddingProperty, value);
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether the control can navigate back in view history.
+    /// </summary>
+    public bool CanNavigateBack => EnableViewHistory && _viewHistoryIndex > 0;
+
+    /// <summary>
+    /// Gets a value indicating whether the control can navigate forward in view history.
+    /// </summary>
+    public bool CanNavigateForward => EnableViewHistory && _viewHistoryIndex < _viewHistory.Count - 1;
+
+    /// <summary>
+    /// Gets the command to zoom in.
+    /// </summary>
+    public ICommand ZoomInCommand => _zoomInCommand ??= new ZoomBorderCommand(() => ZoomIn(ShouldAnimate()), () => EnableZoom && _element != null);
+
+    /// <summary>
+    /// Gets the command to zoom out.
+    /// </summary>
+    public ICommand ZoomOutCommand => _zoomOutCommand ??= new ZoomBorderCommand(() => ZoomOut(ShouldAnimate()), () => EnableZoom && _element != null);
+
+    /// <summary>
+    /// Gets the command to reset the view.
+    /// </summary>
+    public ICommand ResetCommand => _resetCommand ??= new ZoomBorderCommand(() => ResetMatrix(ShouldAnimate()));
+
+    /// <summary>
+    /// Gets the command to fit content to viewport.
+    /// </summary>
+    public ICommand FitCommand => _fitCommand ??= new ZoomBorderCommand(() => AutoFit(ShouldAnimate()), () => _element != null);
+
+    /// <summary>
+    /// Gets the command to fill viewport.
+    /// </summary>
+    public ICommand FillCommand => _fillCommand ??= new ZoomBorderCommand(() => Fill(ShouldAnimate()), () => _element != null);
+
+    /// <summary>
+    /// Gets the command to apply uniform stretch.
+    /// </summary>
+    public ICommand UniformCommand => _uniformCommand ??= new ZoomBorderCommand(() => Uniform(ShouldAnimate()), () => _element != null);
+
+    /// <summary>
+    /// Gets the command to apply uniform to fill stretch.
+    /// </summary>
+    public ICommand UniformToFillCommand => _uniformToFillCommand ??= new ZoomBorderCommand(() => UniformToFill(ShouldAnimate()), () => _element != null);
+
+    /// <summary>
+    /// Gets the command to navigate back in view history.
+    /// </summary>
+    public ICommand NavigateBackCommand => _navigateBackCommand ??= new ZoomBorderCommand(() => NavigateBack(ShouldAnimate()), () => CanNavigateBack);
+
+    /// <summary>
+    /// Gets the command to navigate forward in view history.
+    /// </summary>
+    public ICommand NavigateForwardCommand => _navigateForwardCommand ??= new ZoomBorderCommand(() => NavigateForward(ShouldAnimate()), () => CanNavigateForward);
+
+    /// <summary>
+    /// Gets the command to toggle stretch mode.
+    /// </summary>
+    public ICommand ToggleStretchCommand => _toggleStretchCommand ??= new ZoomBorderCommand(ToggleStretchMode);
+}
+
+/// <summary>
+/// Represents a saved view state.
+/// </summary>
+public struct ViewState
+{
+    /// <summary>
+    /// Gets or sets the transformation matrix.
+    /// </summary>
+    public Matrix Matrix { get; set; }
+
+    /// <summary>
+    /// Gets or sets the stretch mode.
+    /// </summary>
+    public StretchMode Stretch { get; set; }
+
+    /// <summary>
+    /// Gets or sets the timestamp when this state was saved.
+    /// </summary>
+    public DateTime Timestamp { get; set; }
 }

@@ -192,7 +192,8 @@ public partial class ZoomBorder : Border
         PointerMoved += Border_PointerMoved;
         PointerCaptureLost += Border_PointerCaptureLost;
         DoubleTapped += Border_DoubleTapped;
-        
+        KeyDown += Border_KeyDown;
+
         // Add gesture event handlers
         AddHandler(Gestures.PinchEvent, Border_PinchGesture);
         AddHandler(Gestures.PinchEndedEvent, Border_PinchGestureEnded);
@@ -208,6 +209,9 @@ public partial class ZoomBorder : Border
         _updating = true;
         Invalidate(skipTransitions: false);
         _updating = false;
+
+        // Add initial state to history
+        AddToViewHistory();
     }
 
     private void PanAndZoom_DetachedFromVisualTree(object? sender, VisualTreeAttachmentEventArgs e)
@@ -222,7 +226,8 @@ public partial class ZoomBorder : Border
         PointerMoved -= Border_PointerMoved;
         PointerCaptureLost -= Border_PointerCaptureLost;
         DoubleTapped -= Border_DoubleTapped;
-        
+        KeyDown -= Border_KeyDown;
+
         // Remove gesture event handlers
         RemoveHandler(Gestures.PinchEvent, Border_PinchGesture);
         RemoveHandler(Gestures.PinchEndedEvent, Border_PinchGestureEnded);
@@ -449,6 +454,107 @@ public partial class ZoomBorder : Border
         }
 
         e.Handled = true;
+    }
+
+    private void Border_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (!EnableKeyboardNavigation || _element == null)
+            return;
+
+        var handled = true;
+
+        switch (e.Key)
+        {
+            case Key.Left:
+                if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
+                {
+                    // Ctrl+Left: Navigate back
+                    if (EnableViewHistory && CanNavigateBack)
+                    {
+                        NavigateBack(ShouldAnimate());
+                    }
+                }
+                else
+                {
+                    // Left arrow: Pan left
+                    PanDelta(-KeyboardPanStep, 0, ShouldAnimate());
+                }
+                break;
+
+            case Key.Right:
+                if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
+                {
+                    // Ctrl+Right: Navigate forward
+                    if (EnableViewHistory && CanNavigateForward)
+                    {
+                        NavigateForward(ShouldAnimate());
+                    }
+                }
+                else
+                {
+                    // Right arrow: Pan right
+                    PanDelta(KeyboardPanStep, 0, ShouldAnimate());
+                }
+                break;
+
+            case Key.Up:
+                // Up arrow: Pan up
+                PanDelta(0, -KeyboardPanStep, ShouldAnimate());
+                break;
+
+            case Key.Down:
+                // Down arrow: Pan down
+                PanDelta(0, KeyboardPanStep, ShouldAnimate());
+                break;
+
+            case Key.Add:
+            case Key.OemPlus:
+                // +/=: Zoom in
+                if (_element != null)
+                {
+                    var centerX = _element.Bounds.Width / 2.0;
+                    var centerY = _element.Bounds.Height / 2.0;
+                    ZoomTo(KeyboardZoomStep, centerX, centerY, ShouldAnimate());
+                }
+                break;
+
+            case Key.Subtract:
+            case Key.OemMinus:
+                // -: Zoom out
+                if (_element != null)
+                {
+                    var centerX = _element.Bounds.Width / 2.0;
+                    var centerY = _element.Bounds.Height / 2.0;
+                    ZoomTo(1.0 / KeyboardZoomStep, centerX, centerY, ShouldAnimate());
+                }
+                break;
+
+            case Key.D0:
+                if (e.KeyModifiers.HasFlag(KeyModifiers.Control))
+                {
+                    // Ctrl+0: Reset to 100% zoom (1:1)
+                    ResetMatrix(ShouldAnimate());
+                }
+                else
+                {
+                    handled = false;
+                }
+                break;
+
+            case Key.Home:
+                // Home: Fit to viewport
+                AutoFit(ShouldAnimate());
+                break;
+
+            default:
+                handled = false;
+                break;
+        }
+
+        if (handled)
+        {
+            e.Handled = true;
+        }
     }
 
     private void Border_PointerPressed(object? sender, PointerPressedEventArgs e)
@@ -704,6 +810,305 @@ public partial class ZoomBorder : Border
     }
 
     /// <summary>
+    /// Adds the current view state to history.
+    /// </summary>
+    private void AddToViewHistory()
+    {
+        if (!EnableViewHistory || _isNavigating)
+            return;
+
+        var viewState = new ViewState
+        {
+            Matrix = _matrix,
+            Stretch = Stretch,
+            Timestamp = DateTime.UtcNow
+        };
+
+        // Remove any forward history when adding a new state
+        if (_viewHistoryIndex < _viewHistory.Count - 1)
+        {
+            _viewHistory.RemoveRange(_viewHistoryIndex + 1, _viewHistory.Count - _viewHistoryIndex - 1);
+        }
+
+        // Add new state
+        _viewHistory.Add(viewState);
+        _viewHistoryIndex = _viewHistory.Count - 1;
+
+        // Maintain size limit
+        if (_viewHistory.Count > ViewHistorySize)
+        {
+            _viewHistory.RemoveAt(0);
+            _viewHistoryIndex--;
+        }
+
+        ViewHistoryChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// Navigate back to the previous view state in history.
+    /// </summary>
+    /// <param name="animate">Whether to animate the transition.</param>
+    public void NavigateBack(bool animate = true)
+    {
+        if (!CanNavigateBack)
+            return;
+
+        _isNavigating = true;
+        _viewHistoryIndex--;
+        var state = _viewHistory[_viewHistoryIndex];
+        Stretch = state.Stretch;
+        SetMatrix(state.Matrix, !animate);
+        _isNavigating = false;
+
+        ViewHistoryChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// Navigate forward to the next view state in history.
+    /// </summary>
+    /// <param name="animate">Whether to animate the transition.</param>
+    public void NavigateForward(bool animate = true)
+    {
+        if (!CanNavigateForward)
+            return;
+
+        _isNavigating = true;
+        _viewHistoryIndex++;
+        var state = _viewHistory[_viewHistoryIndex];
+        Stretch = state.Stretch;
+        SetMatrix(state.Matrix, !animate);
+        _isNavigating = false;
+
+        ViewHistoryChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// Clears the view history.
+    /// </summary>
+    public void ClearViewHistory()
+    {
+        _viewHistory.Clear();
+        _viewHistoryIndex = -1;
+        ViewHistoryChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// Centers the viewport on a specific point in content coordinates.
+    /// </summary>
+    /// <param name="point">The point to center on.</param>
+    /// <param name="animate">Whether to animate the transition.</param>
+    public void CenterOn(Point point, bool animate = true)
+    {
+        if (_element == null)
+            return;
+
+        var viewportCenterX = (Bounds.Width - CenterPadding.Left - CenterPadding.Right) / 2.0 + CenterPadding.Left;
+        var viewportCenterY = (Bounds.Height - CenterPadding.Top - CenterPadding.Bottom) / 2.0 + CenterPadding.Top;
+
+        var offsetX = viewportCenterX - point.X * _zoomX;
+        var offsetY = viewportCenterY - point.Y * _zoomY;
+
+        Pan(offsetX, offsetY, !animate);
+    }
+
+    /// <summary>
+    /// Centers the viewport on a specific point in content coordinates with a specific zoom level.
+    /// </summary>
+    /// <param name="point">The point to center on.</param>
+    /// <param name="zoom">The target zoom level.</param>
+    /// <param name="animate">Whether to animate the transition.</param>
+    public void CenterOn(Point point, double zoom, bool animate = true)
+    {
+        if (_element == null)
+            return;
+
+        var viewportCenterX = (Bounds.Width - CenterPadding.Left - CenterPadding.Right) / 2.0 + CenterPadding.Left;
+        var viewportCenterY = (Bounds.Height - CenterPadding.Top - CenterPadding.Bottom) / 2.0 + CenterPadding.Top;
+
+        var matrix = MatrixHelper.ScaleAt(zoom, zoom, point.X, point.Y);
+        var offsetX = viewportCenterX - point.X * zoom;
+        var offsetY = viewportCenterY - point.Y * zoom;
+
+        _matrix = MatrixHelper.ScaleAndTranslate(zoom, zoom, offsetX, offsetY);
+        Invalidate(!animate);
+    }
+
+    /// <summary>
+    /// Centers the viewport on a rectangle in content coordinates.
+    /// </summary>
+    /// <param name="rect">The rectangle to center on.</param>
+    /// <param name="animate">Whether to animate the transition.</param>
+    public void CenterOn(Rect rect, bool animate = true)
+    {
+        if (_element == null)
+            return;
+
+        var viewportWidth = Bounds.Width - CenterPadding.Left - CenterPadding.Right;
+        var viewportHeight = Bounds.Height - CenterPadding.Top - CenterPadding.Bottom;
+
+        var zoomX = viewportWidth / rect.Width;
+        var zoomY = viewportHeight / rect.Height;
+        var zoom = Math.Min(zoomX, zoomY);
+
+        var centerX = rect.X + rect.Width / 2.0;
+        var centerY = rect.Y + rect.Height / 2.0;
+
+        CenterOn(new Point(centerX, centerY), zoom, animate);
+    }
+
+    /// <summary>
+    /// Centers the viewport on a control element.
+    /// </summary>
+    /// <param name="element">The element to center on.</param>
+    /// <param name="animate">Whether to animate the transition.</param>
+    public void CenterOn(Control element, bool animate = true)
+    {
+        if (element == null)
+            return;
+
+        var bounds = element.Bounds;
+        CenterOn(bounds, animate);
+    }
+
+    /// <summary>
+    /// Converts a viewport point to content coordinates.
+    /// </summary>
+    /// <param name="viewportPoint">The point in viewport coordinates.</param>
+    /// <returns>The point in content coordinates.</returns>
+    public Point ViewportToContent(Point viewportPoint)
+    {
+        if (!_matrix.TryInvert(out var inverted))
+            return viewportPoint;
+
+        return inverted.Transform(viewportPoint);
+    }
+
+    /// <summary>
+    /// Converts a content point to viewport coordinates.
+    /// </summary>
+    /// <param name="contentPoint">The point in content coordinates.</param>
+    /// <returns>The point in viewport coordinates.</returns>
+    public Point ContentToViewport(Point contentPoint)
+    {
+        return _matrix.Transform(contentPoint);
+    }
+
+    /// <summary>
+    /// Converts a viewport rectangle to content coordinates.
+    /// </summary>
+    /// <param name="viewportRect">The rectangle in viewport coordinates.</param>
+    /// <returns>The rectangle in content coordinates.</returns>
+    public Rect ViewportToContent(Rect viewportRect)
+    {
+        if (!_matrix.TryInvert(out var inverted))
+            return viewportRect;
+
+        var topLeft = inverted.Transform(viewportRect.TopLeft);
+        var bottomRight = inverted.Transform(viewportRect.BottomRight);
+
+        return new Rect(topLeft, bottomRight);
+    }
+
+    /// <summary>
+    /// Converts a content rectangle to viewport coordinates.
+    /// </summary>
+    /// <param name="contentRect">The rectangle in content coordinates.</param>
+    /// <returns>The rectangle in viewport coordinates.</returns>
+    public Rect ContentToViewport(Rect contentRect)
+    {
+        var topLeft = _matrix.Transform(contentRect.TopLeft);
+        var bottomRight = _matrix.Transform(contentRect.BottomRight);
+
+        return new Rect(topLeft, bottomRight);
+    }
+
+    /// <summary>
+    /// Converts a screen vector to content vector.
+    /// </summary>
+    /// <param name="screenVector">The vector in screen coordinates.</param>
+    /// <returns>The vector in content coordinates.</returns>
+    public Vector ScreenToContent(Vector screenVector)
+    {
+        if (!_matrix.TryInvert(out var inverted))
+            return screenVector;
+
+        var origin = inverted.Transform(new Point(0, 0));
+        var transformed = inverted.Transform(new Point(screenVector.X, screenVector.Y));
+
+        return new Vector(transformed.X - origin.X, transformed.Y - origin.Y);
+    }
+
+    /// <summary>
+    /// Converts a content vector to screen vector.
+    /// </summary>
+    /// <param name="contentVector">The vector in content coordinates.</param>
+    /// <returns>The vector in screen coordinates.</returns>
+    public Vector ContentToScreen(Vector contentVector)
+    {
+        var origin = _matrix.Transform(new Point(0, 0));
+        var transformed = _matrix.Transform(new Point(contentVector.X, contentVector.Y));
+
+        return new Vector(transformed.X - origin.X, transformed.Y - origin.Y);
+    }
+
+    /// <summary>
+    /// Converts a screen size to content size.
+    /// </summary>
+    /// <param name="screenSize">The size in screen coordinates.</param>
+    /// <returns>The size in content coordinates.</returns>
+    public Size ScreenToContent(Size screenSize)
+    {
+        return new Size(screenSize.Width / _zoomX, screenSize.Height / _zoomY);
+    }
+
+    /// <summary>
+    /// Converts a content size to screen size.
+    /// </summary>
+    /// <param name="contentSize">The size in content coordinates.</param>
+    /// <returns>The size in screen coordinates.</returns>
+    public Size ContentToScreen(Size contentSize)
+    {
+        return new Size(contentSize.Width * _zoomX, contentSize.Height * _zoomY);
+    }
+
+    /// <summary>
+    /// Gets the transformation matrix from content to screen coordinates.
+    /// </summary>
+    /// <returns>The transformation matrix.</returns>
+    public Matrix GetContentToScreenMatrix()
+    {
+        return _matrix;
+    }
+
+    /// <summary>
+    /// Gets the transformation matrix from screen to content coordinates.
+    /// </summary>
+    /// <returns>The transformation matrix.</returns>
+    public Matrix GetScreenToContentMatrix()
+    {
+        _matrix.TryInvert(out var inverted);
+        return inverted;
+    }
+
+    /// <summary>
+    /// Gets the visible content bounds in content coordinates.
+    /// </summary>
+    /// <returns>The visible content bounds.</returns>
+    public Rect GetVisibleContentBounds()
+    {
+        return ViewportToContent(new Rect(0, 0, Bounds.Width, Bounds.Height));
+    }
+
+    /// <summary>
+    /// Gets the viewport bounds in viewport coordinates.
+    /// </summary>
+    /// <returns>The viewport bounds.</returns>
+    public Rect GetViewportBounds()
+    {
+        return new Rect(0, 0, Bounds.Width, Bounds.Height);
+    }
+
+    /// <summary>
     /// Raises <see cref="ZoomChanged"/> event.
     /// </summary>
     /// <param name="e">Zoom changed event arguments.</param>
@@ -889,6 +1294,9 @@ public partial class ZoomBorder : Border
         InvalidateScrollable();
         InvalidateElement(skipTransitions);
         RaiseZoomChanged();
+
+        // Add to view history after all updates
+        AddToViewHistory();
 
         Log("[Invalidate] End");
     }

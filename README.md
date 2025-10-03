@@ -250,6 +250,139 @@ zoomBorder.WheelPanSensitivity = 1.0;
 
 **Example:** By default, `Shift`+`Wheel` pans horizontally while regular wheel zooms.
 
+### Keyboard Navigation
+
+Navigate and zoom using keyboard shortcuts:
+
+```csharp
+zoomBorder.EnableKeyboardNavigation = true;
+zoomBorder.KeyboardPanStep = 50.0;
+zoomBorder.KeyboardZoomStep = 1.1;
+```
+
+**Built-in Keyboard Shortcuts:**
+- **Arrow Keys**: Pan in the respective direction
+- **`+` / `=`**: Zoom in
+- **`-`**: Zoom out
+- **`Ctrl` + `0`**: Reset view to identity matrix
+- **`Home`**: Fit content to viewport
+- **`Ctrl` + `Left`**: Navigate back in view history
+- **`Ctrl` + `Right`**: Navigate forward in view history
+
+### View History (Undo/Redo)
+
+Track navigation history with undo/redo support:
+
+```csharp
+zoomBorder.EnableViewHistory = true;
+zoomBorder.ViewHistorySize = 50; // Maximum history entries
+
+// Navigate through history
+if (zoomBorder.CanNavigateBack)
+    zoomBorder.NavigateBack();
+
+if (zoomBorder.CanNavigateForward)
+    zoomBorder.NavigateForward();
+
+// Clear history
+zoomBorder.ClearViewHistory();
+
+// Listen for history changes
+zoomBorder.ViewHistoryChanged += (sender, args) =>
+{
+    // Update UI state for back/forward buttons
+};
+```
+
+### Center On Methods
+
+Programmatically center the viewport on specific points, rectangles, or elements:
+
+```csharp
+// Center on a point in content coordinates
+zoomBorder.CenterOn(new Point(100, 100));
+
+// Center on a point with specific zoom
+zoomBorder.CenterOn(new Point(100, 100), zoom: 2.0);
+
+// Center on a rectangle (automatically calculates appropriate zoom)
+zoomBorder.CenterOn(new Rect(50, 50, 200, 150));
+
+// Center on a control element
+var targetControl = this.FindControl<Control>("MyElement");
+zoomBorder.CenterOn(targetControl);
+
+// Add padding when centering
+zoomBorder.CenterPadding = new Thickness(20);
+```
+
+### Coordinate System Helpers
+
+Convert between viewport and content coordinate systems:
+
+```csharp
+// Point conversions
+Point contentPoint = zoomBorder.ViewportToContent(viewportPoint);
+Point viewportPoint = zoomBorder.ContentToViewport(contentPoint);
+
+// Rectangle conversions
+Rect contentRect = zoomBorder.ViewportToContent(viewportRect);
+Rect viewportRect = zoomBorder.ContentToViewport(contentRect);
+
+// Vector conversions
+Vector contentVector = zoomBorder.ScreenToContent(screenVector);
+Vector screenVector = zoomBorder.ContentToScreen(contentVector);
+
+// Size conversions
+Size contentSize = zoomBorder.ScreenToContent(screenSize);
+Size screenSize = zoomBorder.ContentToScreen(contentSize);
+
+// Get transformation matrices
+Matrix contentToScreen = zoomBorder.GetContentToScreenMatrix();
+Matrix screenToContent = zoomBorder.GetScreenToContentMatrix();
+
+// Get bounds
+Rect visibleContent = zoomBorder.GetVisibleContentBounds();
+Rect viewport = zoomBorder.GetViewportBounds();
+```
+
+### MVVM Command Support
+
+Use built-in ICommand implementations for MVVM scenarios:
+
+```xml
+<paz:ZoomBorder Name="ZoomBorder">
+    <!-- Your content -->
+</paz:ZoomBorder>
+
+<StackPanel>
+    <Button Content="Zoom In" Command="{Binding #ZoomBorder.ZoomInCommand}"/>
+    <Button Content="Zoom Out" Command="{Binding #ZoomBorder.ZoomOutCommand}"/>
+    <Button Content="Reset" Command="{Binding #ZoomBorder.ResetCommand}"/>
+    <Button Content="Fit" Command="{Binding #ZoomBorder.FitCommand}"/>
+    <Button Content="Fill" Command="{Binding #ZoomBorder.FillCommand}"/>
+    <Button Content="Uniform" Command="{Binding #ZoomBorder.UniformCommand}"/>
+    <Button Content="Uniform To Fill" Command="{Binding #ZoomBorder.UniformToFillCommand}"/>
+    <Button Content="Back" Command="{Binding #ZoomBorder.NavigateBackCommand}"/>
+    <Button Content="Forward" Command="{Binding #ZoomBorder.NavigateForwardCommand}"/>
+    <Button Content="Toggle Stretch" Command="{Binding #ZoomBorder.ToggleStretchCommand}"/>
+</StackPanel>
+```
+
+**Available Commands:**
+- `ZoomInCommand` - Zoom in at center
+- `ZoomOutCommand` - Zoom out at center
+- `ResetCommand` - Reset to identity matrix
+- `FitCommand` - Fit content to viewport
+- `FillCommand` - Fill viewport
+- `UniformCommand` - Apply uniform stretch
+- `UniformToFillCommand` - Apply uniform to fill stretch
+- `NavigateBackCommand` - Navigate back in history
+- `NavigateForwardCommand` - Navigate forward in history
+- `ToggleStretchCommand` - Cycle through stretch modes
+
+All commands respect `EnableZoom`, `EnablePan`, and `EnableViewHistory` settings.
+
 ### Virtual Methods for Custom Behavior
 
 Override these methods to implement custom logic:
