@@ -1,0 +1,88 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:paz="using:Avalonia.Controls.PanAndZoom"
+             x:Class="AvaloniaDemo.Views.ProgrammaticPanView">
+
+  <Grid ColumnDefinitions="250,*">
+    <!-- Controls -->
+    <StackPanel Grid.Column="0" Margin="12" Spacing="8">
+      <TextBlock Text="Programmatic Pan" FontWeight="Bold" FontSize="16" />
+      <TextBlock Text="Control panning via code" TextWrapping="Wrap" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Pan To Absolute Position:" FontWeight="SemiBold" />
+      <TextBlock Text="X:" FontSize="11" />
+      <TextBox x:Name="PanToX" Text="100" />
+      <TextBlock Text="Y:" FontSize="11" />
+      <TextBox x:Name="PanToY" Text="100" />
+      <Button Content="Pan To Position" Click="PanTo_Click" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Pan by Delta:" FontWeight="SemiBold" />
+      <TextBlock Text="Delta X:" FontSize="11" />
+      <TextBox x:Name="PanDeltaX" Text="50" />
+      <TextBlock Text="Delta Y:" FontSize="11" />
+      <TextBox x:Name="PanDeltaY" Text="50" />
+      <Button Content="Apply Delta" Click="PanDelta_Click" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Directional Pan:" FontWeight="SemiBold" />
+      <Grid ColumnDefinitions="*,*" RowDefinitions="*,*,*" Height="100">
+        <Button Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Content="↑ Up" Click="PanUp_Click" />
+        <Button Grid.Row="1" Grid.Column="0" Content="← Left" Click="PanLeft_Click" />
+        <Button Grid.Row="1" Grid.Column="1" Content="Right →" Click="PanRight_Click" />
+        <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Content="↓ Down" Click="PanDown_Click" />
+      </Grid>
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Current Offset:" FontWeight="SemiBold" />
+      <TextBlock Text="{Binding OffsetX, StringFormat='X: {0:F2}'}" />
+      <TextBlock Text="{Binding OffsetY, StringFormat='Y: {0:F2}'}" />
+    </StackPanel>
+
+    <!-- ZoomBorder -->
+    <Border Grid.Column="1" Margin="12" BorderBrush="Gray" BorderThickness="1">
+      <paz:ZoomBorder x:Name="ZoomBorder"
+                      Stretch="None"
+                      ZoomSpeed="1.2"
+                      Background="SlateBlue"
+                      ClipToBounds="True">
+        <Canvas Width="800" Height="600" Background="LightGray">
+          <TextBlock Canvas.Left="20" Canvas.Top="20" Text="Programmatic Pan Demo" FontSize="24" FontWeight="Bold" />
+
+          <!-- Grid with coordinates -->
+          <Rectangle Stroke="Gray" StrokeThickness="1" Width="800" Height="600" Canvas.Left="0" Canvas.Top="0" Fill="Transparent" />
+
+          <Line StartPoint="0,300" EndPoint="800,300" Stroke="Red" StrokeThickness="1" StrokeDashArray="5,3" />
+          <Line StartPoint="400,0" EndPoint="400,600" Stroke="Red" StrokeThickness="1" StrokeDashArray="5,3" />
+
+          <TextBlock Canvas.Left="10" Canvas.Top="10" Text="(0, 0)" FontSize="12" />
+          <TextBlock Canvas.Left="770" Canvas.Top="10" Text="(800, 0)" FontSize="12" />
+          <TextBlock Canvas.Left="10" Canvas.Top="570" Text="(0, 600)" FontSize="12" />
+          <TextBlock Canvas.Left="750" Canvas.Top="570" Text="(800, 600)" FontSize="12" />
+
+          <Border Canvas.Left="250" Canvas.Top="200" Width="300" Height="200"
+                  Background="Orange" BorderBrush="DarkOrange" BorderThickness="2" Padding="15">
+            <StackPanel Spacing="8">
+              <TextBlock Text="Pan Methods" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" />
+              <TextBlock TextWrapping="Wrap" FontSize="12" HorizontalAlignment="Center">
+                • Pan(x, y) - Move to absolute position
+              </TextBlock>
+              <TextBlock TextWrapping="Wrap" FontSize="12" HorizontalAlignment="Center">
+                • PanDelta(dx, dy) - Move by offset
+              </TextBlock>
+              <TextBlock TextWrapping="Wrap" FontSize="12" HorizontalAlignment="Center">
+                • BeginPanTo() / ContinuePanTo() - Incremental pan
+              </TextBlock>
+            </StackPanel>
+          </Border>
+        </Canvas>
+      </paz:ZoomBorder>
+    </Border>
+  </Grid>
+
+</UserControl>

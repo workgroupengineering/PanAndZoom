@@ -1,0 +1,81 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:paz="using:Avalonia.Controls.PanAndZoom"
+             x:Class="AvaloniaDemo.Views.DynamicZoomLimitsView">
+
+  <Grid ColumnDefinitions="250,*">
+    <!-- Controls -->
+    <StackPanel Grid.Column="0" Margin="12" Spacing="8">
+      <TextBlock Text="Dynamic Zoom Limits Demo" FontWeight="Bold" FontSize="16" />
+      <TextBlock Text="Auto-calculate zoom limits based on content" TextWrapping="Wrap" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Auto-Calculation:" FontWeight="SemiBold" />
+      <CheckBox Content="Auto Calculate Min Zoom" IsChecked="{Binding AutoCalculateMinZoom}" />
+      <CheckBox Content="Auto Calculate Max Zoom" IsChecked="{Binding AutoCalculateMaxZoom}" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Max Zoom Pixel Size:" />
+      <TextBox Text="{Binding MaxZoomPixelSize}" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Manual Limits:" FontWeight="SemiBold" />
+      <TextBlock Text="Min Zoom X:" />
+      <TextBox Text="{Binding MinZoomX}" />
+      <TextBlock Text="Max Zoom X:" />
+      <TextBox Text="{Binding MaxZoomX}" />
+      <TextBlock Text="Min Zoom Y:" />
+      <TextBox Text="{Binding MinZoomY}" />
+      <TextBlock Text="Max Zoom Y:" />
+      <TextBox Text="{Binding MaxZoomY}" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Current Zoom:" FontWeight="SemiBold" />
+      <TextBlock Text="{Binding ZoomX, StringFormat='Zoom X: {0:F2}'}" />
+      <TextBlock Text="{Binding ZoomY, StringFormat='Zoom Y: {0:F2}'}" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Instructions:" FontSize="11" TextWrapping="Wrap">
+        Enable auto-calculation to have zoom limits automatically set based on content and viewport size. Manual limits are combined with auto-calculated values.
+      </TextBlock>
+    </StackPanel>
+
+    <!-- ZoomBorder -->
+    <Border Grid.Column="1" Margin="12" BorderBrush="Gray" BorderThickness="1">
+      <paz:ZoomBorder x:Name="ZoomBorder"
+                      Stretch="Uniform"
+                      ZoomSpeed="1.2"
+                      Background="SlateBlue"
+                      ClipToBounds="True"
+                      AutoCalculateMinZoom="True"
+                      AutoCalculateMaxZoom="True"
+                      MaxZoomPixelSize="5.0"
+                      EnableConstrains="True">
+        <Canvas Width="400" Height="300" Background="LightGray">
+          <TextBlock Canvas.Left="20" Canvas.Top="20" Text="Dynamic Zoom Limits" FontSize="22" FontWeight="Bold" />
+
+          <TextBlock Canvas.Left="20" Canvas.Top="60" TextWrapping="Wrap" Width="360" FontSize="13">
+            With auto-calculation enabled, the minimum zoom ensures the entire content fits in the viewport,
+            and maximum zoom is limited by the pixel size setting.
+          </TextBlock>
+
+          <Border Canvas.Left="50" Canvas.Top="140" Width="300" Height="120"
+                  Background="Orange" BorderBrush="DarkOrange" BorderThickness="3" Padding="10">
+            <StackPanel Spacing="6">
+              <TextBlock Text="Content Area" FontSize="16" FontWeight="Bold" />
+              <TextBlock TextWrapping="Wrap" FontSize="11">
+                Try zooming in and out. Notice how the zoom limits are automatically constrained based on the content size.
+              </TextBlock>
+            </StackPanel>
+          </Border>
+        </Canvas>
+      </paz:ZoomBorder>
+    </Border>
+  </Grid>
+
+</UserControl>

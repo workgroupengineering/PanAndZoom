@@ -1,0 +1,80 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:paz="using:Avalonia.Controls.PanAndZoom"
+             xmlns:vm="using:AvaloniaDemo.ViewModels"
+             x:Class="AvaloniaDemo.Views.GridSnapView"
+             x:DataType="vm:GridSnapViewModel">
+
+  <Grid ColumnDefinitions="250,*">
+    <!-- Controls -->
+    <StackPanel Grid.Column="0" Margin="12" Spacing="8">
+      <TextBlock Text="Grid &amp; Snap Demo" FontWeight="Bold" FontSize="16" />
+      <TextBlock Text="Test grid snapping functionality" TextWrapping="Wrap" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Test Values:" FontWeight="SemiBold" />
+      <TextBlock Text="Single Value:" />
+      <TextBox Text="{Binding TestValue}" />
+      <TextBlock Text="{Binding SnappedValue}" FontWeight="SemiBold" />
+
+      <Separator Margin="0,4" />
+
+      <TextBlock Text="Point X:" />
+      <TextBox Text="{Binding TestX}" />
+      <TextBlock Text="Point Y:" />
+      <TextBox Text="{Binding TestY}" />
+      <TextBlock Text="{Binding SnappedPoint}" FontWeight="SemiBold" />
+
+      <Button Content="Update Snapping" Click="UpdateSnapping_Click" Margin="0,8,0,0" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Grid Settings:" FontWeight="SemiBold" />
+      <CheckBox Content="Enable Snap to Grid" IsChecked="{Binding EnableSnapToGrid}" Click="UpdateSnapping_Click" />
+      <TextBlock Text="Grid Size:" />
+      <TextBox Text="{Binding GridSize}" TextChanged="UpdateSnapping_TextChanged" />
+    </StackPanel>
+
+    <!-- ZoomBorder -->
+    <Border Grid.Column="1" Margin="12" BorderBrush="Gray" BorderThickness="1">
+      <paz:ZoomBorder x:Name="ZoomBorder"
+                      Stretch="None"
+                      ZoomSpeed="1.2"
+                      Background="DarkSlateGray"
+                      ClipToBounds="True"
+                      EnableSnapToGrid="True"
+                      GridSize="50">
+        <Canvas Width="500" Height="500">
+          <!-- Grid visualization -->
+          <Canvas.Background>
+            <DrawingBrush TileMode="Tile" Stretch="None" AlignmentX="Left" AlignmentY="Top">
+              <DrawingBrush.Drawing>
+                <GeometryDrawing>
+                  <GeometryDrawing.Geometry>
+                    <RectangleGeometry Rect="0,0,50,50" />
+                  </GeometryDrawing.Geometry>
+                  <GeometryDrawing.Pen>
+                    <Pen Brush="#404040" Thickness="1" />
+                  </GeometryDrawing.Pen>
+                </GeometryDrawing>
+              </DrawingBrush.Drawing>
+              <DrawingBrush.Transform>
+                <ScaleTransform ScaleX="1" ScaleY="1" />
+              </DrawingBrush.Transform>
+            </DrawingBrush>
+          </Canvas.Background>
+
+          <!-- Draggable rectangles -->
+          <Rectangle Fill="Red" Width="40" Height="40" Canvas.Left="25" Canvas.Top="25" />
+          <Rectangle Fill="Blue" Width="40" Height="40" Canvas.Left="125" Canvas.Top="125" />
+          <Rectangle Fill="Green" Width="40" Height="40" Canvas.Left="225" Canvas.Top="225" />
+          <Rectangle Fill="Orange" Width="40" Height="40" Canvas.Left="325" Canvas.Top="325" />
+
+          <TextBlock Canvas.Left="10" Canvas.Top="10" Foreground="White" Text="Grid: 50px" FontSize="14" />
+        </Canvas>
+      </paz:ZoomBorder>
+    </Border>
+  </Grid>
+
+</UserControl>

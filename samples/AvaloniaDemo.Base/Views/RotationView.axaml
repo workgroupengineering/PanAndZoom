@@ -1,0 +1,74 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:paz="using:Avalonia.Controls.PanAndZoom"
+             xmlns:vm="using:AvaloniaDemo.ViewModels"
+             x:Class="AvaloniaDemo.Views.RotationView"
+             x:DataType="vm:RotationViewModel">
+
+  <Grid ColumnDefinitions="250,*">
+    <!-- Controls -->
+    <StackPanel Grid.Column="0" Margin="12" Spacing="8">
+      <TextBlock Text="Rotation Demo" FontWeight="Bold" FontSize="16" />
+      <TextBlock Text="Rotate content with constraints and snapping" TextWrapping="Wrap" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Current Rotation:" FontWeight="SemiBold" />
+      <TextBlock Text="{Binding CurrentRotation, StringFormat='{}{0:F2}°'}" FontSize="20" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Rotation Controls:" FontWeight="SemiBold" />
+      <Button Content="Rotate +15°" Click="Rotate15_Click" />
+      <Button Content="Rotate -15°" Click="RotateMinus15_Click" />
+      <Button Content="Rotate +45°" Click="Rotate45_Click" />
+      <Button Content="Rotate -45°" Click="RotateMinus45_Click" />
+      <Button Content="Snap to Angle" Click="Snap_Click" />
+      <Button Content="Reset Rotation" Click="Reset_Click" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Settings:" FontWeight="SemiBold" />
+      <CheckBox Content="Enable Gesture Rotation" IsChecked="{Binding EnableGestureRotation}" />
+      <CheckBox Content="Enable Rotation Snapping" IsChecked="{Binding EnableRotationSnapping}" Click="UpdateRotation_Click" />
+      <TextBlock Text="Snap Angle:" />
+      <TextBox Text="{Binding RotationSnapAngle}" />
+      <TextBlock Text="Min Rotation:" />
+      <TextBox Text="{Binding MinRotation}" />
+      <TextBlock Text="Max Rotation:" />
+      <TextBox Text="{Binding MaxRotation}" />
+    </StackPanel>
+
+    <!-- ZoomBorder -->
+    <Border Grid.Column="1" Margin="12" BorderBrush="Gray" BorderThickness="1">
+      <paz:ZoomBorder x:Name="ZoomBorder"
+                      Stretch="None"
+                      ZoomSpeed="1.2"
+                      Background="SlateBlue"
+                      ClipToBounds="True"
+                      EnableGestureRotation="True"
+                      EnableRotationSnapping="True"
+                      RotationSnapAngle="45"
+                      MinRotation="-180"
+                      MaxRotation="180">
+        <Canvas Width="400" Height="400" Background="LightGray">
+          <Border Width="200" Height="200" Canvas.Left="100" Canvas.Top="100"
+                  Background="Orange" BorderBrush="Black" BorderThickness="2">
+            <Border.RenderTransform>
+              <RotateTransform Angle="{Binding CurrentRotation}" CenterX="100" CenterY="100" />
+            </Border.RenderTransform>
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+              <TextBlock Text="ROTATABLE" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" />
+              <TextBlock Text="{Binding CurrentRotation, StringFormat='{}{0:F1}°'}" FontSize="16" HorizontalAlignment="Center" Margin="0,8,0,0" />
+            </StackPanel>
+          </Border>
+
+          <!-- Center crosshair -->
+          <Line StartPoint="0,200" EndPoint="400,200" Stroke="Red" StrokeThickness="1" />
+          <Line StartPoint="200,0" EndPoint="200,400" Stroke="Red" StrokeThickness="1" />
+        </Canvas>
+      </paz:ZoomBorder>
+    </Border>
+  </Grid>
+
+</UserControl>

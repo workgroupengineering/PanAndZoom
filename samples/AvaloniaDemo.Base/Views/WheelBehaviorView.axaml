@@ -1,0 +1,80 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:paz="using:Avalonia.Controls.PanAndZoom"
+             x:Class="AvaloniaDemo.Views.WheelBehaviorView">
+
+  <Grid ColumnDefinitions="250,*">
+    <!-- Controls -->
+    <StackPanel Grid.Column="0" Margin="12" Spacing="8">
+      <TextBlock Text="Mouse Wheel Behavior" FontWeight="Bold" FontSize="16" />
+      <TextBlock Text="Configure wheel with modifiers" TextWrapping="Wrap" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Wheel Behavior:" FontWeight="SemiBold" />
+      <ComboBox SelectedIndex="0" SelectionChanged="WheelBehavior_Changed">
+        <ComboBoxItem Content="Zoom" Tag="Zoom" />
+        <ComboBoxItem Content="Pan Vertical" Tag="PanVertical" />
+        <ComboBoxItem Content="Pan Horizontal" Tag="PanHorizontal" />
+        <ComboBoxItem Content="None" Tag="None" />
+      </ComboBox>
+
+      <TextBlock Text="Wheel + Ctrl:" Margin="0,8,0,0" />
+      <ComboBox SelectedIndex="0" SelectionChanged="WheelCtrl_Changed">
+        <ComboBoxItem Content="Zoom" Tag="Zoom" />
+        <ComboBoxItem Content="Pan Vertical" Tag="PanVertical" />
+        <ComboBoxItem Content="Pan Horizontal" Tag="PanHorizontal" />
+      </ComboBox>
+
+      <TextBlock Text="Wheel + Shift:" Margin="0,8,0,0" />
+      <ComboBox SelectedIndex="1" SelectionChanged="WheelShift_Changed">
+        <ComboBoxItem Content="Zoom" Tag="Zoom" />
+        <ComboBoxItem Content="Pan Vertical" Tag="PanVertical" />
+        <ComboBoxItem Content="Pan Horizontal" Tag="PanHorizontal" />
+      </ComboBox>
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Wheel Zoom Sensitivity:" />
+      <TextBox Text="{Binding WheelZoomSensitivity}" />
+
+      <TextBlock Text="Wheel Pan Sensitivity:" />
+      <TextBox Text="{Binding WheelPanSensitivity}" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Instructions:" FontSize="11" TextWrapping="Wrap">
+        Use mouse wheel alone, with Ctrl, or with Shift to test different behaviors. Sensitivity controls the speed.
+      </TextBlock>
+    </StackPanel>
+
+    <!-- ZoomBorder -->
+    <Border Grid.Column="1" Margin="12" BorderBrush="Gray" BorderThickness="1">
+      <paz:ZoomBorder x:Name="ZoomBorder"
+                      Stretch="None"
+                      ZoomSpeed="1.2"
+                      Background="SlateBlue"
+                      ClipToBounds="True"
+                      WheelBehavior="Zoom"
+                      WheelWithCtrl="Zoom"
+                      WheelWithShift="PanHorizontal"
+                      WheelZoomSensitivity="1.0"
+                      WheelPanSensitivity="1.0">
+        <Canvas Width="800" Height="600" Background="LightGray">
+          <TextBlock Canvas.Left="20" Canvas.Top="20" Text="Mouse Wheel Test Area" FontSize="24" FontWeight="Bold" />
+
+          <Rectangle Fill="Red" Width="100" Height="100" Canvas.Left="50" Canvas.Top="80" />
+          <Rectangle Fill="Blue" Width="100" Height="100" Canvas.Left="200" Canvas.Top="80" />
+          <Rectangle Fill="Green" Width="100" Height="100" Canvas.Left="350" Canvas.Top="80" />
+          <Rectangle Fill="Orange" Width="100" Height="100" Canvas.Left="500" Canvas.Top="80" />
+
+          <TextBlock Canvas.Left="50" Canvas.Top="220" TextWrapping="Wrap" Width="700" FontSize="14">
+            Try scrolling with mouse wheel. Then try Ctrl+Wheel and Shift+Wheel to see different behaviors.
+            Change the settings on the left to customize the behavior.
+          </TextBlock>
+        </Canvas>
+      </paz:ZoomBorder>
+    </Border>
+  </Grid>
+
+</UserControl>

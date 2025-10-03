@@ -1,0 +1,104 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:paz="using:Avalonia.Controls.PanAndZoom"
+             x:Class="AvaloniaDemo.Views.BoundsModeView">
+
+  <Grid ColumnDefinitions="250,*">
+    <!-- Controls -->
+    <StackPanel Grid.Column="0" Margin="12" Spacing="8">
+      <TextBlock Text="Bounds Mode &amp; Constraints" FontWeight="Bold" FontSize="16" />
+      <TextBlock Text="Restrict panning within bounds" TextWrapping="Wrap" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Bounds Mode:" FontWeight="SemiBold" />
+      <ComboBox SelectedIndex="0" SelectionChanged="BoundsMode_Changed">
+        <ComboBoxItem Content="Unrestricted" Tag="Unrestricted" />
+        <ComboBoxItem Content="Keep Content Visible" Tag="KeepContentVisible" />
+        <ComboBoxItem Content="Fill Viewport" Tag="FillViewport" />
+        <ComboBoxItem Content="Keep Centered" Tag="KeepCentered" />
+      </ComboBox>
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Bounds Padding:" FontWeight="SemiBold" />
+      <TextBlock Text="All Sides:" FontSize="11" />
+      <Slider x:Name="BoundsPaddingSlider" Minimum="0" Maximum="100" Value="0" ValueChanged="BoundsPadding_Changed" />
+      <TextBlock Text="{Binding #BoundsPaddingSlider.Value, StringFormat='Value: {0:F0}px'}" FontSize="10" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Min Visible Content %:" FontWeight="SemiBold" />
+      <Slider x:Name="MinVisibleSlider" Minimum="0" Maximum="1" Value="0.1" ValueChanged="MinVisible_Changed" />
+      <TextBlock Text="{Binding #MinVisibleSlider.Value, StringFormat='{}{0:P0}'}" FontSize="10" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Offset Constraints:" FontWeight="SemiBold" />
+      <CheckBox Content="Enable Offset Limits" x:Name="EnableOffsetLimits" Click="OffsetLimits_Changed" />
+
+      <TextBlock Text="Min Offset X:" FontSize="11" />
+      <TextBox x:Name="MinOffsetXBox" Text="-200" IsEnabled="{Binding #EnableOffsetLimits.IsChecked}" />
+
+      <TextBlock Text="Max Offset X:" FontSize="11" />
+      <TextBox x:Name="MaxOffsetXBox" Text="200" IsEnabled="{Binding #EnableOffsetLimits.IsChecked}" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Instructions:" FontSize="11" TextWrapping="Wrap">
+        Try panning with different Bounds Mode settings. KeepContentVisible keeps content in viewport, FillViewport ensures content fills viewport.
+      </TextBlock>
+    </StackPanel>
+
+    <!-- ZoomBorder -->
+    <Border Grid.Column="1" Margin="12" BorderBrush="Gray" BorderThickness="1">
+      <paz:ZoomBorder x:Name="ZoomBorder"
+                      Stretch="None"
+                      ZoomSpeed="1.2"
+                      Background="SlateBlue"
+                      ClipToBounds="True"
+                      BoundsMode="Unrestricted"
+                      BoundsPadding="0"
+                      MinimumVisibleContentPercentage="0.1"
+                      MinOffsetX="-200"
+                      MaxOffsetX="200">
+        <Canvas Width="600" Height="400" Background="LightGray">
+          <TextBlock Canvas.Left="20" Canvas.Top="20" Text="Bounds Mode Demo" FontSize="24" FontWeight="Bold" />
+
+          <!-- Visual boundary indicator -->
+          <Rectangle Stroke="Red" StrokeThickness="3" Width="600" Height="400" Canvas.Left="0" Canvas.Top="0" Fill="Transparent" />
+
+          <Border Canvas.Left="50" Canvas.Top="80" Width="200" Height="120"
+                  Background="Orange" BorderBrush="DarkOrange" BorderThickness="2" Padding="10">
+            <StackPanel>
+              <TextBlock Text="Content Area" FontSize="16" FontWeight="Bold" />
+              <TextBlock TextWrapping="Wrap" FontSize="11" Margin="0,4,0,0">
+                Try to pan outside the red boundary with different modes.
+              </TextBlock>
+            </StackPanel>
+          </Border>
+
+          <Border Canvas.Left="300" Canvas.Top="80" Width="250" Height="280"
+                  Background="Purple" BorderBrush="DarkMagenta" BorderThickness="2" Padding="10">
+            <StackPanel Spacing="6">
+              <TextBlock Text="Bounds Modes" FontSize="16" FontWeight="Bold" Foreground="White" />
+              <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="White">
+                • Unrestricted: Pan anywhere
+              </TextBlock>
+              <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="White">
+                • KeepContentVisible: Content stays in viewport
+              </TextBlock>
+              <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="White">
+                • FillViewport: Content fills viewport
+              </TextBlock>
+              <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="White">
+                • KeepCentered: Content stays centered
+              </TextBlock>
+            </StackPanel>
+          </Border>
+        </Canvas>
+      </paz:ZoomBorder>
+    </Border>
+  </Grid>
+
+</UserControl>

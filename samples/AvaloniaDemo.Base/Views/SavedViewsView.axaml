@@ -1,0 +1,113 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:paz="using:Avalonia.Controls.PanAndZoom"
+             xmlns:vm="using:AvaloniaDemo.ViewModels"
+             x:Class="AvaloniaDemo.Views.SavedViewsView"
+             x:DataType="vm:SavedViewsViewModel">
+
+  <Grid ColumnDefinitions="250,*">
+    <!-- Controls -->
+    <StackPanel Grid.Column="0" Margin="12" Spacing="8">
+      <TextBlock Text="Saved Views" FontWeight="Bold" FontSize="16" />
+      <TextBlock Text="Save and restore view presets" TextWrapping="Wrap" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Save New View:" FontWeight="SemiBold" />
+      <TextBlock Text="Name:" FontSize="11" />
+      <TextBox Text="{Binding ViewName}" Watermark="Enter view name..." />
+
+      <TextBlock Text="Description:" FontSize="11" />
+      <TextBox Text="{Binding ViewDescription}" Watermark="Optional description..." />
+
+      <Button Content="Save Current View" Click="SaveView_Click" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Saved Views:" FontWeight="SemiBold" />
+      <ListBox ItemsSource="{Binding SavedViews}"
+               SelectedItem="{Binding SelectedViewName}"
+               Height="150">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <TextBlock Text="{Binding}" />
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+
+      <Button Content="Restore Selected" Click="RestoreView_Click" IsEnabled="{Binding SelectedViewName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+      <Button Content="Delete Selected" Click="DeleteView_Click" IsEnabled="{Binding SelectedViewName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+      <Button Content="Clear All Views" Click="ClearAllViews_Click" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Instructions:" FontSize="11" TextWrapping="Wrap">
+        Pan and zoom to interesting positions, then save them with a name. Restore saved views anytime!
+      </TextBlock>
+    </StackPanel>
+
+    <!-- ZoomBorder -->
+    <Border Grid.Column="1" Margin="12" BorderBrush="Gray" BorderThickness="1">
+      <paz:ZoomBorder x:Name="ZoomBorder"
+                      Stretch="Uniform"
+                      ZoomSpeed="1.2"
+                      Background="SlateBlue"
+                      ClipToBounds="True">
+        <Canvas Width="1000" Height="700" Background="LightGray">
+          <TextBlock Canvas.Left="20" Canvas.Top="20" Text="Saved Views Demo" FontSize="28" FontWeight="Bold" />
+
+          <Border Canvas.Left="50" Canvas.Top="100" Width="250" Height="150"
+                  Background="Red" BorderBrush="DarkRed" BorderThickness="3">
+            <TextBlock Text="Region 1: Overview" FontSize="20" FontWeight="Bold"
+                       VerticalAlignment="Center" HorizontalAlignment="Center" />
+          </Border>
+
+          <Border Canvas.Left="350" Canvas.Top="100" Width="250" Height="150"
+                  Background="Blue" BorderBrush="DarkBlue" BorderThickness="3">
+            <TextBlock Text="Region 2: Details" FontSize="20" FontWeight="Bold" Foreground="White"
+                       VerticalAlignment="Center" HorizontalAlignment="Center" />
+          </Border>
+
+          <Border Canvas.Left="650" Canvas.Top="100" Width="250" Height="150"
+                  Background="Green" BorderBrush="DarkGreen" BorderThickness="3">
+            <TextBlock Text="Region 3: Close-up" FontSize="20" FontWeight="Bold"
+                       VerticalAlignment="Center" HorizontalAlignment="Center" />
+          </Border>
+
+          <Border Canvas.Left="50" Canvas.Top="300" Width="400" Height="350"
+                  Background="Orange" BorderBrush="DarkOrange" BorderThickness="3" Padding="15">
+            <StackPanel Spacing="10">
+              <TextBlock Text="Region 4: Info Panel" FontSize="22" FontWeight="Bold" />
+              <TextBlock TextWrapping="Wrap" FontSize="14">
+                Navigate to different regions and save them as named views:
+              </TextBlock>
+              <TextBlock TextWrapping="Wrap" FontSize="13">
+                • "Overview" - Full view of all regions
+              </TextBlock>
+              <TextBlock TextWrapping="Wrap" FontSize="13">
+                • "Region 1" - Focused on red area
+              </TextBlock>
+              <TextBlock TextWrapping="Wrap" FontSize="13">
+                • "Details" - Zoomed into blue section
+              </TextBlock>
+              <TextBlock TextWrapping="Wrap" FontSize="13">
+                • "Close-up" - Maximum zoom on green
+              </TextBlock>
+            </StackPanel>
+          </Border>
+
+          <Border Canvas.Left="500" Canvas.Top="300" Width="400" Height="150"
+                  Background="Purple" BorderBrush="DarkMagenta" BorderThickness="3" Padding="15">
+            <StackPanel>
+              <TextBlock Text="Region 5: Custom View" FontSize="20" FontWeight="Bold" Foreground="White" />
+              <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="White" Margin="0,8,0,0">
+                Create your own custom views and switch between them instantly!
+              </TextBlock>
+            </StackPanel>
+          </Border>
+        </Canvas>
+      </paz:ZoomBorder>
+    </Border>
+  </Grid>
+
+</UserControl>

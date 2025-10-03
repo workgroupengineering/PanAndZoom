@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:paz="using:Avalonia.Controls.PanAndZoom"
+             xmlns:vm="using:AvaloniaDemo.ViewModels"
+             x:Class="AvaloniaDemo.Views.BoundsCallbacksView"
+             x:DataType="vm:BoundsCallbacksViewModel">
+
+  <Grid ColumnDefinitions="250,*">
+    <!-- Controls -->
+    <StackPanel Grid.Column="0" Margin="12" Spacing="8">
+      <TextBlock Text="Bounds &amp; Callbacks Demo" FontWeight="Bold" FontSize="16" />
+      <TextBlock Text="Monitor visible area, content bounds, and events" TextWrapping="Wrap" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Bounds Information:" FontWeight="SemiBold" />
+      <TextBlock Text="{Binding VisibleArea}" TextWrapping="Wrap" />
+      <TextBlock Text="{Binding ContentBounds}" TextWrapping="Wrap" />
+
+      <Button Content="Refresh Bounds" Click="RefreshBounds_Click" Margin="0,8,0,0" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Event Log:" FontWeight="SemiBold" />
+      <ScrollViewer Height="200" VerticalScrollBarVisibility="Auto">
+        <TextBlock Text="{Binding EventLog}" TextWrapping="Wrap" FontFamily="Consolas" FontSize="10" />
+      </ScrollViewer>
+    </StackPanel>
+
+    <!-- ZoomBorder -->
+    <Border Grid.Column="1" Margin="12" BorderBrush="Gray" BorderThickness="1">
+      <paz:ZoomBorder x:Name="ZoomBorder"
+                      Stretch="None"
+                      ZoomSpeed="1.2"
+                      Background="SlateBlue"
+                      ClipToBounds="True">
+        <Canvas Width="600" Height="400" Background="LightGray">
+          <Rectangle Fill="Red" Width="100" Height="100" Canvas.Left="50" Canvas.Top="50" />
+          <Rectangle Fill="Blue" Width="100" Height="100" Canvas.Left="200" Canvas.Top="50" />
+          <Rectangle Fill="Green" Width="100" Height="100" Canvas.Left="350" Canvas.Top="50" />
+          <Rectangle Fill="Orange" Width="100" Height="100" Canvas.Left="50" Canvas.Top="200" />
+          <Rectangle Fill="Purple" Width="100" Height="100" Canvas.Left="200" Canvas.Top="200" />
+          <Rectangle Fill="Cyan" Width="100" Height="100" Canvas.Left="350" Canvas.Top="200" />
+        </Canvas>
+      </paz:ZoomBorder>
+    </Border>
+  </Grid>
+
+</UserControl>

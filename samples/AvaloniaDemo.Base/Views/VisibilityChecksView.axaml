@@ -1,0 +1,80 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:paz="using:Avalonia.Controls.PanAndZoom"
+             xmlns:vm="using:AvaloniaDemo.ViewModels"
+             x:Class="AvaloniaDemo.Views.VisibilityChecksView"
+             x:DataType="vm:VisibilityChecksViewModel">
+
+  <Grid ColumnDefinitions="250,*">
+    <!-- Controls -->
+    <StackPanel Grid.Column="0" Margin="12" Spacing="8">
+      <TextBlock Text="Visibility Checks" FontWeight="Bold" FontSize="16" />
+      <TextBlock Text="Check if points/rects are visible" TextWrapping="Wrap" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Check Point:" FontWeight="SemiBold" />
+      <TextBlock Text="X:" FontSize="11" />
+      <TextBox Text="{Binding PointX}" />
+      <TextBlock Text="Y:" FontSize="11" />
+      <TextBox Text="{Binding PointY}" />
+      <Button Content="Check Point Visibility" Click="CheckPoint_Click" />
+      <TextBlock Text="{Binding PointResult}" FontWeight="SemiBold" TextWrapping="Wrap" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Check Rectangle:" FontWeight="SemiBold" />
+      <TextBlock Text="X:" FontSize="11" />
+      <TextBox Text="{Binding RectX}" />
+      <TextBlock Text="Y:" FontSize="11" />
+      <TextBox Text="{Binding RectY}" />
+      <TextBlock Text="Width:" FontSize="11" />
+      <TextBox Text="{Binding RectWidth}" />
+      <TextBlock Text="Height:" FontSize="11" />
+      <TextBox Text="{Binding RectHeight}" />
+      <Button Content="Check Rect Visibility" Click="CheckRect_Click" />
+      <TextBlock Text="{Binding RectResult}" FontWeight="SemiBold" TextWrapping="Wrap" />
+
+      <Separator Margin="0,8" />
+
+      <Button Content="Get Visible Portion" Click="GetPortion_Click" />
+      <TextBlock Text="{Binding PortionResult}" FontWeight="SemiBold" TextWrapping="Wrap" FontSize="10" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Instructions:" FontSize="11" TextWrapping="Wrap">
+        Pan/zoom then check if elements are visible. GetVisiblePortion() returns the part of a rect that's currently visible.
+      </TextBlock>
+    </StackPanel>
+
+    <!-- ZoomBorder -->
+    <Border Grid.Column="1" Margin="12" BorderBrush="Gray" BorderThickness="1">
+      <paz:ZoomBorder x:Name="ZoomBorder"
+                      Stretch="Uniform"
+                      ZoomSpeed="1.2"
+                      Background="SlateBlue"
+                      ClipToBounds="True">
+        <Canvas Width="500" Height="400" Background="LightGray">
+          <TextBlock Canvas.Left="20" Canvas.Top="20" Text="Visibility Checks Demo" FontSize="24" FontWeight="Bold" />
+
+          <!-- Test Point -->
+          <Ellipse Width="20" Height="20" Fill="Red"
+                   Canvas.Left="{Binding PointX}"
+                   Canvas.Top="{Binding PointY}" />
+
+          <!-- Test Rectangle -->
+          <Border Canvas.Left="{Binding RectX}"
+                  Canvas.Top="{Binding RectY}"
+                  Width="{Binding RectWidth}"
+                  Height="{Binding RectHeight}"
+                  BorderBrush="Blue" BorderThickness="3" Background="#40000080" />
+
+          <TextBlock Canvas.Left="20" Canvas.Top="320" TextWrapping="Wrap" Width="460" FontSize="12">
+            Methods: IsPointVisible(), IsRectangleVisible(), GetVisiblePortion(). Pan/zoom to move elements in/out of view, then check visibility.
+          </TextBlock>
+        </Canvas>
+      </paz:ZoomBorder>
+    </Border>
+  </Grid>
+
+</UserControl>

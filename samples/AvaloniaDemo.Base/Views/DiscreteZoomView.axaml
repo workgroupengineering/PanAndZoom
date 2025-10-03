@@ -1,0 +1,64 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:paz="using:Avalonia.Controls.PanAndZoom"
+             x:Class="AvaloniaDemo.Views.DiscreteZoomView">
+
+  <Grid ColumnDefinitions="250,*">
+    <!-- Controls -->
+    <StackPanel Grid.Column="0" Margin="12" Spacing="8">
+      <TextBlock Text="Discrete Zoom Levels" FontWeight="Bold" FontSize="16" />
+      <TextBlock Text="Snap to predefined zoom levels" TextWrapping="Wrap" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Zoom Controls:" FontWeight="SemiBold" />
+      <Button Content="Zoom to Next Level" Click="ZoomNext_Click" />
+      <Button Content="Zoom to Previous Level" Click="ZoomPrevious_Click" />
+      <Button Content="Zoom to 25%" Click="Zoom25_Click" />
+      <Button Content="Zoom to 50%" Click="Zoom50_Click" />
+      <Button Content="Zoom to 100%" Click="Zoom100_Click" />
+      <Button Content="Zoom to 200%" Click="Zoom200_Click" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Current Zoom:" FontWeight="SemiBold" />
+      <TextBlock Text="{Binding ZoomX, StringFormat='{}{0:P0}'}" FontSize="20" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Settings:" FontWeight="SemiBold" />
+      <CheckBox Content="Enable Discrete Zoom Levels" IsChecked="{Binding EnableDiscreteZoomLevels}" />
+
+      <TextBlock Text="Discrete Levels: 25%, 50%, 75%, 100%, 150%, 200%, 300%, 400%" FontSize="10" TextWrapping="Wrap" Margin="0,4"/>
+    </StackPanel>
+
+    <!-- ZoomBorder -->
+    <Border Grid.Column="1" Margin="12" BorderBrush="Gray" BorderThickness="1">
+      <paz:ZoomBorder x:Name="ZoomBorder"
+                      Stretch="Uniform"
+                      ZoomSpeed="1.2"
+                      Background="SlateBlue"
+                      ClipToBounds="True"
+                      EnableDiscreteZoomLevels="True"
+                      DiscreteZoomLevels="0.25,0.5,0.75,1.0,1.5,2.0,3.0,4.0">
+        <Canvas Width="400" Height="300" Background="LightGray">
+          <TextBlock Canvas.Left="20" Canvas.Top="20" Text="Discrete Zoom Demo" FontSize="24" FontWeight="Bold" />
+
+          <Border Canvas.Left="50" Canvas.Top="80" Width="300" Height="180"
+                  Background="Orange" BorderBrush="DarkOrange" BorderThickness="2" Padding="10">
+            <StackPanel Spacing="8">
+              <TextBlock Text="Zoom Levels" FontSize="18" FontWeight="Bold" />
+              <TextBlock TextWrapping="Wrap" FontSize="12">
+                Use mouse wheel or buttons to zoom. With discrete zoom enabled, the zoom will snap to predefined levels.
+              </TextBlock>
+              <TextBlock TextWrapping="Wrap" FontSize="11">
+                Levels: 25%, 50%, 75%, 100%, 150%, 200%, 300%, 400%
+              </TextBlock>
+            </StackPanel>
+          </Border>
+        </Canvas>
+      </paz:ZoomBorder>
+    </Border>
+  </Grid>
+
+</UserControl>
