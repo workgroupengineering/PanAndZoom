@@ -1,0 +1,92 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:paz="using:Avalonia.Controls.PanAndZoom"
+             x:Class="AvaloniaDemo.Views.AdvancedZoomView">
+
+  <Grid ColumnDefinitions="250,*">
+    <!-- Controls -->
+    <StackPanel Grid.Column="0" Margin="12" Spacing="8">
+      <TextBlock Text="Advanced Zoom Controls" FontWeight="Bold" FontSize="16" />
+      <TextBlock Text="Fine-grained zoom control" TextWrapping="Wrap" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Current Zoom:" FontWeight="SemiBold" />
+      <TextBlock Text="{Binding ZoomBorder.ZoomX, StringFormat='{}{0:F2}x'}" FontSize="20" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Zoom Methods:" FontWeight="SemiBold" />
+      <Button Content="Zoom In" Click="ZoomIn_Click" />
+      <Button Content="Zoom Out" Click="ZoomOut_Click" />
+
+      <Separator Margin="0,4" />
+
+      <TextBlock Text="Set Absolute Zoom:" FontSize="11" />
+      <Slider x:Name="AbsoluteZoomSlider" Minimum="0.1" Maximum="5" Value="1" />
+      <TextBlock Text="{Binding #AbsoluteZoomSlider.Value, StringFormat='{}{0:F2}x'}" FontSize="10" />
+      <Button Content="Apply Absolute Zoom" Click="SetAbsoluteZoom_Click" />
+
+      <Separator Margin="0,4" />
+
+      <TextBlock Text="Zoom to Ratio:" FontSize="11" />
+      <TextBox x:Name="ZoomRatioBox" Text="1.5" />
+      <Button Content="Apply Ratio" Click="ZoomToRatio_Click" />
+
+      <Separator Margin="0,4" />
+
+      <TextBlock Text="Zoom Delta:" FontSize="11" />
+      <TextBox x:Name="ZoomDeltaBox" Text="0.2" />
+      <Button Content="Apply Delta" Click="ZoomDelta_Click" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Zoom Settings:" FontWeight="SemiBold" />
+      <TextBlock Text="Power Factor:" FontSize="11" />
+      <TextBox Text="{Binding ZoomBorder.PowerFactor}" />
+
+      <TextBlock Text="Transition Threshold:" FontSize="11" />
+      <TextBox Text="{Binding ZoomBorder.TransitionThreshold}" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Instructions:" FontSize="11" TextWrapping="Wrap">
+        PowerFactor controls zoom curve steepness. TransitionThreshold sets the zoom change required to trigger transitions.
+      </TextBlock>
+    </StackPanel>
+
+    <!-- ZoomBorder -->
+    <Border Grid.Column="1" Margin="12" BorderBrush="Gray" BorderThickness="1">
+      <paz:ZoomBorder x:Name="ZoomBorder"
+                      Stretch="Uniform"
+                      ZoomSpeed="1.2"
+                      Background="SlateBlue"
+                      ClipToBounds="True"
+                      PowerFactor="1.0"
+                      TransitionThreshold="0.5">
+        <Canvas Width="500" Height="400" Background="LightGray">
+          <TextBlock Canvas.Left="20" Canvas.Top="20" Text="Advanced Zoom Demo" FontSize="24" FontWeight="Bold" />
+
+          <!-- Crosshair at center -->
+          <Line StartPoint="0,200" EndPoint="500,200" Stroke="Red" StrokeThickness="1" StrokeDashArray="5,3" />
+          <Line StartPoint="250,0" EndPoint="250,400" Stroke="Red" StrokeThickness="1" StrokeDashArray="5,3" />
+
+          <Border Canvas.Left="125" Canvas.Top="125" Width="250" Height="150"
+                  Background="Orange" BorderBrush="DarkOrange" BorderThickness="2" Padding="10">
+            <StackPanel>
+              <TextBlock Text="Zoom Target Area" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" />
+              <TextBlock TextWrapping="Wrap" FontSize="12" HorizontalAlignment="Center" Margin="0,8,0,0">
+                All zoom operations center on the viewport center (crosshair).
+              </TextBlock>
+            </StackPanel>
+          </Border>
+
+          <TextBlock Canvas.Left="20" Canvas.Top="320" TextWrapping="Wrap" Width="460" FontSize="13">
+            Use the controls on the left to test different zoom methods: ZoomIn(), ZoomOut(), Zoom(level), ZoomTo(ratio), ZoomDeltaTo(delta).
+          </TextBlock>
+        </Canvas>
+      </paz:ZoomBorder>
+    </Border>
+  </Grid>
+
+</UserControl>

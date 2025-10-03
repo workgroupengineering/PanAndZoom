@@ -64,6 +64,66 @@
       <views:StateSerializationView />
     </TabItem>
 
+    <!-- Advanced: Discrete Zoom -->
+    <TabItem Header="Discrete Zoom">
+      <views:DiscreteZoomView />
+    </TabItem>
+
+    <!-- Advanced: Double Click Zoom -->
+    <TabItem Header="Double Click Zoom">
+      <views:DoubleClickZoomView />
+    </TabItem>
+
+    <!-- Advanced: Mouse Wheel -->
+    <TabItem Header="Mouse Wheel">
+      <views:WheelBehaviorView />
+    </TabItem>
+
+    <!-- Advanced: Bounds Mode -->
+    <TabItem Header="Bounds Mode">
+      <views:BoundsModeView />
+    </TabItem>
+
+    <!-- Advanced: Saved Views -->
+    <TabItem Header="Saved Views">
+      <views:SavedViewsView />
+    </TabItem>
+
+    <!-- Advanced: Advanced Zoom -->
+    <TabItem Header="Advanced Zoom">
+      <views:AdvancedZoomView />
+    </TabItem>
+
+    <!-- Advanced: Center Controls -->
+    <TabItem Header="Center Controls">
+      <views:CenterControlsView />
+    </TabItem>
+
+    <!-- Advanced: Programmatic Pan -->
+    <TabItem Header="Programmatic Pan">
+      <views:ProgrammaticPanView />
+    </TabItem>
+
+    <!-- Advanced: Animation -->
+    <TabItem Header="Animation">
+      <views:AnimationView />
+    </TabItem>
+
+    <!-- Advanced: Visibility Checks -->
+    <TabItem Header="Visibility Checks">
+      <views:VisibilityChecksView />
+    </TabItem>
+
+    <!-- Advanced: Resize Behavior -->
+    <TabItem Header="Resize Behavior">
+      <views:ResizeBehaviorView />
+    </TabItem>
+
+    <!-- Advanced: Gesture Fine Control -->
+    <TabItem Header="Gesture Fine Control">
+      <views:GestureFineControlView />
+    </TabItem>
+
     <!-- Original Basic Demos -->
     <TabItem Header="Basic Demo">
       <DockPanel>

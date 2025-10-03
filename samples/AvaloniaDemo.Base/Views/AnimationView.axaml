@@ -1,0 +1,76 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:paz="using:Avalonia.Controls.PanAndZoom"
+             x:Class="AvaloniaDemo.Views.AnimationView">
+
+  <Grid ColumnDefinitions="250,*">
+    <!-- Controls -->
+    <StackPanel Grid.Column="0" Margin="12" Spacing="8">
+      <TextBlock Text="Animation Controls" FontWeight="Bold" FontSize="16" />
+      <TextBlock Text="Smooth vs instant transitions" TextWrapping="Wrap" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Animation Settings:" FontWeight="SemiBold" />
+      <CheckBox Content="Enable Animations" IsChecked="{Binding ZoomBorder.EnableAnimations}" />
+
+      <TextBlock Text="Animation Duration (ms):" Margin="0,8,0,0" />
+      <Slider x:Name="DurationSlider" Minimum="0" Maximum="2000" Value="300" />
+      <TextBlock Text="{Binding #DurationSlider.Value, StringFormat='{}{0:F0}ms'}" FontSize="10" />
+      <Button Content="Apply Duration" Click="ApplyDuration_Click" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Test Animations:" FontWeight="SemiBold" />
+      <Button Content="Zoom In (Animated)" Click="ZoomInAnimated_Click" />
+      <Button Content="Zoom Out (Animated)" Click="ZoomOutAnimated_Click" />
+      <Button Content="Pan Right (Animated)" Click="PanRightAnimated_Click" />
+      <Button Content="Reset (Animated)" Click="ResetAnimated_Click" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Test Instant (No Animation):" FontWeight="SemiBold" />
+      <Button Content="Zoom In (Instant)" Click="ZoomInInstant_Click" />
+      <Button Content="Reset (Instant)" Click="ResetInstant_Click" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Instructions:" FontSize="11" TextWrapping="Wrap">
+        Compare animated vs instant transitions. Higher duration makes smoother but slower animations. Try different durations!
+      </TextBlock>
+    </StackPanel>
+
+    <!-- ZoomBorder -->
+    <Border Grid.Column="1" Margin="12" BorderBrush="Gray" BorderThickness="1">
+      <paz:ZoomBorder x:Name="ZoomBorder"
+                      Stretch="Uniform"
+                      ZoomSpeed="1.2"
+                      Background="SlateBlue"
+                      ClipToBounds="True"
+                      EnableAnimations="True"
+                      AnimationDuration="0:0:0.3">
+        <Canvas Width="500" Height="400" Background="LightGray">
+          <TextBlock Canvas.Left="20" Canvas.Top="20" Text="Animation Demo" FontSize="24" FontWeight="Bold" />
+
+          <Border Canvas.Left="100" Canvas.Top="100" Width="300" Height="200"
+                  Background="Orange" BorderBrush="DarkOrange" BorderThickness="2" Padding="15">
+            <StackPanel Spacing="10">
+              <TextBlock Text="Watch the Transitions!" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" />
+              <TextBlock TextWrapping="Wrap" FontSize="13" HorizontalAlignment="Center">
+                With animations enabled, all pan and zoom operations will smoothly transition to their target state.
+              </TextBlock>
+              <TextBlock TextWrapping="Wrap" FontSize="13" HorizontalAlignment="Center">
+                Without animations (or using skipTransitions), changes happen instantly.
+              </TextBlock>
+            </StackPanel>
+          </Border>
+
+          <TextBlock Canvas.Left="20" Canvas.Top="340" TextWrapping="Wrap" Width="460" FontSize="12">
+            Duration controls animation speed: 0ms = instant, 300ms = default, 1000ms+ = slow motion.
+          </TextBlock>
+        </Canvas>
+      </paz:ZoomBorder>
+    </Border>
+  </Grid>
+
+</UserControl>

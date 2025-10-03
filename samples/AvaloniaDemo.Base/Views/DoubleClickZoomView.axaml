@@ -1,0 +1,72 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:paz="using:Avalonia.Controls.PanAndZoom"
+             x:Class="AvaloniaDemo.Views.DoubleClickZoomView">
+
+  <Grid ColumnDefinitions="250,*">
+    <!-- Controls -->
+    <StackPanel Grid.Column="0" Margin="12" Spacing="8">
+      <TextBlock Text="Double Click Zoom" FontWeight="Bold" FontSize="16" />
+      <TextBlock Text="Configure double-click behavior" TextWrapping="Wrap" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Settings:" FontWeight="SemiBold" />
+      <CheckBox Content="Enable Double Click Zoom" IsChecked="{Binding ZoomBorder.EnableDoubleClickZoom}" />
+
+      <TextBlock Text="Double Click Mode:" Margin="0,8,0,0" />
+      <ComboBox SelectedItem="{Binding ZoomBorder.DoubleClickZoomMode}">
+        <ComboBoxItem Content="ZoomInOut" Tag="ZoomInOut" />
+        <ComboBoxItem Content="Reset" Tag="Reset" />
+        <ComboBoxItem Content="Fill" Tag="Fill" />
+        <ComboBoxItem Content="Uniform" Tag="Uniform" />
+      </ComboBox>
+
+      <TextBlock Text="Zoom Factor:" Margin="0,8,0,0" />
+      <TextBox Text="{Binding ZoomBorder.DoubleClickZoomFactor}" />
+
+      <Separator Margin="0,8" />
+
+      <TextBlock Text="Instructions:" FontSize="11" TextWrapping="Wrap">
+        Double-click on the content area to test the behavior. ZoomInOut alternates between zooming in and out.
+      </TextBlock>
+    </StackPanel>
+
+    <!-- ZoomBorder -->
+    <Border Grid.Column="1" Margin="12" BorderBrush="Gray" BorderThickness="1">
+      <paz:ZoomBorder x:Name="ZoomBorder"
+                      Stretch="Uniform"
+                      ZoomSpeed="1.2"
+                      Background="SlateBlue"
+                      ClipToBounds="True"
+                      EnableDoubleClickZoom="True"
+                      DoubleClickZoomMode="ZoomInOut"
+                      DoubleClickZoomFactor="2.0">
+        <Canvas Width="500" Height="400" Background="LightGray">
+          <TextBlock Canvas.Left="20" Canvas.Top="20" Text="Double-Click Anywhere!" FontSize="24" FontWeight="Bold" />
+
+          <Border Canvas.Left="50" Canvas.Top="80" Width="200" Height="140"
+                  Background="Red" BorderBrush="DarkRed" BorderThickness="2" Padding="10">
+            <StackPanel>
+              <TextBlock Text="Area 1" FontSize="16" FontWeight="Bold" />
+              <TextBlock TextWrapping="Wrap" FontSize="11" Margin="0,4,0,0">
+                Double-click here to zoom in/out
+              </TextBlock>
+            </StackPanel>
+          </Border>
+
+          <Border Canvas.Left="300" Canvas.Top="80" Width="150" Height="140"
+                  Background="Blue" BorderBrush="DarkBlue" BorderThickness="2" Padding="10">
+            <StackPanel>
+              <TextBlock Text="Area 2" FontSize="16" FontWeight="Bold" Foreground="White" />
+              <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="White" Margin="0,4,0,0">
+                Test here too!
+              </TextBlock>
+            </StackPanel>
+          </Border>
+        </Canvas>
+      </paz:ZoomBorder>
+    </Border>
+  </Grid>
+
+</UserControl>
