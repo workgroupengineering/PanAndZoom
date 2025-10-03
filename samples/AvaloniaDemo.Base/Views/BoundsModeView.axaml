@@ -22,30 +22,26 @@
       <Separator Margin="0,8" />
 
       <TextBlock Text="Bounds Padding:" FontWeight="SemiBold" />
-      <TextBlock Text="Left/Right:" FontSize="11" />
-      <Slider Value="{Binding ZoomBorder.BoundsPadding.Left}" Minimum="0" Maximum="100" />
-      <TextBlock Text="{Binding ZoomBorder.BoundsPadding.Left, StringFormat='Value: {0:F0}'}" FontSize="10" />
-
-      <TextBlock Text="Top/Bottom:" FontSize="11" />
-      <Slider Value="{Binding ZoomBorder.BoundsPadding.Top}" Minimum="0" Maximum="100" />
-      <TextBlock Text="{Binding ZoomBorder.BoundsPadding.Top, StringFormat='Value: {0:F0}'}" FontSize="10" />
+      <TextBlock Text="All Sides:" FontSize="11" />
+      <Slider x:Name="BoundsPaddingSlider" Minimum="0" Maximum="100" Value="0" ValueChanged="BoundsPadding_Changed" />
+      <TextBlock Text="{Binding #BoundsPaddingSlider.Value, StringFormat='Value: {0:F0}px'}" FontSize="10" />
 
       <Separator Margin="0,8" />
 
       <TextBlock Text="Min Visible Content %:" FontWeight="SemiBold" />
-      <Slider Value="{Binding ZoomBorder.MinimumVisibleContentPercentage}" Minimum="0" Maximum="1" />
-      <TextBlock Text="{Binding ZoomBorder.MinimumVisibleContentPercentage, StringFormat='{}{0:P0}'}" FontSize="10" />
+      <Slider x:Name="MinVisibleSlider" Minimum="0" Maximum="1" Value="0.1" ValueChanged="MinVisible_Changed" />
+      <TextBlock Text="{Binding #MinVisibleSlider.Value, StringFormat='{}{0:P0}'}" FontSize="10" />
 
       <Separator Margin="0,8" />
 
       <TextBlock Text="Offset Constraints:" FontWeight="SemiBold" />
-      <CheckBox Content="Enable Offset Limits" IsChecked="{Binding #EnableOffsetLimits.IsChecked}" x:Name="EnableOffsetLimits" />
+      <CheckBox Content="Enable Offset Limits" x:Name="EnableOffsetLimits" Click="OffsetLimits_Changed" />
 
       <TextBlock Text="Min Offset X:" FontSize="11" />
-      <TextBox Text="{Binding ZoomBorder.MinOffsetX}" IsEnabled="{Binding #EnableOffsetLimits.IsChecked}" />
+      <TextBox x:Name="MinOffsetXBox" Text="-200" IsEnabled="{Binding #EnableOffsetLimits.IsChecked}" />
 
       <TextBlock Text="Max Offset X:" FontSize="11" />
-      <TextBox Text="{Binding ZoomBorder.MaxOffsetX}" IsEnabled="{Binding #EnableOffsetLimits.IsChecked}" />
+      <TextBox x:Name="MaxOffsetXBox" Text="200" IsEnabled="{Binding #EnableOffsetLimits.IsChecked}" />
 
       <Separator Margin="0,8" />
 

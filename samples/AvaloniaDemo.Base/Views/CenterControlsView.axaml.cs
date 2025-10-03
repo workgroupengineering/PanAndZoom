@@ -44,4 +44,11 @@ public partial class CenterControlsView : UserControl
     {
         ZoomBorder.CenterOn(new Rect(450, 350, 300, 200));
     }
+
+    private void CenterPadding_Changed(object? sender, Avalonia.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+    {
+        if (ZoomBorder == null) return;
+        var padding = e.NewValue;
+        ZoomBorder.CenterPadding = new Thickness(padding);
+    }
 }

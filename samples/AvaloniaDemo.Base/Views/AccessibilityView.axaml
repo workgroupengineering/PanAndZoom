@@ -28,7 +28,7 @@
       <Separator Margin="0,8" />
 
       <TextBlock Text="Settings:" FontWeight="SemiBold" />
-      <CheckBox Content="Use High Contrast Mode" IsChecked="{Binding ZoomBorder.UseHighContrastMode}" />
+      <CheckBox Content="Use High Contrast Mode" IsChecked="{Binding UseHighContrastMode}" />
 
       <Separator Margin="0,8" />
 

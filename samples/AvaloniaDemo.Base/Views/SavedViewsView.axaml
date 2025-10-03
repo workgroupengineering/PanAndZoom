@@ -35,8 +35,8 @@
         </ListBox.ItemTemplate>
       </ListBox>
 
-      <Button Content="Restore Selected" Click="RestoreView_Click" IsEnabled="{Binding SelectedViewName, Converter={x:Static ObjectConverters.IsNotNull}}" />
-      <Button Content="Delete Selected" Click="DeleteView_Click" IsEnabled="{Binding SelectedViewName, Converter={x:Static ObjectConverters.IsNotNull}}" />
+      <Button Content="Restore Selected" Click="RestoreView_Click" IsEnabled="{Binding SelectedViewName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+      <Button Content="Delete Selected" Click="DeleteView_Click" IsEnabled="{Binding SelectedViewName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
       <Button Content="Clear All Views" Click="ClearAllViews_Click" />
 
       <Separator Margin="0,8" />

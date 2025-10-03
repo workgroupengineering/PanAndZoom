@@ -12,31 +12,31 @@
       <Separator Margin="0,8" />
 
       <TextBlock Text="Auto-Calculation:" FontWeight="SemiBold" />
-      <CheckBox Content="Auto Calculate Min Zoom" IsChecked="{Binding ZoomBorder.AutoCalculateMinZoom}" />
-      <CheckBox Content="Auto Calculate Max Zoom" IsChecked="{Binding ZoomBorder.AutoCalculateMaxZoom}" />
+      <CheckBox Content="Auto Calculate Min Zoom" IsChecked="{Binding AutoCalculateMinZoom}" />
+      <CheckBox Content="Auto Calculate Max Zoom" IsChecked="{Binding AutoCalculateMaxZoom}" />
 
       <Separator Margin="0,8" />
 
       <TextBlock Text="Max Zoom Pixel Size:" />
-      <TextBox Text="{Binding ZoomBorder.MaxZoomPixelSize}" />
+      <TextBox Text="{Binding MaxZoomPixelSize}" />
 
       <Separator Margin="0,8" />
 
       <TextBlock Text="Manual Limits:" FontWeight="SemiBold" />
       <TextBlock Text="Min Zoom X:" />
-      <TextBox Text="{Binding ZoomBorder.MinZoomX}" />
+      <TextBox Text="{Binding MinZoomX}" />
       <TextBlock Text="Max Zoom X:" />
-      <TextBox Text="{Binding ZoomBorder.MaxZoomX}" />
+      <TextBox Text="{Binding MaxZoomX}" />
       <TextBlock Text="Min Zoom Y:" />
-      <TextBox Text="{Binding ZoomBorder.MinZoomY}" />
+      <TextBox Text="{Binding MinZoomY}" />
       <TextBlock Text="Max Zoom Y:" />
-      <TextBox Text="{Binding ZoomBorder.MaxZoomY}" />
+      <TextBox Text="{Binding MaxZoomY}" />
 
       <Separator Margin="0,8" />
 
       <TextBlock Text="Current Zoom:" FontWeight="SemiBold" />
-      <TextBlock Text="{Binding ZoomBorder.ZoomX, StringFormat='Zoom X: {0:F2}'}" />
-      <TextBlock Text="{Binding ZoomBorder.ZoomY, StringFormat='Zoom Y: {0:F2}'}" />
+      <TextBlock Text="{Binding ZoomX, StringFormat='Zoom X: {0:F2}'}" />
+      <TextBlock Text="{Binding ZoomY, StringFormat='Zoom Y: {0:F2}'}" />
 
       <Separator Margin="0,8" />
 

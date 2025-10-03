@@ -31,9 +31,9 @@
       <Separator Margin="0,8" />
 
       <TextBlock Text="Grid Settings:" FontWeight="SemiBold" />
-      <CheckBox Content="Enable Snap to Grid" IsChecked="{Binding ZoomBorder.EnableSnapToGrid}" Click="UpdateSnapping_Click" />
+      <CheckBox Content="Enable Snap to Grid" IsChecked="{Binding EnableSnapToGrid}" Click="UpdateSnapping_Click" />
       <TextBlock Text="Grid Size:" />
-      <TextBox Text="{Binding ZoomBorder.GridSize}" TextChanged="UpdateSnapping_TextChanged" />
+      <TextBox Text="{Binding GridSize}" TextChanged="UpdateSnapping_TextChanged" />
     </StackPanel>
 
     <!-- ZoomBorder -->

@@ -12,7 +12,7 @@
       <Separator Margin="0,8" />
 
       <TextBlock Text="Animation Settings:" FontWeight="SemiBold" />
-      <CheckBox Content="Enable Animations" IsChecked="{Binding ZoomBorder.EnableAnimations}" />
+      <CheckBox Content="Enable Animations" IsChecked="{Binding EnableAnimations}" />
 
       <TextBlock Text="Animation Duration (ms):" Margin="0,8,0,0" />
       <Slider x:Name="DurationSlider" Minimum="0" Maximum="2000" Value="300" />

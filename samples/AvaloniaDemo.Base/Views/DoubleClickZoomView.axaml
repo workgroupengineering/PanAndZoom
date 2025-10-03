@@ -12,10 +12,10 @@
       <Separator Margin="0,8" />
 
       <TextBlock Text="Settings:" FontWeight="SemiBold" />
-      <CheckBox Content="Enable Double Click Zoom" IsChecked="{Binding ZoomBorder.EnableDoubleClickZoom}" />
+      <CheckBox Content="Enable Double Click Zoom" IsChecked="{Binding EnableDoubleClickZoom}" />
 
       <TextBlock Text="Double Click Mode:" Margin="0,8,0,0" />
-      <ComboBox SelectedItem="{Binding ZoomBorder.DoubleClickZoomMode}">
+      <ComboBox SelectedItem="{Binding DoubleClickZoomMode}">
         <ComboBoxItem Content="ZoomInOut" Tag="ZoomInOut" />
         <ComboBoxItem Content="Reset" Tag="Reset" />
         <ComboBoxItem Content="Fill" Tag="Fill" />
@@ -23,7 +23,7 @@
       </ComboBox>
 
       <TextBlock Text="Zoom Factor:" Margin="0,8,0,0" />
-      <TextBox Text="{Binding ZoomBorder.DoubleClickZoomFactor}" />
+      <TextBox Text="{Binding DoubleClickZoomFactor}" />
 
       <Separator Margin="0,8" />
 

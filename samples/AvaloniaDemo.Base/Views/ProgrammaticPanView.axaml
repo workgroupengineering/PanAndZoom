@@ -40,8 +40,8 @@
       <Separator Margin="0,8" />
 
       <TextBlock Text="Current Offset:" FontWeight="SemiBold" />
-      <TextBlock Text="{Binding ZoomBorder.OffsetX, StringFormat='X: {0:F2}'}" />
-      <TextBlock Text="{Binding ZoomBorder.OffsetY, StringFormat='Y: {0:F2}'}" />
+      <TextBlock Text="{Binding OffsetX, StringFormat='X: {0:F2}'}" />
+      <TextBlock Text="{Binding OffsetY, StringFormat='Y: {0:F2}'}" />
     </StackPanel>
 
     <!-- ZoomBorder -->

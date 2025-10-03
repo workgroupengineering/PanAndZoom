@@ -29,4 +29,35 @@ public partial class BoundsModeView : UserControl
             };
         }
     }
+
+    private void BoundsPadding_Changed(object? sender, Avalonia.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+    {
+        if (ZoomBorder == null) return;
+        var padding = e.NewValue;
+        ZoomBorder.BoundsPadding = new Thickness(padding);
+    }
+
+    private void MinVisible_Changed(object? sender, Avalonia.Controls.Primitives.RangeBaseValueChangedEventArgs e)
+    {
+        if (ZoomBorder == null) return;
+        ZoomBorder.MinimumVisibleContentPercentage = e.NewValue;
+    }
+
+    private void OffsetLimits_Changed(object? sender, RoutedEventArgs e)
+    {
+        if (ZoomBorder == null) return;
+
+        if (EnableOffsetLimits.IsChecked == true)
+        {
+            if (double.TryParse(MinOffsetXBox.Text, out var minX))
+                ZoomBorder.MinOffsetX = minX;
+            if (double.TryParse(MaxOffsetXBox.Text, out var maxX))
+                ZoomBorder.MaxOffsetX = maxX;
+        }
+        else
+        {
+            ZoomBorder.MinOffsetX = double.NegativeInfinity;
+            ZoomBorder.MaxOffsetX = double.PositiveInfinity;
+        }
+    }
 }

@@ -31,8 +31,8 @@
       <Separator Margin="0,8" />
 
       <TextBlock Text="Center Padding:" FontWeight="SemiBold" />
-      <Slider Value="{Binding ZoomBorder.CenterPadding.Left}" Minimum="0" Maximum="100" />
-      <TextBlock Text="{Binding ZoomBorder.CenterPadding.Left, StringFormat='Padding: {0:F0}px'}" FontSize="10" />
+      <Slider x:Name="CenterPaddingSlider" Minimum="0" Maximum="100" Value="0" ValueChanged="CenterPadding_Changed" />
+      <TextBlock Text="{Binding #CenterPaddingSlider.Value, StringFormat='Padding: {0:F0}px'}" FontSize="10" />
 
       <Separator Margin="0,8" />
 

@@ -22,12 +22,12 @@
       <Separator Margin="0,8" />
 
       <TextBlock Text="Current Zoom:" FontWeight="SemiBold" />
-      <TextBlock Text="{Binding ZoomBorder.ZoomX, StringFormat='{}{0:P0}'}" FontSize="20" />
+      <TextBlock Text="{Binding ZoomX, StringFormat='{}{0:P0}'}" FontSize="20" />
 
       <Separator Margin="0,8" />
 
       <TextBlock Text="Settings:" FontWeight="SemiBold" />
-      <CheckBox Content="Enable Discrete Zoom Levels" IsChecked="{Binding ZoomBorder.EnableDiscreteZoomLevels}" />
+      <CheckBox Content="Enable Discrete Zoom Levels" IsChecked="{Binding EnableDiscreteZoomLevels}" />
 
       <TextBlock Text="Discrete Levels: 25%, 50%, 75%, 100%, 150%, 200%, 300%, 400%" FontSize="10" TextWrapping="Wrap" Margin="0,4"/>
     </StackPanel>

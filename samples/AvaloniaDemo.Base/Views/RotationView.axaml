@@ -29,14 +29,14 @@
       <Separator Margin="0,8" />
 
       <TextBlock Text="Settings:" FontWeight="SemiBold" />
-      <CheckBox Content="Enable Gesture Rotation" IsChecked="{Binding ZoomBorder.EnableGestureRotation}" />
-      <CheckBox Content="Enable Rotation Snapping" IsChecked="{Binding ZoomBorder.EnableRotationSnapping}" Click="UpdateRotation_Click" />
+      <CheckBox Content="Enable Gesture Rotation" IsChecked="{Binding EnableGestureRotation}" />
+      <CheckBox Content="Enable Rotation Snapping" IsChecked="{Binding EnableRotationSnapping}" Click="UpdateRotation_Click" />
       <TextBlock Text="Snap Angle:" />
-      <TextBox Text="{Binding ZoomBorder.RotationSnapAngle}" />
+      <TextBox Text="{Binding RotationSnapAngle}" />
       <TextBlock Text="Min Rotation:" />
-      <TextBox Text="{Binding ZoomBorder.MinRotation}" />
+      <TextBox Text="{Binding MinRotation}" />
       <TextBlock Text="Max Rotation:" />
-      <TextBox Text="{Binding ZoomBorder.MaxRotation}" />
+      <TextBox Text="{Binding MaxRotation}" />
     </StackPanel>
 
     <!-- ZoomBorder -->

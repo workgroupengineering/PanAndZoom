@@ -36,10 +36,10 @@
       <Separator Margin="0,8" />
 
       <TextBlock Text="Wheel Zoom Sensitivity:" />
-      <TextBox Text="{Binding ZoomBorder.WheelZoomSensitivity}" />
+      <TextBox Text="{Binding WheelZoomSensitivity}" />
 
       <TextBlock Text="Wheel Pan Sensitivity:" />
-      <TextBox Text="{Binding ZoomBorder.WheelPanSensitivity}" />
+      <TextBox Text="{Binding WheelPanSensitivity}" />
 
       <Separator Margin="0,8" />
 

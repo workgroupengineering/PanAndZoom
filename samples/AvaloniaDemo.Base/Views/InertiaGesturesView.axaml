@@ -12,17 +12,17 @@
       <Separator Margin="0,8" />
 
       <TextBlock Text="Gesture Settings:" FontWeight="SemiBold" />
-      <CheckBox Content="Enable Gestures" IsChecked="{Binding ZoomBorder.EnableGestures}" />
-      <CheckBox Content="Enable Gesture Rotation" IsChecked="{Binding ZoomBorder.EnableGestureRotation}" />
+      <CheckBox Content="Enable Gestures" IsChecked="{Binding EnableGestures}" />
+      <CheckBox Content="Enable Gesture Rotation" IsChecked="{Binding EnableGestureRotation}" />
 
       <Separator Margin="0,8" />
 
       <TextBlock Text="Multi-Touch:" FontWeight="SemiBold" />
-      <CheckBox Content="Simultaneous Pan/Zoom" IsChecked="{Binding ZoomBorder.EnableSimultaneousPanZoom}" />
+      <CheckBox Content="Simultaneous Pan/Zoom" IsChecked="{Binding EnableSimultaneousPanZoom}" />
       <TextBlock Text="Min Touch Points:" />
-      <TextBox Text="{Binding ZoomBorder.MinimumTouchPoints}" />
+      <TextBox Text="{Binding MinimumTouchPoints}" />
       <TextBlock Text="Max Touch Points:" />
-      <TextBox Text="{Binding ZoomBorder.MaximumTouchPoints}" />
+      <TextBox Text="{Binding MaximumTouchPoints}" />
 
       <Separator Margin="0,8" />
 
