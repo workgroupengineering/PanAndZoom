@@ -287,6 +287,18 @@ public partial class ZoomBorder
     public static readonly StyledProperty<Thickness> CenterPaddingProperty =
         AvaloniaProperty.Register<ZoomBorder, Thickness>(nameof(CenterPadding), new Thickness(0), false, BindingMode.TwoWay);
 
+    /// <summary>
+    /// Identifies the <seealso cref="EnableDiscreteZoomLevels"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<bool> EnableDiscreteZoomLevelsProperty =
+        AvaloniaProperty.Register<ZoomBorder, bool>(nameof(EnableDiscreteZoomLevels), false, false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="DiscreteZoomLevels"/> avalonia property.
+    /// </summary>
+    public static readonly StyledProperty<double[]?> DiscreteZoomLevelsProperty =
+        AvaloniaProperty.Register<ZoomBorder, double[]?>(nameof(DiscreteZoomLevels), new[] { 0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 3.0, 4.0, 6.0, 8.0 }, false, BindingMode.TwoWay);
+
     static ZoomBorder()
     {
         AffectsArrange<ZoomBorder>(
@@ -326,6 +338,7 @@ public partial class ZoomBorder
     private List<ViewState> _viewHistory = new List<ViewState>();
     private int _viewHistoryIndex = -1;
     private bool _isNavigating = false;
+    private Dictionary<string, SavedView> _savedViews = new Dictionary<string, SavedView>();
 
     // Commands
     private ICommand? _zoomInCommand;
@@ -795,6 +808,24 @@ public partial class ZoomBorder
     }
 
     /// <summary>
+    /// Gets or sets flag indicating whether discrete zoom levels are enabled.
+    /// </summary>
+    public bool EnableDiscreteZoomLevels
+    {
+        get => GetValue(EnableDiscreteZoomLevelsProperty);
+        set => SetValue(EnableDiscreteZoomLevelsProperty, value);
+    }
+
+    /// <summary>
+    /// Gets or sets the array of discrete zoom levels.
+    /// </summary>
+    public double[]? DiscreteZoomLevels
+    {
+        get => GetValue(DiscreteZoomLevelsProperty);
+        set => SetValue(DiscreteZoomLevelsProperty, value);
+    }
+
+    /// <summary>
     /// Gets a value indicating whether the control can navigate back in view history.
     /// </summary>
     public bool CanNavigateBack => EnableViewHistory && _viewHistoryIndex > 0;
@@ -872,6 +903,37 @@ public struct ViewState
 
     /// <summary>
     /// Gets or sets the timestamp when this state was saved.
+    /// </summary>
+    public DateTime Timestamp { get; set; }
+}
+
+/// <summary>
+/// Represents a named saved view.
+/// </summary>
+public struct SavedView
+{
+    /// <summary>
+    /// Gets or sets the view name.
+    /// </summary>
+    public string Name { get; set; }
+
+    /// <summary>
+    /// Gets or sets the transformation matrix.
+    /// </summary>
+    public Matrix Matrix { get; set; }
+
+    /// <summary>
+    /// Gets or sets the stretch mode.
+    /// </summary>
+    public StretchMode Stretch { get; set; }
+
+    /// <summary>
+    /// Gets or sets optional description.
+    /// </summary>
+    public string? Description { get; set; }
+
+    /// <summary>
+    /// Gets or sets the timestamp when this view was saved.
     /// </summary>
     public DateTime Timestamp { get; set; }
 }

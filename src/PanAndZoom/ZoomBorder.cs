@@ -1,7 +1,9 @@
 // Copyright (c) Wiesław Šoltés. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Avalonia.Controls.Metadata;
 using Avalonia.Input;
 using Avalonia.Input.GestureRecognizers;
@@ -1106,6 +1108,286 @@ public partial class ZoomBorder : Border
     public Rect GetViewportBounds()
     {
         return new Rect(0, 0, Bounds.Width, Bounds.Height);
+    }
+
+    /// <summary>
+    /// Zooms to fit a specific rectangle in content coordinates.
+    /// </summary>
+    /// <param name="rect">The rectangle to zoom to.</param>
+    /// <param name="padding">Optional padding around the rectangle.</param>
+    /// <param name="animate">Whether to animate the transition.</param>
+    public void ZoomToRectangle(Rect rect, Thickness? padding = null, bool animate = true)
+    {
+        if (_element == null || rect.Width == 0 || rect.Height == 0)
+            return;
+
+        var pad = padding ?? new Thickness(0);
+        var viewportWidth = Bounds.Width - pad.Left - pad.Right;
+        var viewportHeight = Bounds.Height - pad.Top - pad.Bottom;
+
+        if (viewportWidth <= 0 || viewportHeight <= 0)
+            return;
+
+        var zoomX = viewportWidth / rect.Width;
+        var zoomY = viewportHeight / rect.Height;
+        var zoom = Math.Min(zoomX, zoomY);
+
+        // Apply discrete zoom levels if enabled
+        if (EnableDiscreteZoomLevels && DiscreteZoomLevels != null && DiscreteZoomLevels.Length > 0)
+        {
+            zoom = GetNearestDiscreteZoomLevel(zoom);
+        }
+
+        var centerX = rect.X + rect.Width / 2.0;
+        var centerY = rect.Y + rect.Height / 2.0;
+
+        var viewportCenterX = (Bounds.Width - pad.Left - pad.Right) / 2.0 + pad.Left;
+        var viewportCenterY = (Bounds.Height - pad.Top - pad.Bottom) / 2.0 + pad.Top;
+
+        var offsetX = viewportCenterX - centerX * zoom;
+        var offsetY = viewportCenterY - centerY * zoom;
+
+        _matrix = MatrixHelper.ScaleAndTranslate(zoom, zoom, offsetX, offsetY);
+        Invalidate(!animate);
+    }
+
+    /// <summary>
+    /// Zooms to fit a specific rectangle with exact pixel dimensions.
+    /// </summary>
+    /// <param name="rect">The rectangle in content coordinates.</param>
+    /// <param name="viewportRect">The target rectangle in viewport coordinates.</param>
+    /// <param name="animate">Whether to animate the transition.</param>
+    public void ZoomToRectangleExact(Rect rect, Rect viewportRect, bool animate = true)
+    {
+        if (_element == null || rect.Width == 0 || rect.Height == 0)
+            return;
+
+        var zoomX = viewportRect.Width / rect.Width;
+        var zoomY = viewportRect.Height / rect.Height;
+        var zoom = Math.Min(zoomX, zoomY);
+
+        if (EnableDiscreteZoomLevels && DiscreteZoomLevels != null && DiscreteZoomLevels.Length > 0)
+        {
+            zoom = GetNearestDiscreteZoomLevel(zoom);
+        }
+
+        var centerX = rect.X + rect.Width / 2.0;
+        var centerY = rect.Y + rect.Height / 2.0;
+
+        var viewportCenterX = viewportRect.X + viewportRect.Width / 2.0;
+        var viewportCenterY = viewportRect.Y + viewportRect.Height / 2.0;
+
+        var offsetX = viewportCenterX - centerX * zoom;
+        var offsetY = viewportCenterY - centerY * zoom;
+
+        _matrix = MatrixHelper.ScaleAndTranslate(zoom, zoom, offsetX, offsetY);
+        Invalidate(!animate);
+    }
+
+    /// <summary>
+    /// Saves the current view with a name.
+    /// </summary>
+    /// <param name="name">The name for this view.</param>
+    /// <param name="description">Optional description.</param>
+    public void SaveView(string name, string? description = null)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("View name cannot be empty", nameof(name));
+
+        var savedView = new SavedView
+        {
+            Name = name,
+            Matrix = _matrix,
+            Stretch = Stretch,
+            Description = description,
+            Timestamp = DateTime.UtcNow
+        };
+
+        _savedViews[name] = savedView;
+    }
+
+    /// <summary>
+    /// Restores a previously saved view.
+    /// </summary>
+    /// <param name="name">The name of the view to restore.</param>
+    /// <param name="animate">Whether to animate the transition.</param>
+    /// <returns>True if the view was found and restored, false otherwise.</returns>
+    public bool RestoreView(string name, bool animate = true)
+    {
+        if (!_savedViews.TryGetValue(name, out var savedView))
+            return false;
+
+        Stretch = savedView.Stretch;
+        SetMatrix(savedView.Matrix, !animate);
+        return true;
+    }
+
+    /// <summary>
+    /// Gets a saved view by name.
+    /// </summary>
+    /// <param name="name">The name of the view.</param>
+    /// <returns>The saved view, or null if not found.</returns>
+    public SavedView? GetSavedView(string name)
+    {
+        return _savedViews.TryGetValue(name, out var view) ? view : null;
+    }
+
+    /// <summary>
+    /// Gets all saved view names.
+    /// </summary>
+    /// <returns>An array of saved view names.</returns>
+    public string[] GetSavedViewNames()
+    {
+        return _savedViews.Keys.ToArray();
+    }
+
+    /// <summary>
+    /// Gets all saved views.
+    /// </summary>
+    /// <returns>A collection of saved views.</returns>
+    public IReadOnlyCollection<SavedView> GetSavedViews()
+    {
+        return _savedViews.Values.ToList().AsReadOnly();
+    }
+
+    /// <summary>
+    /// Deletes a saved view.
+    /// </summary>
+    /// <param name="name">The name of the view to delete.</param>
+    /// <returns>True if the view was found and deleted, false otherwise.</returns>
+    public bool DeleteSavedView(string name)
+    {
+        return _savedViews.Remove(name);
+    }
+
+    /// <summary>
+    /// Clears all saved views.
+    /// </summary>
+    public void ClearSavedViews()
+    {
+        _savedViews.Clear();
+    }
+
+    /// <summary>
+    /// Zooms to the nearest discrete zoom level.
+    /// </summary>
+    /// <param name="targetZoom">The target zoom level.</param>
+    /// <returns>The nearest discrete zoom level.</returns>
+    private double GetNearestDiscreteZoomLevel(double targetZoom)
+    {
+        if (DiscreteZoomLevels == null || DiscreteZoomLevels.Length == 0)
+            return targetZoom;
+
+        var nearest = DiscreteZoomLevels[0];
+        var minDiff = Math.Abs(targetZoom - nearest);
+
+        foreach (var level in DiscreteZoomLevels)
+        {
+            var diff = Math.Abs(targetZoom - level);
+            if (diff < minDiff)
+            {
+                minDiff = diff;
+                nearest = level;
+            }
+        }
+
+        return nearest;
+    }
+
+    /// <summary>
+    /// Gets the next discrete zoom level up from current zoom.
+    /// </summary>
+    /// <returns>The next zoom level, or current zoom if at maximum.</returns>
+    public double GetNextDiscreteZoomLevel()
+    {
+        if (!EnableDiscreteZoomLevels || DiscreteZoomLevels == null || DiscreteZoomLevels.Length == 0)
+            return _zoomX * ZoomSpeed;
+
+        var sorted = DiscreteZoomLevels.OrderBy(z => z).ToArray();
+        var current = _zoomX;
+
+        foreach (var level in sorted)
+        {
+            if (level > current)
+                return level;
+        }
+
+        return sorted[sorted.Length - 1];
+    }
+
+    /// <summary>
+    /// Gets the previous discrete zoom level down from current zoom.
+    /// </summary>
+    /// <returns>The previous zoom level, or current zoom if at minimum.</returns>
+    public double GetPreviousDiscreteZoomLevel()
+    {
+        if (!EnableDiscreteZoomLevels || DiscreteZoomLevels == null || DiscreteZoomLevels.Length == 0)
+            return _zoomX / ZoomSpeed;
+
+        var sorted = DiscreteZoomLevels.OrderByDescending(z => z).ToArray();
+        var current = _zoomX;
+
+        foreach (var level in sorted)
+        {
+            if (level < current)
+                return level;
+        }
+
+        return sorted[sorted.Length - 1];
+    }
+
+    /// <summary>
+    /// Zooms to a specific discrete level.
+    /// </summary>
+    /// <param name="level">The zoom level to zoom to.</param>
+    /// <param name="centerX">The x-coordinate of the zoom center point.</param>
+    /// <param name="centerY">The y-coordinate of the zoom center point.</param>
+    /// <param name="animate">Whether to animate the transition.</param>
+    public void ZoomToLevel(double level, double centerX, double centerY, bool animate = true)
+    {
+        if (!EnableZoom || _element == null)
+            return;
+
+        var zoom = level;
+        if (EnableDiscreteZoomLevels && DiscreteZoomLevels != null && DiscreteZoomLevels.Length > 0)
+        {
+            zoom = GetNearestDiscreteZoomLevel(level);
+        }
+
+        ZoomTo(zoom / _zoomX, centerX, centerY, !animate);
+    }
+
+    /// <summary>
+    /// Determines if a rectangle in content coordinates is visible in the viewport.
+    /// </summary>
+    /// <param name="rect">The rectangle in content coordinates.</param>
+    /// <returns>True if any part of the rectangle is visible.</returns>
+    public bool IsRectangleVisible(Rect rect)
+    {
+        var visibleContent = GetVisibleContentBounds();
+        return rect.Intersects(visibleContent);
+    }
+
+    /// <summary>
+    /// Determines if a point in content coordinates is visible in the viewport.
+    /// </summary>
+    /// <param name="point">The point in content coordinates.</param>
+    /// <returns>True if the point is visible.</returns>
+    public bool IsPointVisible(Point point)
+    {
+        var visibleContent = GetVisibleContentBounds();
+        return visibleContent.Contains(point);
+    }
+
+    /// <summary>
+    /// Gets the intersection of a rectangle with the visible content bounds.
+    /// </summary>
+    /// <param name="rect">The rectangle in content coordinates.</param>
+    /// <returns>The visible portion of the rectangle.</returns>
+    public Rect GetVisiblePortion(Rect rect)
+    {
+        var visibleContent = GetVisibleContentBounds();
+        return rect.Intersect(visibleContent);
     }
 
     /// <summary>
