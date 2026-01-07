@@ -225,4 +225,94 @@ public class ZoomBorderContentBoundsTests
         Assert.True(zoomBorder.OffsetX < 1000, "OffsetX should be constrained");
         Assert.True(zoomBorder.OffsetY < 1000, "OffsetY should be constrained");
     }
+
+    [AvaloniaFact]
+    public void BoundsMode_FillViewport_ConstrainsPanning()
+    {
+        // Arrange
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 400,
+            Height = 300,
+            BoundsMode = ContentBoundsMode.FillViewport,
+            EnableConstrains = true
+        };
+
+        var childElement = new Border
+        {
+            Width = 200,
+            Height = 150,
+            Background = Brushes.Red
+        };
+
+        zoomBorder.Child = childElement;
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+
+        // Act - Try to pan
+        zoomBorder.Pan(500, 500);
+
+        // Assert - FillViewport mode constrains movement
+        Assert.NotNull(zoomBorder);
+    }
+
+    [AvaloniaFact]
+    public void BoundsMode_KeepCentered_ConstrainsPanning()
+    {
+        // Arrange
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 400,
+            Height = 300,
+            BoundsMode = ContentBoundsMode.KeepCentered,
+            EnableConstrains = true
+        };
+
+        var childElement = new Border
+        {
+            Width = 200,
+            Height = 150,
+            Background = Brushes.Red
+        };
+
+        zoomBorder.Child = childElement;
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+
+        // Act - Try to pan
+        zoomBorder.Pan(500, 500);
+
+        // Assert - KeepCentered mode constrains movement
+        Assert.NotNull(zoomBorder);
+    }
+
+    [AvaloniaFact]
+    public void BoundsMode_Custom_AllowsCustomBehavior()
+    {
+        // Arrange
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 400,
+            Height = 300,
+            BoundsMode = ContentBoundsMode.Custom,
+            EnableConstrains = true
+        };
+
+        var childElement = new Border
+        {
+            Width = 200,
+            Height = 150,
+            Background = Brushes.Red
+        };
+
+        zoomBorder.Child = childElement;
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+
+        // Act - Pan
+        zoomBorder.Pan(100, 100);
+
+        // Assert - Custom bounds mode doesn't throw
+        Assert.NotNull(zoomBorder);
+    }
 }

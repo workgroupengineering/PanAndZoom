@@ -52,11 +52,9 @@
                       MinRotation="-180"
                       MaxRotation="180">
         <Canvas Width="400" Height="400" Background="LightGray">
+          <!-- The entire canvas is rotated by ZoomBorder - no need for separate RotateTransform -->
           <Border Width="200" Height="200" Canvas.Left="100" Canvas.Top="100"
                   Background="Orange" BorderBrush="Black" BorderThickness="2">
-            <Border.RenderTransform>
-              <RotateTransform Angle="{Binding CurrentRotation}" CenterX="100" CenterY="100" />
-            </Border.RenderTransform>
             <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
               <TextBlock Text="ROTATABLE" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" />
               <TextBlock Text="{Binding CurrentRotation, StringFormat='{}{0:F1}°'}" FontSize="16" HorizontalAlignment="Center" Margin="0,8,0,0" />

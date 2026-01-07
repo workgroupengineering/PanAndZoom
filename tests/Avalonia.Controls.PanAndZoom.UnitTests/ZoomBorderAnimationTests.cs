@@ -1,6 +1,7 @@
 // Copyright (c) Wiesław Šoltés. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 using System;
+using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Xunit;
 
@@ -96,5 +97,160 @@ public class ZoomBorderAnimationTests
 
         // Assert
         Assert.Equal(TimeSpan.FromSeconds(2), zoomBorder.AnimationDuration);
+    }
+
+    // ===== Functional Animation Tests =====
+
+    [AvaloniaFact]
+    public void ZoomTo_WithAnimationsEnabled_AppliesZoom()
+    {
+        // Arrange
+        var canvas = new Canvas { Width = 400, Height = 400 };
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 800,
+            Height = 600,
+            EnableAnimations = true,
+            AnimationDuration = TimeSpan.FromMilliseconds(100),
+            Child = canvas
+        };
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+
+        var initialZoomX = zoomBorder.ZoomX;
+
+        // Act - ZoomTo with animation enabled (not skipping transitions)
+        zoomBorder.ZoomTo(2.0, 100, 100, skipTransitions: false);
+
+        // Assert - Zoom value should be updated even with animations enabled
+        Assert.True(zoomBorder.ZoomX > initialZoomX, "ZoomX should increase after ZoomTo");
+    }
+
+    [AvaloniaFact]
+    public void ZoomTo_WithAnimationsDisabled_AppliesZoomImmediately()
+    {
+        // Arrange
+        var canvas = new Canvas { Width = 400, Height = 400 };
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 800,
+            Height = 600,
+            EnableAnimations = false, // Animations disabled
+            Child = canvas
+        };
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+
+        var initialZoomX = zoomBorder.ZoomX;
+
+        // Act
+        zoomBorder.ZoomTo(2.0, 100, 100);
+
+        // Assert - Zoom should be applied immediately
+        Assert.True(zoomBorder.ZoomX > initialZoomX);
+    }
+
+    [AvaloniaFact]
+    public void SkipTransitions_True_DisablesTransitionsTemporarily()
+    {
+        // Arrange
+        var canvas = new Canvas { Width = 400, Height = 400 };
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 800,
+            Height = 600,
+            EnableAnimations = true,
+            AnimationDuration = TimeSpan.FromMilliseconds(100),
+            Child = canvas
+        };
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+
+        var initialZoomX = zoomBorder.ZoomX;
+
+        // Act - Use skipTransitions: true to bypass animations
+        zoomBorder.ZoomTo(2.0, 100, 100, skipTransitions: true);
+
+        // Assert - Zoom should be applied
+        Assert.True(zoomBorder.ZoomX > initialZoomX);
+    }
+
+    [AvaloniaFact]
+    public void Pan_WithAnimationsEnabled_AppliesPan()
+    {
+        // Arrange
+        var canvas = new Canvas { Width = 400, Height = 400 };
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 800,
+            Height = 600,
+            EnableAnimations = true,
+            AnimationDuration = TimeSpan.FromMilliseconds(100),
+            EnablePan = true,
+            Child = canvas
+        };
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+
+        var initialOffsetX = zoomBorder.OffsetX;
+
+        // Act - PanDelta with animations (not skipping transitions)
+        zoomBorder.PanDelta(50, 50, skipTransitions: false);
+
+        // Assert - Offset should be updated
+        Assert.NotEqual(initialOffsetX, zoomBorder.OffsetX);
+    }
+
+    [AvaloniaFact]
+    public void ResetMatrix_WithAnimations_ResetsZoomAndPan()
+    {
+        // Arrange
+        var canvas = new Canvas { Width = 400, Height = 400 };
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 800,
+            Height = 600,
+            EnableAnimations = true,
+            AnimationDuration = TimeSpan.FromMilliseconds(100),
+            Child = canvas
+        };
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+
+        // First zoom and pan to a non-default state
+        zoomBorder.ZoomTo(2.0, 100, 100, skipTransitions: true);
+        zoomBorder.PanDelta(50, 50, skipTransitions: true);
+
+        // Act - Reset with animation
+        zoomBorder.ResetMatrix(skipTransitions: false);
+
+        // Assert - Matrix should be reset to identity
+        Assert.Equal(1.0, zoomBorder.ZoomX, 5);
+        Assert.Equal(1.0, zoomBorder.ZoomY, 5);
+    }
+
+    [AvaloniaFact]
+    public void AnimationDuration_Zero_TreatedAsNoAnimation()
+    {
+        // Arrange
+        var canvas = new Canvas { Width = 400, Height = 400 };
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 800,
+            Height = 600,
+            EnableAnimations = true, // Enabled but...
+            AnimationDuration = TimeSpan.Zero, // ...duration is zero
+            Child = canvas
+        };
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+
+        var initialZoomX = zoomBorder.ZoomX;
+
+        // Act
+        zoomBorder.ZoomTo(2.0, 100, 100);
+
+        // Assert - Should still apply (zero duration means no animation)
+        Assert.True(zoomBorder.ZoomX > initialZoomX);
     }
 }

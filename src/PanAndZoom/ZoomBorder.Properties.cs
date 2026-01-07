@@ -320,6 +320,7 @@ public partial class ZoomBorder
 
     /// <summary>
     /// Identifies the <seealso cref="ShowZoomIndicator"/> avalonia property.
+    /// When true, a zoom indicator will be displayed temporarily after zoom operations.
     /// </summary>
     public static readonly StyledProperty<bool> ShowZoomIndicatorProperty =
         AvaloniaProperty.Register<ZoomBorder, bool>(nameof(ShowZoomIndicator), false, false, BindingMode.TwoWay);
@@ -338,9 +339,19 @@ public partial class ZoomBorder
 
     /// <summary>
     /// Identifies the <seealso cref="ZoomIndicatorAutoHideDuration"/> avalonia property.
+    /// Controls how long the zoom indicator remains visible before auto-hiding.
     /// </summary>
     public static readonly StyledProperty<TimeSpan> ZoomIndicatorAutoHideDurationProperty =
         AvaloniaProperty.Register<ZoomBorder, TimeSpan>(nameof(ZoomIndicatorAutoHideDuration), TimeSpan.FromSeconds(2), false, BindingMode.TwoWay);
+
+    /// <summary>
+    /// Identifies the <seealso cref="IsZoomIndicatorVisible"/> avalonia property.
+    /// This is a read-only property that indicates whether the zoom indicator is currently visible.
+    /// </summary>
+    public static readonly DirectProperty<ZoomBorder, bool> IsZoomIndicatorVisibleProperty =
+        AvaloniaProperty.RegisterDirect<ZoomBorder, bool>(
+            nameof(IsZoomIndicatorVisible),
+            o => o.IsZoomIndicatorVisible);
 
     /// <summary>
     /// Identifies the <seealso cref="ShowGrid"/> avalonia property.
@@ -428,27 +439,32 @@ public partial class ZoomBorder
 
     /// <summary>
     /// Identifies the <seealso cref="EnableSimultaneousPanZoom"/> avalonia property.
+    /// When true, allows pan and zoom gestures to occur simultaneously. When false, only one gesture type is active at a time.
     /// </summary>
     public static readonly StyledProperty<bool> EnableSimultaneousPanZoomProperty =
         AvaloniaProperty.Register<ZoomBorder, bool>(nameof(EnableSimultaneousPanZoom), true, false, BindingMode.TwoWay);
 
     /// <summary>
     /// Identifies the <seealso cref="MinimumTouchPoints"/> avalonia property.
+    /// Controls the minimum number of touch points required to activate gestures.
     /// </summary>
     public static readonly StyledProperty<int> MinimumTouchPointsProperty =
         AvaloniaProperty.Register<ZoomBorder, int>(nameof(MinimumTouchPoints), 1, false, BindingMode.TwoWay);
 
     /// <summary>
     /// Identifies the <seealso cref="MaximumTouchPoints"/> avalonia property.
+    /// Controls the maximum number of touch points that will be tracked for gestures.
     /// </summary>
     public static readonly StyledProperty<int> MaximumTouchPointsProperty =
         AvaloniaProperty.Register<ZoomBorder, int>(nameof(MaximumTouchPoints), 2, false, BindingMode.TwoWay);
 
     /// <summary>
     /// Identifies the <seealso cref="GestureRecognitionDelay"/> avalonia property.
+    /// Controls the delay before a gesture is recognized, allowing time to accumulate touch points.
+    /// Default is zero (no delay). Set a positive value to enable gesture recognition delay.
     /// </summary>
     public static readonly StyledProperty<TimeSpan> GestureRecognitionDelayProperty =
-        AvaloniaProperty.Register<ZoomBorder, TimeSpan>(nameof(GestureRecognitionDelay), TimeSpan.FromMilliseconds(50), false, BindingMode.TwoWay);
+        AvaloniaProperty.Register<ZoomBorder, TimeSpan>(nameof(GestureRecognitionDelay), TimeSpan.Zero, false, BindingMode.TwoWay);
 
     /// <summary>
     /// Identifies the <seealso cref="ZoomLevelDescription"/> avalonia property.
@@ -1058,6 +1074,12 @@ public partial class ZoomBorder
     }
 
     /// <summary>
+    /// Gets a value indicating whether the zoom indicator is currently visible.
+    /// This property is read-only and controlled by the auto-hide timer.
+    /// </summary>
+    public bool IsZoomIndicatorVisible => _zoomIndicatorVisible;
+
+    /// <summary>
     /// Gets or sets a value indicating whether to show the grid.
     /// </summary>
     public bool ShowGrid
@@ -1185,6 +1207,7 @@ public partial class ZoomBorder
 
     /// <summary>
     /// Gets or sets a value indicating whether simultaneous pan and zoom is enabled.
+    /// When true, allows pan and zoom gestures to occur at the same time.
     /// </summary>
     public bool EnableSimultaneousPanZoom
     {
@@ -1193,7 +1216,7 @@ public partial class ZoomBorder
     }
 
     /// <summary>
-    /// Gets or sets the minimum number of touch points.
+    /// Gets or sets the minimum number of touch points required to activate gestures.
     /// </summary>
     public int MinimumTouchPoints
     {
@@ -1202,7 +1225,7 @@ public partial class ZoomBorder
     }
 
     /// <summary>
-    /// Gets or sets the maximum number of touch points.
+    /// Gets or sets the maximum number of touch points that will be tracked.
     /// </summary>
     public int MaximumTouchPoints
     {
@@ -1211,7 +1234,7 @@ public partial class ZoomBorder
     }
 
     /// <summary>
-    /// Gets or sets the gesture recognition delay.
+    /// Gets or sets the gesture recognition delay before recognizing a gesture.
     /// </summary>
     public TimeSpan GestureRecognitionDelay
     {

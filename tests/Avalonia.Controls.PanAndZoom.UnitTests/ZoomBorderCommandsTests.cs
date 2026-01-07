@@ -460,4 +460,151 @@ public class ZoomBorderCommandsTests
         // Assert - No exceptions should be thrown
         Assert.NotNull(zoomBorder);
     }
+
+    #region ICommand Interface Tests
+
+    [AvaloniaFact]
+    public void ZoomInCommand_ImplementsICommand_CanExecuteAndExecute()
+    {
+        // Arrange
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 400,
+            Height = 300,
+            EnableZoom = true,
+            Stretch = StretchMode.None
+        };
+
+        var childElement = new Border { Width = 200, Height = 150, Background = Brushes.Red };
+        zoomBorder.Child = childElement;
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+
+        var command = zoomBorder.ZoomInCommand;
+
+        // Act & Assert
+        Assert.True(command.CanExecute(null));
+        command.Execute(null);
+        
+        // Verify zoom increased
+        Assert.True(zoomBorder.ZoomX > 1.0);
+    }
+
+    [AvaloniaFact]
+    public void ZoomOutCommand_ImplementsICommand_CanExecuteAndExecute()
+    {
+        // Arrange
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 400,
+            Height = 300,
+            EnableZoom = true,
+            Stretch = StretchMode.None
+        };
+
+        var childElement = new Border { Width = 200, Height = 150, Background = Brushes.Red };
+        zoomBorder.Child = childElement;
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+
+        // Zoom in first
+        zoomBorder.ZoomIn();
+
+        var command = zoomBorder.ZoomOutCommand;
+        var zoomBefore = zoomBorder.ZoomX;
+
+        // Act & Assert
+        Assert.True(command.CanExecute(null));
+        command.Execute(null);
+        
+        // Verify zoom decreased
+        Assert.True(zoomBorder.ZoomX < zoomBefore);
+    }
+
+    [AvaloniaFact]
+    public void ResetCommand_ImplementsICommand_CanExecuteAndExecute()
+    {
+        // Arrange
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 400,
+            Height = 300,
+            EnableZoom = true,
+            Stretch = StretchMode.None
+        };
+
+        var childElement = new Border { Width = 200, Height = 150, Background = Brushes.Red };
+        zoomBorder.Child = childElement;
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+
+        // Change zoom and offset
+        zoomBorder.ZoomIn();
+        zoomBorder.Pan(50, 50);
+
+        var command = zoomBorder.ResetCommand;
+
+        // Act & Assert
+        Assert.True(command.CanExecute(null));
+        command.Execute(null);
+        
+        // Verify reset (in None mode, zoom goes to 1.0)
+        Assert.Equal(1.0, zoomBorder.ZoomX, 3);
+    }
+
+    [AvaloniaFact]
+    public void ToggleStretchCommand_ImplementsICommand_CanExecuteAndExecute()
+    {
+        // Arrange
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 400,
+            Height = 300,
+            EnableZoom = true,
+            Stretch = StretchMode.None
+        };
+
+        var childElement = new Border { Width = 200, Height = 150, Background = Brushes.Red };
+        zoomBorder.Child = childElement;
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+
+        var command = zoomBorder.ToggleStretchCommand;
+        var stretchBefore = zoomBorder.Stretch;
+
+        // Act & Assert
+        Assert.True(command.CanExecute(null));
+        command.Execute(null);
+        
+        // Verify stretch changed
+        Assert.NotEqual(stretchBefore, zoomBorder.Stretch);
+    }
+
+    [AvaloniaFact]
+    public void Command_CanExecuteChanged_CanSubscribe()
+    {
+        // Arrange
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 400,
+            Height = 300,
+            EnableZoom = true,
+            Stretch = StretchMode.None
+        };
+
+        var childElement = new Border { Width = 200, Height = 150, Background = Brushes.Red };
+        zoomBorder.Child = childElement;
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+
+        var command = zoomBorder.ZoomInCommand;
+        
+        // Act
+        command.CanExecuteChanged += (_, _) => { };
+        
+        // Assert - Just verify we can subscribe without errors
+        Assert.NotNull(command);
+    }
+
+    #endregion
 }

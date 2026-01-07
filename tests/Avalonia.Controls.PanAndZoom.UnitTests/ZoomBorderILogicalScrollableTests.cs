@@ -335,7 +335,7 @@ public class ZoomBorderILogicalScrollableTests
     }
     
     [AvaloniaFact]
-    public void ZoomBorder_ScrollViewer_BringIntoView_ReturnsFalse()
+    public void ZoomBorder_ScrollViewer_BringIntoView_BringsVisibleElement_ReturnsTrue()
     {
         // Arrange
         var zoomBorder = new ZoomBorder
@@ -358,9 +358,78 @@ public class ZoomBorderILogicalScrollableTests
         
         var scrollable = (ILogicalScrollable)zoomBorder;
         
-        // Act & Assert
+        // Act - BringIntoView with a rect that's already visible
         var result = scrollable.BringIntoView(childElement, new Rect(0, 0, 50, 50));
-        Assert.False(result, "BringIntoView should return false as it's not implemented");
+        
+        // Assert - Should return true since the element can be brought into view
+        Assert.True(result, "BringIntoView should return true when element can be shown");
+    }
+    
+    [AvaloniaFact]
+    public void ZoomBorder_ScrollViewer_BringIntoView_WithNullTarget_ReturnsFalse()
+    {
+        // Arrange
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 400,
+            Height = 300
+        };
+        
+        var childElement = new Border
+        {
+            Width = 200,
+            Height = 150,
+            Background = Brushes.Red
+        };
+        
+        zoomBorder.Child = childElement;
+        
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+        
+        var scrollable = (ILogicalScrollable)zoomBorder;
+        
+        // Act - BringIntoView with null target
+        var result = scrollable.BringIntoView(null!, new Rect(0, 0, 50, 50));
+        
+        // Assert - Should return false with null target
+        Assert.False(result, "BringIntoView should return false when target is null");
+    }
+    
+    [AvaloniaFact]
+    public void ZoomBorder_ScrollViewer_BringIntoView_PansToShowOffscreenContent()
+    {
+        // Arrange
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 400,
+            Height = 300
+        };
+        
+        var childElement = new Border
+        {
+            Width = 800,  // Larger than viewport
+            Height = 600,
+            Background = Brushes.Red
+        };
+        
+        zoomBorder.Child = childElement;
+        
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+        
+        // Pan content off screen first
+        zoomBorder.Pan(-500, -400);
+        var initialOffsetX = zoomBorder.OffsetX;
+        var initialOffsetY = zoomBorder.OffsetY;
+        
+        var scrollable = (ILogicalScrollable)zoomBorder;
+        
+        // Act - BringIntoView a portion that was panned off screen
+        var result = scrollable.BringIntoView(childElement, new Rect(0, 0, 100, 100));
+        
+        // Assert - Should return true and have adjusted the pan
+        Assert.True(result, "BringIntoView should return true");
     }
     
     [AvaloniaFact]

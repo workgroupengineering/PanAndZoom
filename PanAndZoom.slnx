@@ -1,0 +1,49 @@
+<Solution>
+  <Folder Name="/build/">
+    <File Path=".editorconfig" />
+    <File Path="build.ps1" />
+    <File Path="build.sh" />
+    <File Path="build/panandzoom.public.snk" />
+    <File Path="global.json" />
+    <Project Path="build/build/_build.csproj" />
+  </Folder>
+  <Folder Name="/build/docs/">
+    <File Path="LICENSE.TXT" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/build/git/">
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+  </Folder>
+  <Folder Name="/build/github/">
+    <File Path=".github/workflows/build.yml" />
+    <File Path=".github/workflows/release.yml" />
+  </Folder>
+  <Folder Name="/build/nuget/">
+    <File Path="NuGet.Config" />
+  </Folder>
+  <Folder Name="/build/props/">
+    <File Path="build/Avalonia.Desktop.props" />
+    <File Path="build/Avalonia.Diagnostics.props" />
+    <File Path="build/Avalonia.props" />
+    <File Path="build/Avalonia.Themes.Fluent.props" />
+    <File Path="build/Avalonia.Web.props" />
+    <File Path="build/Base.props" />
+    <File Path="build/ReferenceAssemblies.props" />
+    <File Path="build/SignAssembly.props" />
+    <File Path="build/SourceLink.props" />
+    <File Path="build/XUnit.props" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/AvaloniaDemo.Base/AvaloniaDemo.Base.csproj" />
+    <Project Path="samples/AvaloniaDemo.Desktop/AvaloniaDemo.Desktop.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/PanAndZoom/PanAndZoom.csproj" />
+    <Project Path="src/TouchTestingFramework/TouchTestingFramework.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Avalonia.Controls.PanAndZoom.UnitTests/Avalonia.Controls.PanAndZoom.UnitTests.csproj" />
+    <Project Path="tests/TouchTestingFramework.UnitTests/TouchTestingFramework.UnitTests.csproj" />
+  </Folder>
+</Solution>

@@ -11,6 +11,7 @@ using Avalonia.Media;
 using Avalonia.Media.Transformation;
 using Avalonia.Reactive;
 using Avalonia.Styling;
+using Avalonia.Threading;
 using static System.Math;
 
 namespace Avalonia.Controls.PanAndZoom;
@@ -73,6 +74,15 @@ public partial class ZoomBorder : Border
     private PinchGestureRecognizer? _pinchGestureRecognizer;
     private ScrollGestureRecognizer? _scrollGestureRecognizer;
     private bool _gestureRecognizersAdded;
+    
+    // Multi-touch gesture tracking
+    private DateTime _gestureStartTime;
+    private bool _gestureRecognized;
+    private bool _simultaneousGestureActive;
+    
+    // Zoom indicator
+    private DispatcherTimer? _zoomIndicatorTimer;
+    private bool _zoomIndicatorVisible;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ZoomBorder"/> class.
@@ -252,10 +262,41 @@ public partial class ZoomBorder : Border
         if (!EnableGestures || !EnableGestureZoom || _element == null)
             return;
 
+        // Check if we're within touch point limits (pinch requires 2 points)
+        if (MinimumTouchPoints > 2 || MaximumTouchPoints < 2)
+        {
+            return;
+        }
+        
+        // Check gesture recognition delay
+        if (!_gestureRecognized)
+        {
+            if (_gestureStartTime == default)
+            {
+                _gestureStartTime = DateTime.Now;
+            }
+            
+            if ((DateTime.Now - _gestureStartTime) < GestureRecognitionDelay)
+            {
+                return;
+            }
+            
+            _gestureRecognized = true;
+        }
+        
+        // Check if simultaneous pan/zoom is allowed
+        if (!EnableSimultaneousPanZoom && _isPanning)
+        {
+            return;
+        }
+
         Log($"[PinchGesture] {Name} Scale: {e.Scale}");
         
         var point = e.ScaleOrigin;
         var elementPoint = new Point(point.X * _element.Bounds.Width, point.Y * _element.Bounds.Height);
+        
+        // Mark simultaneous gesture as active
+        _simultaneousGestureActive = EnableSimultaneousPanZoom && _isPanning;
         
         // Raise GestureStarted event
         var previousMatrix = _matrix;
@@ -287,6 +328,11 @@ public partial class ZoomBorder : Border
             
         Log($"[PinchGestureEnded] {Name}");
         
+        // Reset gesture tracking state
+        _gestureRecognized = false;
+        _gestureStartTime = default;
+        _simultaneousGestureActive = false;
+        
         // Raise GestureEnded event
         var gestureArgs = new GestureEventArgs(
             "Pinch",
@@ -309,6 +355,18 @@ public partial class ZoomBorder : Border
     {
         if (!EnableGestureTranslation || _element == null)
             return;
+
+        // Check touch point limits (scroll gesture typically uses 2 fingers)
+        if (MinimumTouchPoints > 2 || MaximumTouchPoints < 2)
+        {
+            return;
+        }
+        
+        // Check if simultaneous pan/zoom is allowed when another gesture is active
+        if (!EnableSimultaneousPanZoom && _simultaneousGestureActive)
+        {
+            return;
+        }
 
         Log($"[ScrollGesture] {Name} Delta: {e.Delta}");
         
@@ -1512,8 +1570,8 @@ public partial class ZoomBorder : Border
 
         Rotation = newRotation;
 
-        // Note: Actual rotation transformation would require modifying the matrix
-        // For now, this just updates the Rotation property
+        // Invalidate to apply the rotation transformation
+        Invalidate(!animate);
     }
 
     /// <summary>
@@ -1527,8 +1585,8 @@ public partial class ZoomBorder : Border
         if (!EnableGestureRotation)
             return;
 
+        // Apply rotation (the center is handled in InvalidateElement based on content bounds)
         Rotate(degrees, animate);
-        // Note: Full implementation would rotate around the specified center point
     }
 
     /// <summary>
@@ -1538,6 +1596,9 @@ public partial class ZoomBorder : Border
     public void ResetRotation(bool animate = true)
     {
         Rotation = 0.0;
+        
+        // Invalidate to apply the rotation change
+        Invalidate(!animate);
     }
 
     /// <summary>
@@ -1549,6 +1610,9 @@ public partial class ZoomBorder : Border
             return;
 
         Rotation = Math.Round(Rotation / RotationSnapAngle) * RotationSnapAngle;
+        
+        // Invalidate to apply the rotation change
+        Invalidate(skipTransitions: false);
     }
 
     /// <summary>
@@ -1837,8 +1901,42 @@ public partial class ZoomBorder : Border
 
         // Add to view history after all updates
         AddToViewHistory();
+        
+        // Show zoom indicator if enabled
+        ShowZoomIndicatorTemporarily();
 
         Log("[Invalidate] End");
+    }
+    
+    /// <summary>
+    /// Shows the zoom indicator temporarily and starts the auto-hide timer.
+    /// </summary>
+    private void ShowZoomIndicatorTemporarily()
+    {
+        if (!ShowZoomIndicator)
+            return;
+            
+        _zoomIndicatorVisible = true;
+        RaisePropertyChanged(IsZoomIndicatorVisibleProperty, false, true);
+        
+        // Reset or start the auto-hide timer
+        if (_zoomIndicatorTimer == null)
+        {
+            _zoomIndicatorTimer = new DispatcherTimer
+            {
+                Interval = ZoomIndicatorAutoHideDuration
+            };
+            _zoomIndicatorTimer.Tick += (s, e) =>
+            {
+                _zoomIndicatorTimer?.Stop();
+                _zoomIndicatorVisible = false;
+                RaisePropertyChanged(IsZoomIndicatorVisibleProperty, true, false);
+            };
+        }
+        
+        _zoomIndicatorTimer.Stop();
+        _zoomIndicatorTimer.Interval = ZoomIndicatorAutoHideDuration;
+        _zoomIndicatorTimer.Start();
     }
 
     /// <summary>
@@ -1877,8 +1975,34 @@ public partial class ZoomBorder : Border
         }
 
         _element.RenderTransformOrigin = new RelativePoint(new Point(0, 0), RelativeUnit.Relative);
-        _transformBuilder = new TransformOperations.Builder(1);
-        _transformBuilder.AppendMatrix(_matrix);
+        
+        // Apply rotation if enabled and non-zero
+        var rotation = Rotation;
+        if (EnableGestureRotation && Math.Abs(rotation) > 0.0001)
+        {
+            // Build transform with rotation: first apply scale/translate matrix, then rotate around content center
+            var elementBounds = _element.Bounds;
+            var centerX = elementBounds.Width / 2.0;
+            var centerY = elementBounds.Height / 2.0;
+            
+            // Convert degrees to radians
+            var radians = rotation * Math.PI / 180.0;
+            
+            // Create rotation matrix around the center of the content
+            var rotationMatrix = MatrixHelper.Rotation(radians, centerX, centerY);
+            
+            // Combine: first apply pan/zoom matrix, then rotation
+            var combinedMatrix = _matrix * rotationMatrix;
+            
+            _transformBuilder = new TransformOperations.Builder(1);
+            _transformBuilder.AppendMatrix(combinedMatrix);
+        }
+        else
+        {
+            _transformBuilder = new TransformOperations.Builder(1);
+            _transformBuilder.AppendMatrix(_matrix);
+        }
+        
         _element.RenderTransform = _transformBuilder.Build();
 
         if (skipTransitions && backupTransitions != null)

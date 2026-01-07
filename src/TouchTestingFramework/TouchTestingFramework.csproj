@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net6.0;net8.0;net10.0</TargetFrameworks>
+    <OutputType>Library</OutputType>
+    <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Avalonia.TouchTestingFramework</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>TouchTestingFramework</PackageId>
+    <Description>A comprehensive touch input simulator and gesture recognizer test helpers for headless testing of Avalonia controls. Enables testing touch events, multi-touch gestures, pinch/zoom, scroll gestures, and touchpad events in Avalonia.Headless.XUnit.</Description>
+    <PackageTags>Avalonia;Touch;Testing;Headless;Unit Tests;Gestures;Pinch;Zoom;Scroll;Multi-touch;Test Helpers</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <Import Project="..\..\build\Base.props" />
+  <Import Project="..\..\build\SignAssembly.props" />
+  <Import Project="..\..\build\SourceLink.props" />
+  <Import Project="..\..\build\ReferenceAssemblies.props" />
+  <Import Project="..\..\build\Avalonia.props" />
+
+</Project>

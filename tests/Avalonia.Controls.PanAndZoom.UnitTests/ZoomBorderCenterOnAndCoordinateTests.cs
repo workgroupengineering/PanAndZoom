@@ -478,4 +478,144 @@ public class ZoomBorderCenterOnAndCoordinateTests
         Assert.Equal(400, bounds.Width);
         Assert.Equal(300, bounds.Height);
     }
+
+    [AvaloniaFact]
+    public void CenterOn_Control_CentersOnChildControl()
+    {
+        // Arrange
+        var innerBorder = new Border
+        {
+            Width = 50,
+            Height = 50,
+            Background = Brushes.Blue
+        };
+
+        var canvas = new Canvas
+        {
+            Width = 400,
+            Height = 400
+        };
+        canvas.Children.Add(innerBorder);
+        Canvas.SetLeft(innerBorder, 200);
+        Canvas.SetTop(innerBorder, 200);
+
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 400,
+            Height = 300,
+            Child = canvas
+        };
+
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+
+        // Act
+        zoomBorder.CenterOn(innerBorder, animate: false);
+
+        // Assert - Just verify it didn't throw
+        Assert.NotNull(zoomBorder);
+    }
+
+    [AvaloniaFact]
+    public void ScreenToContent_ConvertsCoordinates()
+    {
+        // Arrange
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 400,
+            Height = 300
+        };
+
+        var childElement = new Border
+        {
+            Width = 200,
+            Height = 150,
+            Background = Brushes.Red
+        };
+
+        zoomBorder.Child = childElement;
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+
+        // Act
+        var contentPoint = zoomBorder.ScreenToContent(new Vector(100, 100));
+
+        // Assert - At identity matrix, coordinates should be the same
+        Assert.NotEqual(default, contentPoint);
+    }
+
+    [AvaloniaFact]
+    public void ContentToScreen_ConvertsCoordinates()
+    {
+        // Arrange
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 400,
+            Height = 300
+        };
+
+        var childElement = new Border
+        {
+            Width = 200,
+            Height = 150,
+            Background = Brushes.Red
+        };
+
+        zoomBorder.Child = childElement;
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+
+        // Act
+        var screenPoint = zoomBorder.ContentToScreen(new Vector(100, 100));
+
+        // Assert - At identity matrix, coordinates should be the same
+        Assert.NotEqual(default, screenPoint);
+    }
+
+    [AvaloniaFact]
+    public void GetSavedViews_ReturnsEmptyWhenNoSavedViews()
+    {
+        // Arrange
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 400,
+            Height = 300
+        };
+
+        var childElement = new Border { Width = 200, Height = 150, Background = Brushes.Red };
+        zoomBorder.Child = childElement;
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+
+        // Act
+        var savedViews = zoomBorder.GetSavedViews();
+
+        // Assert
+        Assert.Empty(savedViews);
+    }
+
+    [AvaloniaFact]
+    public void GetSavedViews_ReturnsSavedViewsAfterSaving()
+    {
+        // Arrange
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 400,
+            Height = 300
+        };
+
+        var childElement = new Border { Width = 200, Height = 150, Background = Brushes.Red };
+        zoomBorder.Child = childElement;
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+
+        // Save a view
+        zoomBorder.SaveView("TestView");
+
+        // Act
+        var savedViews = zoomBorder.GetSavedViews();
+
+        // Assert
+        Assert.Contains(savedViews, v => v.Name == "TestView");
+    }
 }

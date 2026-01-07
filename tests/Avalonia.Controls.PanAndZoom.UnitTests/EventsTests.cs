@@ -463,4 +463,192 @@ public class EventsTests
         Assert.True(panArgs!.ZoomX > 0);
         Assert.True(panArgs.ZoomY > 0);
     }
+
+    #region EventArgs Coverage Tests
+
+    [Fact]
+    public void GestureEventArgs_AllProperties_ReturnCorrectValues()
+    {
+        // Arrange & Act
+        var args = new GestureEventArgs(
+            gestureType: "Pinch",
+            zoomX: 2.0,
+            zoomY: 2.5,
+            offsetX: 100.0,
+            offsetY: 150.0,
+            centerX: 50.0,
+            centerY: 75.0,
+            delta: 0.5,
+            matrix: Matrix.CreateScale(2.0, 2.5),
+            previousMatrix: Matrix.Identity
+        );
+
+        // Assert
+        Assert.Equal("Pinch", args.GestureType);
+        Assert.Equal(2.0, args.ZoomX);
+        Assert.Equal(2.5, args.ZoomY);
+        Assert.Equal(100.0, args.OffsetX);
+        Assert.Equal(150.0, args.OffsetY);
+        Assert.Equal(50.0, args.CenterX);
+        Assert.Equal(75.0, args.CenterY);
+        Assert.Equal(0.5, args.Delta);
+        Assert.Equal(2.0, args.Matrix.M11);
+        Assert.Equal(2.5, args.Matrix.M22);
+        Assert.Equal(Matrix.Identity, args.PreviousMatrix);
+    }
+
+    [Fact]
+    public void MatrixChangedEventArgs_AllProperties_ReturnCorrectValues()
+    {
+        // Arrange & Act
+        var currentMatrix = Matrix.CreateScale(2.0, 2.0);
+        var previousMatrix = Matrix.Identity;
+        var args = new MatrixChangedEventArgs(
+            matrix: currentMatrix,
+            previousMatrix: previousMatrix,
+            zoomX: 2.0,
+            zoomY: 2.0,
+            offsetX: 100.0,
+            offsetY: 150.0,
+            previousZoomX: 1.0,
+            previousZoomY: 1.0,
+            previousOffsetX: 0.0,
+            previousOffsetY: 0.0,
+            operation: "TestOperation"
+        );
+
+        // Assert
+        Assert.Equal(currentMatrix, args.Matrix);
+        Assert.Equal(previousMatrix, args.PreviousMatrix);
+        Assert.Equal(2.0, args.ZoomX);
+        Assert.Equal(2.0, args.ZoomY);
+        Assert.Equal(100.0, args.OffsetX);
+        Assert.Equal(150.0, args.OffsetY);
+        Assert.Equal(1.0, args.PreviousZoomX);
+        Assert.Equal(1.0, args.PreviousZoomY);
+        Assert.Equal(0.0, args.PreviousOffsetX);
+        Assert.Equal(0.0, args.PreviousOffsetY);
+        Assert.Equal("TestOperation", args.Operation);
+    }
+
+    [Fact]
+    public void ZoomEventArgs_AllProperties_ReturnCorrectValues()
+    {
+        // Arrange & Act
+        var currentMatrix = Matrix.CreateScale(2.0, 2.0);
+        var previousMatrix = Matrix.Identity;
+        var args = new ZoomEventArgs(
+            zoomX: 2.0,
+            zoomY: 2.5,
+            previousZoomX: 1.0,
+            previousZoomY: 1.0,
+            zoomDelta: 1.5,
+            centerX: 100.0,
+            centerY: 150.0,
+            offsetX: 50.0,
+            offsetY: 75.0,
+            matrix: currentMatrix,
+            previousMatrix: previousMatrix
+        );
+
+        // Assert
+        Assert.Equal(2.0, args.ZoomX);
+        Assert.Equal(2.5, args.ZoomY);
+        Assert.Equal(1.0, args.PreviousZoomX);
+        Assert.Equal(1.0, args.PreviousZoomY);
+        Assert.Equal(1.5, args.ZoomDelta);
+        Assert.Equal(100.0, args.CenterX);
+        Assert.Equal(150.0, args.CenterY);
+        Assert.Equal(50.0, args.OffsetX);
+        Assert.Equal(75.0, args.OffsetY);
+        Assert.Equal(currentMatrix, args.Matrix);
+        Assert.Equal(previousMatrix, args.PreviousMatrix);
+    }
+
+    [Fact]
+    public void PanEventArgs_AllProperties_ReturnCorrectValues()
+    {
+        // Arrange & Act
+        var currentMatrix = Matrix.CreateTranslation(100, 150);
+        var previousMatrix = Matrix.Identity;
+        var args = new PanEventArgs(
+            zoomX: 1.5,
+            zoomY: 1.5,
+            offsetX: 100.0,
+            offsetY: 150.0,
+            previousOffsetX: 50.0,
+            previousOffsetY: 75.0,
+            deltaX: 50.0,
+            deltaY: 75.0,
+            matrix: currentMatrix,
+            previousMatrix: previousMatrix
+        );
+
+        // Assert
+        Assert.Equal(1.5, args.ZoomX);
+        Assert.Equal(1.5, args.ZoomY);
+        Assert.Equal(100.0, args.OffsetX);
+        Assert.Equal(150.0, args.OffsetY);
+        Assert.Equal(50.0, args.PreviousOffsetX);
+        Assert.Equal(75.0, args.PreviousOffsetY);
+        Assert.Equal(50.0, args.DeltaX);
+        Assert.Equal(75.0, args.DeltaY);
+        Assert.Equal(currentMatrix, args.Matrix);
+        Assert.Equal(previousMatrix, args.PreviousMatrix);
+    }
+
+    [Fact]
+    public void StretchModeChangedEventArgs_AllProperties_ReturnCorrectValues()
+    {
+        // Arrange & Act
+        var args = new StretchModeChangedEventArgs(
+            stretchMode: StretchMode.UniformToFill,
+            previousStretchMode: StretchMode.None,
+            matrix: Matrix.CreateScale(2.0, 2.0),
+            previousMatrix: Matrix.Identity,
+            zoomX: 2.0,
+            zoomY: 2.0,
+            offsetX: 100.0,
+            offsetY: 150.0,
+            panelWidth: 800.0,
+            panelHeight: 600.0,
+            elementWidth: 400.0,
+            elementHeight: 300.0
+        );
+
+        // Assert
+        Assert.Equal(StretchMode.UniformToFill, args.StretchMode);
+        Assert.Equal(StretchMode.None, args.PreviousStretchMode);
+        Assert.Equal(2.0, args.Matrix.M11);
+        Assert.Equal(2.0, args.Matrix.M22);
+        Assert.Equal(Matrix.Identity, args.PreviousMatrix);
+        Assert.Equal(2.0, args.ZoomX);
+        Assert.Equal(2.0, args.ZoomY);
+        Assert.Equal(100.0, args.OffsetX);
+        Assert.Equal(150.0, args.OffsetY);
+        Assert.Equal(800.0, args.PanelWidth);
+        Assert.Equal(600.0, args.PanelHeight);
+        Assert.Equal(400.0, args.ElementWidth);
+        Assert.Equal(300.0, args.ElementHeight);
+    }
+
+    [Fact]
+    public void ZoomChangedEventArgs_AllProperties_ReturnCorrectValues()
+    {
+        // Arrange & Act
+        var args = new ZoomChangedEventArgs(
+            zoomX: 2.0,
+            zoomY: 2.5,
+            offsetX: 100.0,
+            offsetY: 150.0
+        );
+
+        // Assert
+        Assert.Equal(2.0, args.ZoomX);
+        Assert.Equal(2.5, args.ZoomY);
+        Assert.Equal(100.0, args.OffsetX);
+        Assert.Equal(150.0, args.OffsetY);
+    }
+
+    #endregion
 }

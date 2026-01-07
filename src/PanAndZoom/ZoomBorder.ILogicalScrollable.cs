@@ -169,7 +169,78 @@ public partial class ZoomBorder : ILogicalScrollable
 
     bool ILogicalScrollable.BringIntoView(Control target, Rect targetRect)
     {
-        return false;
+        if (_element == null || target == null)
+        {
+            return false;
+        }
+
+        // Get the bounds of the target control relative to the ZoomBorder's child element
+        var targetBounds = targetRect;
+        
+        // If targetRect has zero size, use the target's bounds
+        if (targetRect.Width <= 0 && targetRect.Height <= 0)
+        {
+            targetBounds = target.Bounds;
+        }
+
+        // Try to translate target coordinates to our content coordinate system
+        if (target != _element)
+        {
+            var transform = target.TransformToVisual(_element);
+            if (transform.HasValue)
+            {
+                targetBounds = targetBounds.TransformToAABB(transform.Value);
+            }
+            else
+            {
+                // Cannot determine transform, fail gracefully
+                return false;
+            }
+        }
+
+        // Transform the target bounds using current matrix to get viewport coordinates
+        var transformedBounds = targetBounds.TransformToAABB(_matrix);
+
+        // Get current viewport
+        var viewportRect = new Rect(0, 0, Bounds.Width, Bounds.Height);
+
+        // Check if already fully visible
+        if (viewportRect.Contains(transformedBounds))
+        {
+            return true;
+        }
+
+        // Calculate required pan to bring target into view
+        var deltaX = 0.0;
+        var deltaY = 0.0;
+
+        // Check horizontal visibility
+        if (transformedBounds.Left < viewportRect.Left)
+        {
+            deltaX = viewportRect.Left - transformedBounds.Left;
+        }
+        else if (transformedBounds.Right > viewportRect.Right)
+        {
+            deltaX = viewportRect.Right - transformedBounds.Right;
+        }
+
+        // Check vertical visibility
+        if (transformedBounds.Top < viewportRect.Top)
+        {
+            deltaY = viewportRect.Top - transformedBounds.Top;
+        }
+        else if (transformedBounds.Bottom > viewportRect.Bottom)
+        {
+            deltaY = viewportRect.Bottom - transformedBounds.Bottom;
+        }
+
+        // Apply pan if needed
+        if (deltaX != 0 || deltaY != 0)
+        {
+            PanDelta(deltaX, deltaY);
+        }
+
+        return true;
     }
 
     Control? ILogicalScrollable.GetControlInDirection(NavigationDirection direction, Control? from)

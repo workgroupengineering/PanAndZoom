@@ -16,10 +16,11 @@
 
       <TextBlock Text="Double Click Mode:" Margin="0,8,0,0" />
       <ComboBox SelectedItem="{Binding DoubleClickZoomMode}">
-        <ComboBoxItem Content="ZoomInOut" Tag="ZoomInOut" />
-        <ComboBoxItem Content="Reset" Tag="Reset" />
-        <ComboBoxItem Content="Fill" Tag="Fill" />
-        <ComboBoxItem Content="Uniform" Tag="Uniform" />
+        <paz:DoubleClickZoomMode>ZoomIn</paz:DoubleClickZoomMode>
+        <paz:DoubleClickZoomMode>ZoomOut</paz:DoubleClickZoomMode>
+        <paz:DoubleClickZoomMode>ZoomInOut</paz:DoubleClickZoomMode>
+        <paz:DoubleClickZoomMode>ZoomToFit</paz:DoubleClickZoomMode>
+        <paz:DoubleClickZoomMode>None</paz:DoubleClickZoomMode>
       </ComboBox>
 
       <TextBlock Text="Zoom Factor:" Margin="0,8,0,0" />
