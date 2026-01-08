@@ -2,7 +2,7 @@
 
 A comprehensive touch input simulator, gesture recognizer test helpers, tree traversal utilities, and headless screen recorder for testing Avalonia controls.
 
-[![NuGet](https://img.shields.io/nuget/v/Avalonia.HeadlessTestingFramework.svg)](https://www.nuget.org/packages/Avalonia.HeadlessTestingFramework)
+[![NuGet](https://img.shields.io/nuget/v/HeadlessTestingFramework.svg)](https://www.nuget.org/packages/HeadlessTestingFramework)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE.TXT)
 
 ## Overview
@@ -26,7 +26,7 @@ HeadlessTestingFramework enables testing touch and gesture-based interactions in
 ## Installation
 
 ```bash
-dotnet add package Avalonia.HeadlessTestingFramework
+dotnet add package HeadlessTestingFramework
 ```
 
 ## Quick Start
