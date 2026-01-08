@@ -503,7 +503,10 @@ public class TouchInputSimulator
             position,
             _timestamp,
             properties,
-            KeyModifiers.None);
+            KeyModifiers.None)
+        {
+            RoutedEvent = InputElement.PointerPressedEvent
+        };
     }
 
     private PointerEventArgs CreatePointerMovedEventArgs(Interactive target, Point position, int touchId)
@@ -535,7 +538,10 @@ public class TouchInputSimulator
             _timestamp,
             properties,
             KeyModifiers.None,
-            MouseButton.Left);
+            MouseButton.Left)
+        {
+            RoutedEvent = InputElement.PointerReleasedEvent
+        };
     }
 
     private PointerDeltaEventArgs CreatePointerDeltaEventArgs(Interactive target, Vector delta, Point position, RoutedEvent routedEvent, KeyModifiers modifiers)
