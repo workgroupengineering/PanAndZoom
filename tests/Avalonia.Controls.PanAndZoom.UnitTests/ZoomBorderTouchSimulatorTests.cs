@@ -1,6 +1,6 @@
 // Copyright (c) Wiesław Šoltés. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
-using Avalonia.TouchTestingFramework;
+using Avalonia.HeadlessTestingFramework;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Media;
@@ -767,5 +767,46 @@ public class ZoomBorderTouchSimulatorTests
 
         // Assert
         Assert.True(true, "ScrollGestureEnded should not throw");
+    }
+
+    [AvaloniaFact]
+    public void TouchInputSimulator_SimulateDrag_ActuallyPans()
+    {
+        // Arrange
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 400,
+            Height = 300,
+            EnablePan = true,
+            PanButton = ButtonName.Left
+        };
+        
+        var childElement = new Border
+        {
+            Width = 200,
+            Height = 150,
+            Background = Avalonia.Media.Brushes.Red
+        };
+        
+        zoomBorder.Child = childElement;
+        
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+        
+        // First zoom in so we have something to pan
+        zoomBorder.ZoomTo(2.0, 200, 150, skipTransitions: true);
+
+        var simulator = new TouchInputSimulator();
+        var initialOffsetX = zoomBorder.OffsetX;
+        var isPanning = false;
+        
+        zoomBorder.PanContinued += (_, _) => isPanning = true;
+
+        // Act
+        simulator.SimulateDrag(zoomBorder, new Point(100, 100), new Point(200, 150), 5);
+
+        // Assert
+        Assert.True(isPanning, "PanContinued should be raised");
+        Assert.NotEqual(initialOffsetX, zoomBorder.OffsetX);
     }
 }
