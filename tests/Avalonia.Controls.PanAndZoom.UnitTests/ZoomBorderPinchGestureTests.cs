@@ -146,6 +146,7 @@ public class ZoomBorderPinchGestureTests
             Width = 400,
             Height = 300,
             EnableGestureZoom = false,
+            EnableGestureRotation = false, // Also disable rotation to fully ignore pinch
             EnableGestures = true
         };
         
@@ -176,7 +177,7 @@ public class ZoomBorderPinchGestureTests
         // Assert
         Assert.Equal(initialZoomX, zoomBorder.ZoomX);
         Assert.Equal(initialZoomY, zoomBorder.ZoomY);
-        Assert.False(pinchEventArgs.Handled, "Pinch event should not be handled when gesture zoom is disabled");
+        Assert.False(pinchEventArgs.Handled, "Pinch event should not be handled when gesture zoom and rotation are disabled");
     }
     
     [AvaloniaFact]
