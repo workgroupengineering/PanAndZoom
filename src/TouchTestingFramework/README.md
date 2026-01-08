@@ -1,6 +1,6 @@
 # TouchTestingFramework
 
-A comprehensive touch input simulator and gesture recognizer test helpers for headless testing of Avalonia controls.
+A comprehensive touch input simulator, gesture recognizer test helpers, tree traversal utilities, and headless screen recorder for testing Avalonia controls.
 
 [![NuGet](https://img.shields.io/nuget/v/TouchTestingFramework.svg)](https://www.nuget.org/packages/TouchTestingFramework)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.TXT)
@@ -12,6 +12,11 @@ TouchTestingFramework enables testing touch and gesture-based interactions in Av
 - **TouchInputSimulator** - Simulate raw touch events and high-level gesture events
 - **GestureRecognizerTestHelper** - Trigger actual Avalonia gesture recognizers with proper multi-touch support
 - **MultiTouchTestHelperFactory** - Convenient factory for multi-finger gesture simulation
+- **VisualTreeTestHelper** - Extension methods for visual tree traversal and querying
+- **LogicalTreeTestHelper** - Extension methods for logical tree traversal and querying
+- **ControlFinder** - Fluent API for complex control queries with chainable filters
+- **HeadlessScreenRecorder** - Capture frames during headless tests for visual regression testing
+- **RecordedTouchSimulator** - Integrated touch simulation with automatic frame capture
 
 ## Installation
 
@@ -140,6 +145,225 @@ Factory for multi-finger gesture simulation:
 | `SimulateTwoFingerPan(target, start, end, spacing)` | Two-finger pan |
 | `SimulateRotation(target, center, radius, startAngle, endAngle)` | Rotation gesture |
 
+### VisualTreeTestHelper
+
+Extension methods for visual tree traversal and querying in tests:
+
+```csharp
+using Avalonia.TouchTestingFramework;
+
+// Find controls by type
+var button = window.FindFirst<Button>();
+var allButtons = window.FindAll<Button>();
+
+// Find by name
+var submitBtn = window.FindByName<Button>("SubmitButton");
+var controls = window.FindByNameStartingWith<Button>("btn_");
+var matching = window.FindByNameMatching<TextBox>(@"^Input\d+$");
+
+// Find by property
+var enabled = window.FindByProperty<Button, bool>(Button.IsEnabledProperty, true);
+var tagged = window.FindByTag<Button>("primary");
+var styled = window.FindByClass<Border>("section");
+
+// Find by state
+var enabledButtons = window.FindEnabled<Button>();
+var disabledButtons = window.FindDisabled<Button>();
+var visibleBorders = window.FindVisible<Border>();
+var hiddenPanels = window.FindHidden<Panel>();
+
+// Ancestor queries
+var parentPanel = button.FindAncestor<StackPanel>();
+var namedAncestor = button.FindAncestorByName<Border>("Container");
+var ancestors = button.GetAncestors<Panel>();
+
+// Tree navigation
+var children = panel.GetChildren<Button>();
+var firstChild = panel.GetFirstChild<TextBlock>();
+var path = button.GetPathFromRoot();
+
+// Hit testing
+var hitResult = window.HitTest(new Point(100, 100));
+var bounds = button.GetBoundsRelativeTo(window);
+
+// Debugging
+window.PrintTree();  // Prints full visual tree to console
+```
+
+| Method | Description |
+|--------|-------------|
+| `FindFirst<T>()` | Find first descendant of type |
+| `FindAll<T>(predicate?)` | Find all descendants of type |
+| `FindByName<T>(name)` | Find by exact Name property |
+| `FindByNameStartingWith<T>(prefix)` | Find by name prefix |
+| `FindByNameEndingWith<T>(suffix)` | Find by name suffix |
+| `FindByNameContaining<T>(substring)` | Find by name substring |
+| `FindByNameMatching<T>(regex)` | Find by name regex pattern |
+| `FindByProperty<T,TValue>(prop, value)` | Find by AvaloniaProperty value |
+| `FindByTag<T>(tag)` | Find by Tag property |
+| `FindByClass<T>(className)` | Find by style class |
+| `FindByClasses<T>(classes)` | Find by multiple style classes |
+| `FindEnabled<T>()` | Find enabled controls |
+| `FindDisabled<T>()` | Find disabled controls |
+| `FindVisible<T>()` | Find visible controls |
+| `FindHidden<T>()` | Find hidden controls |
+| `FindAncestor<T>()` | Find nearest ancestor |
+| `GetAncestors<T>()` | Get all ancestors |
+| `GetChildren<T>()` | Get typed children |
+| `GetPathFromRoot()` | Get path from root to control |
+| `HitTest(point)` | Hit test at point |
+| `PrintTree()` | Debug print tree structure |
+
+### LogicalTreeTestHelper
+
+Extension methods for logical tree traversal:
+
+```csharp
+using Avalonia.TouchTestingFramework;
+
+// Find in logical tree
+var button = window.FindFirstLogical<Button>();
+var allButtons = window.FindAllLogical<Button>();
+var named = window.FindLogicalByName<TextBox>("Input");
+
+// Ancestor queries  
+var parent = button.FindLogicalAncestor<StackPanel>();
+var ancestors = button.GetLogicalAncestors<Panel>();
+
+// Sibling navigation
+var nextButton = button.GetNextLogicalSibling<Button>();
+var prevButton = button.GetPreviousLogicalSibling<Button>();
+var siblings = button.GetLogicalSiblings<Button>();
+var siblingIndex = button.GetLogicalSiblingIndex();
+var isFirst = button.IsFirstLogicalChild();
+var isLast = button.IsLastLogicalChild();
+
+// Content access
+var content = contentControl.GetContent<TextBlock>();
+var items = itemsControl.GetItems<string>();
+
+// Debugging
+window.PrintLogicalTree();
+```
+
+| Method | Description |
+|--------|-------------|
+| `FindFirstLogical<T>()` | Find first in logical tree |
+| `FindAllLogical<T>(predicate?)` | Find all in logical tree |
+| `FindLogicalByName<T>(name)` | Find by name in logical tree |
+| `FindLogicalAncestor<T>()` | Find logical ancestor |
+| `GetLogicalAncestors<T>()` | Get all logical ancestors |
+| `GetLogicalChildren<T>()` | Get typed logical children |
+| `GetNextLogicalSibling<T>()` | Get next sibling |
+| `GetPreviousLogicalSibling<T>()` | Get previous sibling |
+| `GetLogicalSiblings<T>()` | Get all siblings (excluding self) |
+| `GetLogicalSiblingIndex()` | Get index among siblings |
+| `IsFirstLogicalChild()` | Check if first child |
+| `IsLastLogicalChild()` | Check if last child |
+| `GetContent<T>()` | Get content from ContentControl |
+| `GetItems<T>()` | Get items from ItemsControl |
+| `PrintLogicalTree()` | Debug print logical tree |
+
+### ControlFinder (Fluent API)
+
+Chainable fluent API for complex control queries:
+
+```csharp
+using Avalonia.TouchTestingFramework;
+
+// Basic usage
+var buttons = window.Find()
+    .OfType<Button>()
+    .FindAll<Button>();
+
+// Type filtering
+var exactButtons = window.Find()
+    .ExactType<Button>()  // Only Button, not ToggleButton subclasses
+    .FindAll<Button>();
+
+// Name filtering
+var submitBtns = window.Find()
+    .OfType<Button>()
+    .WithName("SubmitButton")
+    .FindFirst<Button>();
+
+var matchingNames = window.Find()
+    .OfType<TextBox>()
+    .WithNameMatching(@"^Input\d+$")
+    .FindAll<TextBox>();
+
+// Property and style filtering
+var primary = window.Find()
+    .OfType<Button>()
+    .WithTag("action")
+    .WithClass("primary")
+    .FindAll<Button>();
+
+// State filtering
+var enabledPrimary = window.Find()
+    .OfType<Button>()
+    .Enabled()
+    .WithClass("primary")
+    .FindAll<Button>();
+
+// Complex queries
+var results = window.Find()
+    .InVisualTree()           // Search visual tree (default)
+    .OfType<Button>()
+    .Enabled()
+    .WithAnyClass("primary", "action")
+    .Where<Button>(b => b.Width > 50)
+    .Except<Button>(b => b.Name == "Cancel")
+    .Skip(1)
+    .Take(5)
+    .FindAll<Button>();
+
+// Aggregation
+var count = window.Find().OfType<Button>().Count();
+var exists = window.Find().OfType<Button>().WithName("Submit").Any();
+var single = window.Find().OfType<CheckBox>().Single<CheckBox>();
+```
+
+| Method | Description |
+|--------|-------------|
+| `From(root)` | Set search root |
+| `InVisualTree()` | Search visual tree |
+| `InLogicalTree()` | Search logical tree |
+| `OfType<T>()` | Filter by type (includes subclasses) |
+| `ExactType<T>()` | Filter by exact type only |
+| `AssignableFrom(type)` | Filter by assignable type |
+| `WithName(name)` | Filter by exact name |
+| `WithNameStartingWith(prefix)` | Filter by name prefix |
+| `WithNameEndingWith(suffix)` | Filter by name suffix |
+| `WithNameContaining(substring)` | Filter by name substring |
+| `WithNameMatching(pattern)` | Filter by regex pattern |
+| `WithProperty<T>(prop, value)` | Filter by property value |
+| `WithTag(tag)` | Filter by Tag |
+| `WithClass(className)` | Filter by style class |
+| `WithClasses(classes)` | Filter by all classes |
+| `WithAnyClass(classes)` | Filter by any class |
+| `WithoutClass(className)` | Exclude by class |
+| `Enabled()` | Filter to enabled controls |
+| `Disabled()` | Filter to disabled controls |
+| `Visible()` | Filter to visible controls |
+| `Hidden()` | Filter to hidden controls |
+| `WithText(text)` | Filter controls with text |
+| `WithDataContext<T>()` | Filter by DataContext type |
+| `WithMinItemCount(min)` | Filter ItemsControls |
+| `Where(predicate)` | Custom filter |
+| `Except(predicate)` | Exclude by predicate |
+| `Except<T>()` | Exclude specific type |
+| `Skip(count)` | Skip first N results |
+| `Take(count)` | Take first N results |
+| `IncludeSelf()` | Include root in search |
+| `MaxDepth(depth)` | Limit search depth |
+| `FindAll<T>()` | Execute and return all |
+| `FindFirst<T>()` | Execute and return first |
+| `Single<T>()` | Execute expecting exactly one |
+| `Count()` | Execute and count results |
+| `Any()` | Check if any results exist |
+| `None()` | Check if no results exist |
+
 ## Critical Usage Notes
 
 ### ⚠️ Event Handler Registration Order
@@ -221,8 +445,149 @@ public void PinchZoom_ShouldChangeScale()
 
 ## Requirements
 
-- .NET 6.0, .NET 8.0, or .NET Standard 2.0
+- .NET 6.0, .NET 8.0, .NET 10.0, or .NET Standard 2.0
 - Avalonia 11.x
+
+## Headless Screen Recording
+
+The framework includes powerful screen recording capabilities for visual regression testing.
+
+### Basic Screen Recording
+
+```csharp
+using Avalonia.TouchTestingFramework.Recording;
+
+var recorder = new HeadlessScreenRecorder();
+
+// Start recording
+var session = recorder.StartRecording(window, new RecordingOptions
+{
+    FrameRate = 30,
+    Format = RecordingFormat.PngSequence,
+    OutputDirectory = "/path/to/output"
+});
+
+// Capture frames manually or automatically
+recorder.CaptureFrame();
+
+// Record events
+recorder.RecordInputEvent("Button clicked", new { ButtonName = "Submit" });
+recorder.RecordScrollEvent("Scrolled down", new Vector(0, -100));
+recorder.AddMarker("Test checkpoint");
+
+// Stop and get statistics
+var stats = recorder.StopRecording();
+Console.WriteLine($"Captured {stats.FramesCaptured} frames in {stats.Duration}");
+```
+
+### Recording Options
+
+```csharp
+// High quality for detailed analysis
+var highQuality = RecordingOptions.HighQuality;
+
+// Performance mode for faster tests
+var performance = RecordingOptions.Performance;
+
+// Custom options
+var custom = new RecordingOptions
+{
+    FrameRate = 60,
+    Format = RecordingFormat.PngSequence,
+    Quality = 100,
+    ScaleFactor = 1.0,
+    AutoCapture = true,           // Capture automatically at frame rate
+    WriteImmediately = true,      // Write frames to disk immediately
+    CaptureOnChangeOnly = false,  // Capture every frame
+    MaxDuration = TimeSpan.FromSeconds(30),
+    BaseFileName = "recording"
+};
+```
+
+### Integrated Touch Recording
+
+Use `RecordedTouchSimulator` to combine touch simulation with automatic frame capture:
+
+```csharp
+using Avalonia.TouchTestingFramework.Recording;
+
+using var simulator = new RecordedTouchSimulator();
+
+// Start recording
+var session = simulator.StartRecording(window, outputPath: "/path/to/output");
+
+// Gestures automatically capture frames at each step
+simulator.RecordedPinchZoom(control, center, startDist: 50, endDist: 150);
+simulator.RecordedDrag(control, startPoint, endPoint, steps: 10);
+simulator.RecordedSwipe(control, startPoint, SwipeDirection.Right);
+
+// Add markers for analysis
+simulator.AddMarker("ZoomComplete");
+
+// Stop and analyze
+var stats = simulator.StopRecording();
+```
+
+### Recording ZoomBorder Interactions
+
+```csharp
+[AvaloniaFact]
+public void ZoomBorder_PinchZoom_CapturesAnimation()
+{
+    using var simulator = new RecordedTouchSimulator();
+    var zoomBorder = new ZoomBorder { Child = content };
+    var window = new Window { Content = zoomBorder };
+    window.Show();
+
+    var session = simulator.StartRecording(window, outputPath: outputDir);
+
+    // Record zoom interaction with automatic frame capture
+    simulator.AddMarker("ZoomStart", new { Zoom = zoomBorder.ZoomX });
+    simulator.RecordedPinchZoom(zoomBorder, new Point(200, 150), 50, 150, steps: 10);
+    simulator.AddMarker("ZoomEnd", new { Zoom = zoomBorder.ZoomX });
+
+    var stats = simulator.StopRecording();
+
+    Assert.True(stats.FramesCaptured >= 10);
+    Assert.True(stats.OutputFiles.Count > 0);
+}
+```
+
+### Output Formats
+
+| Format | Description | Use Case |
+|--------|-------------|----------|
+| `PngSequence` | Individual PNG files | High quality, frame analysis |
+| `JpegSequence` | Individual JPEG files | Smaller file size |
+| `RawFrames` | In-memory frames | Custom processing |
+| `Gif` | Animated GIF (via PNG sequence) | Quick sharing |
+
+### Recording Session Events
+
+Track events during recording for analysis:
+
+```csharp
+session.RecordEvent(RecordingEventType.Input, "Touch down at (100, 100)");
+session.RecordEvent(RecordingEventType.Scroll, "Scrolled", new { Delta = delta });
+session.RecordEvent(RecordingEventType.Animation, "Zoom animation started");
+session.RecordEvent(RecordingEventType.Gesture, "Pinch gesture", new { Scale = 1.5 });
+session.RecordEvent(RecordingEventType.Marker, "Checkpoint 1");
+```
+
+### Async Recording
+
+Record animations and async operations:
+
+```csharp
+// Record for a specific duration
+await recorder.RecordDurationAsync(TimeSpan.FromSeconds(2), frameInterval: 16);
+
+// Record during an async action
+await recorder.RecordActionAsync(async () =>
+{
+    await control.AnimateZoomAsync(2.0);
+}, frameInterval: 16);
+```
 
 ## License
 
