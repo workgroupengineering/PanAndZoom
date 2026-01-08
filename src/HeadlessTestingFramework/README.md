@@ -2,8 +2,8 @@
 
 A comprehensive touch input simulator, gesture recognizer test helpers, tree traversal utilities, and headless screen recorder for testing Avalonia controls.
 
-[![NuGet](https://img.shields.io/nuget/v/HeadlessTestingFramework.svg)](https://www.nuget.org/packages/HeadlessTestingFramework)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE.TXT)
+[![NuGet](https://img.shields.io/nuget/v/Avalonia.HeadlessTestingFramework.svg)](https://www.nuget.org/packages/Avalonia.HeadlessTestingFramework)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](../../LICENSE.TXT)
 
 ## Overview
 
@@ -15,13 +15,18 @@ HeadlessTestingFramework enables testing touch and gesture-based interactions in
 - **VisualTreeTestHelper** - Extension methods for visual tree traversal and querying
 - **LogicalTreeTestHelper** - Extension methods for logical tree traversal and querying
 - **ControlFinder** - Fluent API for complex control queries with chainable filters
+- **TreeValidator** - Fluent validation API for asserting visual tree structure
+- **TreeXPath** - XPath-like queries for visual tree navigation
+- **TreeComparer** - Compare visual trees for structural differences
+- **TemplateComparer** - Compare control templates for differences
+- **AvaloniaDriver** - Appium-like API for UI automation testing
 - **HeadlessScreenRecorder** - Capture frames during headless tests for visual regression testing
 - **RecordedTouchSimulator** - Integrated touch simulation with automatic frame capture
 
 ## Installation
 
 ```bash
-dotnet add package HeadlessTestingFramework
+dotnet add package Avalonia.HeadlessTestingFramework
 ```
 
 ## Quick Start
@@ -589,9 +594,311 @@ await recorder.RecordActionAsync(async () =>
 }, frameInterval: 16);
 ```
 
+### TreeValidator (Fluent Validation)
+
+Fluent API for validating visual tree structure in tests:
+
+```csharp
+using Avalonia.HeadlessTestingFramework;
+
+// Basic validation
+var validator = new TreeValidator()
+    .RequireName("SubmitButton")
+    .RequireType<TextBox>()
+    .RequireMinCount<Button>(3)
+    .ValidateVisualTree(window);
+
+if (!validator.IsValid)
+{
+    Console.WriteLine(validator.GetSummary());
+}
+
+// Assert throws on failure
+validator.AssertValid();
+
+// Complex validation
+new TreeValidator()
+    .RequireNames("SaveButton", "CancelButton", "DeleteButton")
+    .RequireNameOfType<Button>("SubmitButton")
+    .RequireExactCount<TextBox>(2)
+    .RequireMaxCount<ComboBox>(5)
+    .RequireEnabled("SaveButton")
+    .RequireVisible("FormPanel")
+    .RequireClass("SubmitButton", "primary")
+    .RequirePattern("//Button[@Name='Submit']")
+    .ForbidType<Slider>()
+    .ForbidPattern("//Button[@IsEnabled='False']")
+    .Custom("Has valid form", root => root.FindByName<Panel>("Form") != null)
+    .ValidateVisualTree(window)
+    .AssertValid();
+```
+
+| Method | Description |
+|--------|-------------|
+| `RequireName(name)` | Assert control with name exists |
+| `RequireNames(names...)` | Assert all named controls exist |
+| `RequireType<T>()` | Assert control of type exists |
+| `RequireNameOfType<T>(name)` | Assert named control is of type |
+| `RequireExactCount<T>(count)` | Assert exact count of type |
+| `RequireMinCount<T>(min)` | Assert minimum count of type |
+| `RequireMaxCount<T>(max)` | Assert maximum count of type |
+| `RequireEnabled(name)` | Assert control is enabled |
+| `RequireVisible(name)` | Assert control is visible |
+| `RequireClass(name, class)` | Assert control has style class |
+| `RequirePattern(xpath)` | Assert XPath pattern matches |
+| `ForbidType<T>()` | Assert type does not exist |
+| `ForbidPattern(xpath)` | Assert XPath pattern doesn't match |
+| `Custom(desc, predicate)` | Custom validation rule |
+| `ValidateVisualTree(root)` | Execute against visual tree |
+| `ValidateLogicalTree(root)` | Execute against logical tree |
+| `AssertValid()` | Throw if validation failed |
+| `GetSummary()` | Get detailed failure summary |
+
+### TreeXPath (XPath-like Queries)
+
+XPath-like query syntax for visual tree navigation:
+
+```csharp
+using Avalonia.HeadlessTestingFramework;
+
+// Create XPath engine
+var xpath = new TreeXPath(window);
+
+// Or use extension methods
+var button = window.SelectFirstXPath<Button>("//Button[@Name='Submit']");
+var allButtons = window.SelectXPath<Button>("//Button").ToList();
+var exists = window.ExistsXPath("//TextBox[@Name='Input']");
+var count = window.CountXPath("//Button");
+
+// Query examples
+var buttons = xpath.Select<Button>("//Button");                    // All buttons
+var named = xpath.SelectFirst<Button>("//Button[@Name='Submit']"); // By name
+var tagged = xpath.Select<Button>("//Button[@Tag='primary']");     // By tag
+var disabled = xpath.Select<Button>("//Button[@IsEnabled='False']"); // By property
+
+// Predicate functions
+var matching = xpath.Select<TextBox>("//TextBox[contains(@Name, 'Input')]");
+var starting = xpath.Select<Button>("//Button[starts-with(@Name, 'btn_')]");
+var ending = xpath.Select<Control>("//Control[ends-with(@Name, 'Panel')]");
+var regex = xpath.Select<TextBox>("//TextBox[matches(@Name, '^Input\\d+$')]");
+
+// Position predicates
+var first = xpath.SelectFirst<Button>("//Button[1]");
+var last = xpath.SelectFirst<Button>("//Button[last()]");
+
+// Child/descendant queries
+var panels = xpath.Select<StackPanel>("//StackPanel[Button]");  // Has Button child
+var containers = xpath.Select<Border>("//Border[//TextBox]");   // Has TextBox descendant
+```
+
+| Method | Description |
+|--------|-------------|
+| `Select<T>(xpath)` | Select all matching controls |
+| `SelectFirst<T>(xpath)` | Select first match |
+| `Exists(xpath)` | Check if pattern matches |
+| `Count(xpath)` | Count matching controls |
+
+### TreeComparer (Visual Tree Comparison)
+
+Compare visual trees for structural differences:
+
+```csharp
+using Avalonia.HeadlessTestingFramework;
+
+// Compare two trees
+var result = TreeComparer.Compare(expected, actual);
+
+if (!result.AreEqual)
+{
+    Console.WriteLine($"Trees differ: {result.Summary}");
+    foreach (var diff in result.Differences)
+    {
+        Console.WriteLine($"  {diff.Path}: {diff.Description}");
+    }
+}
+
+// With options
+var result = TreeComparer.Compare(expected, actual, new TreeCompareOptions
+{
+    CompareProperties = true,
+    CompareNames = true,
+    CompareClasses = true,
+    CompareBounds = false,
+    IgnoredTypes = { typeof(AdornerLayer) },
+    IgnoredProperties = { "IsPointerOver", "IsFocused" },
+    MaxDepth = 10
+});
+
+// Assert trees are equal
+TreeComparer.AssertEqual(expected, actual);
+```
+
+| Property | Description |
+|----------|-------------|
+| `AreEqual` | Whether trees are structurally equal |
+| `Differences` | List of differences found |
+| `Summary` | Human-readable summary |
+
+### TemplateComparer (Template Comparison)
+
+Compare control templates for differences:
+
+```csharp
+using Avalonia.HeadlessTestingFramework;
+
+// Compare templates
+var result = TemplateComparer.Compare(control1, control2);
+
+if (!result.AreEqual)
+{
+    Console.WriteLine($"Templates differ:");
+    foreach (var diff in result.Differences)
+    {
+        Console.WriteLine($"  {diff}");
+    }
+}
+
+// Compare with baseline
+var baseline = CreateBaselineControl();
+var current = CreateCurrentControl();
+TemplateComparer.AssertEqual(baseline, current, "Template should match baseline");
+```
+
+### AvaloniaDriver (Appium-like API)
+
+Selenium/Appium-style API for UI automation testing:
+
+```csharp
+using Avalonia.HeadlessTestingFramework.Appium;
+
+// Create driver
+var driver = new AvaloniaDriver(window);
+
+// Find elements using locators
+var button = driver.FindElement(By.Name("SubmitButton"));
+var textBox = driver.FindElement(By.AutomationId("email_input"));
+var allButtons = driver.FindElements(By.ClassName("Button"));
+var typed = driver.FindElement(By.Type<ZoomBorder>());
+var xpath = driver.FindElement(By.XPath("//Button[@Name='Submit']"));
+
+// Element interactions
+button.Click();
+textBox.SendKeys("test@example.com");
+textBox.Clear();
+var text = textBox.Text;
+var isEnabled = button.Enabled;
+var isDisplayed = button.Displayed;
+
+// Get/set properties
+var zoom = element.GetProperty<double>("ZoomX");
+element.SetProperty("EnablePan", true);
+
+// Screenshots
+var screenshot = driver.Screenshot();
+var elementShot = button.Screenshot();
+
+// Wait for conditions
+var result = driver.Wait.Until(
+    ExpectedConditions.ElementExists(By.Name("Result")),
+    timeout: TimeSpan.FromSeconds(5)
+);
+
+var visible = driver.Wait.Until(
+    ExpectedConditions.ElementIsVisible(By.Name("Panel")),
+    timeout: TimeSpan.FromSeconds(3)
+);
+
+// Check existence
+var exists = driver.ElementExists(By.Name("OptionalButton"));
+var count = driver.ElementCount(By.ClassName("Button"));
+```
+
+#### Locator Strategies
+
+| Locator | Description |
+|---------|-------------|
+| `By.Name(name)` | Find by Name property |
+| `By.AutomationId(id)` | Find by AutomationId |
+| `By.ClassName(name)` | Find by type name |
+| `By.Type<T>()` | Find by exact type |
+| `By.XPath(expr)` | Find by XPath expression |
+| `By.Property(name, value)` | Find by property value |
+| `By.Predicate(desc, func)` | Find by custom predicate |
+| `By.Chained(locators...)` | Chain locators (parent→child) |
+| `By.All(locators...)` | Match all conditions |
+| `By.Any(locators...)` | Match any condition |
+
+#### Touch Actions
+
+```csharp
+using Avalonia.HeadlessTestingFramework.Appium;
+
+var element = driver.FindElement(By.Type<ZoomBorder>());
+
+// Simple gestures
+var action = new TouchAction(driver)
+    .Tap(element)
+    .Perform();
+
+// Double tap
+new TouchAction(driver)
+    .DoubleTap(element)
+    .Perform();
+
+// Long press
+new TouchAction(driver)
+    .LongPress(element, 500)
+    .Perform();
+
+// Swipe/drag
+new TouchAction(driver)
+    .Press(element)
+    .MoveTo(element.Center.X + 100, element.Center.Y)
+    .Release()
+    .Perform();
+
+// Chained actions
+new TouchAction(driver)
+    .Press(element)
+    .Wait(100)
+    .MoveBy(50, 0)
+    .Wait(100)
+    .Release()
+    .Perform();
+
+// Multi-touch gestures
+MultiTouchAction.Pinch(driver, element, scale: 1.5);  // Zoom in
+MultiTouchAction.Pinch(driver, element, scale: 0.5);  // Zoom out
+MultiTouchAction.Scroll(driver, element, 0, 100);     // Scroll
+```
+
+#### Expected Conditions
+
+```csharp
+using Avalonia.HeadlessTestingFramework.Appium;
+
+// Wait for element to exist
+driver.Wait.Until(ExpectedConditions.ElementExists(By.Name("Button")));
+
+// Wait for element to be visible
+driver.Wait.Until(ExpectedConditions.ElementIsVisible(By.Name("Panel")));
+
+// Wait for element to be clickable
+driver.Wait.Until(ExpectedConditions.ElementToBeClickable(By.Name("Submit")));
+
+// Wait for attribute value
+driver.Wait.Until(ExpectedConditions.AttributeToBe(By.Name("Input"), "Text", "Hello"));
+
+// Wait for element count
+driver.Wait.Until(ExpectedConditions.NumberOfElementsToBe(By.ClassName("Item"), 5));
+
+// Custom condition
+driver.Wait.Until(d => d.FindElement(By.Name("Status")).Text == "Complete");
+```
+
 ## License
 
-MIT License - see [LICENSE.TXT](LICENSE.TXT) for details.
+MIT License - see [LICENSE.TXT](../../LICENSE.TXT) for details.
 
 ## Contributing
 
