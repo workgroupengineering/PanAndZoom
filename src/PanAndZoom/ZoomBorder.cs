@@ -259,7 +259,11 @@ public partial class ZoomBorder : Border
 
     private void Border_PinchGesture(object? sender, PinchEventArgs e)
     {
-        if (!EnableGestures || !EnableGestureZoom || _element == null)
+        if (!EnableGestures || _element == null)
+            return;
+
+        // Need either zoom or rotation enabled for pinch gesture to do anything
+        if (!EnableGestureZoom && !EnableGestureRotation)
             return;
 
         // Check if we're within touch point limits (pinch requires 2 points)
@@ -290,10 +294,11 @@ public partial class ZoomBorder : Border
             return;
         }
 
-        Log($"[PinchGesture] {Name} Scale: {e.Scale}");
+        Log($"[PinchGesture] {Name} Scale: {e.Scale}, AngleDelta: {e.AngleDelta}");
         
-        var point = e.ScaleOrigin;
-        var elementPoint = new Point(point.X * _element.Bounds.Width, point.Y * _element.Bounds.Height);
+        // ScaleOrigin is already in element pixel coordinates (midpoint of two touch points)
+        // from Avalonia's PinchGestureRecognizer, so use it directly
+        var elementPoint = e.ScaleOrigin;
         
         // Mark simultaneous gesture as active
         _simultaneousGestureActive = EnableSimultaneousPanZoom && _isPanning;
@@ -314,9 +319,21 @@ public partial class ZoomBorder : Border
         );
         RaiseGestureStarted(gestureArgs);
         
-        // Calculate zoom delta based on scale change
-        var zoomDelta = e.Scale - 1.0;
-        ZoomDeltaTo(zoomDelta, elementPoint.X, elementPoint.Y);
+        // Apply zoom if enabled
+        if (EnableGestureZoom)
+        {
+            // Use ZoomTo with the scale factor directly
+            // e.Scale is a multiplicative factor (e.g., 1.2 for 20% zoom in)
+            ZoomTo(e.Scale, elementPoint.X, elementPoint.Y);
+        }
+        
+        // Apply rotation if enabled
+        if (EnableGestureRotation && Math.Abs(e.AngleDelta) > 0.001)
+        {
+            // AngleDelta is in degrees (positive = clockwise, negative = counterclockwise)
+            // Use RotateAt to rotate around the pinch center point
+            RotateAt(e.AngleDelta, elementPoint, animate: false);
+        }
         
         e.Handled = true;
     }
