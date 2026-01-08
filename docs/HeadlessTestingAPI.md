@@ -32,8 +32,7 @@ The `HeadlessTestingFramework` provides a comprehensive API for headless testing
     - [Driver Session](#driver-session)
     - [Wait Helper](#wait-helper)
 15. [API Compatibility Matrix](#api-compatibility-matrix)
-16. [Test Coverage Summary](#test-coverage-summary)
-17. [Complete Examples](#complete-examples)
+16. [Complete Examples](#complete-examples)
 
 ---
 
@@ -3005,90 +3004,6 @@ driver.CreateTouchAction()
     .MoveTo(100, 200)
     .Release()
     .Perform();
-```
-
----
-
-## Test Coverage Summary
-
-The HeadlessTestingFramework includes comprehensive test suites totaling **1,274 tests** across multiple test files:
-
-### Test File Summary
-
-| Test File | Tests | Description |
-|-----------|-------|-------------|
-| `AppiumApiTests.cs` | 171 | Appium-like API core functionality |
-| `ZoomBorderAppiumTests.cs` | 73 | ZoomBorder tests using Appium API |
-| `GestureSimulatorTests.cs` | ~100 | GestureSimulator event tests |
-| `TouchInputSimulatorTests.cs` | ~50 | Low-level touch simulation |
-| `GestureRecognizerTestHelperTests.cs` | ~40 | Gesture recognizer integration |
-| `HeadlessScreenRecorderTests.cs` | ~30 | Screen recording functionality |
-| `RecordedTouchSimulatorTests.cs` | ~40 | Recording with simulation |
-| `TreeXPathTests.cs` | ~60 | XPath element finding |
-| `ControlFinderTests.cs` | ~50 | Control finder utilities |
-| `VisualTreeTestHelperTests.cs` | ~40 | Visual tree traversal |
-| `LogicalTreeTestHelperTests.cs` | ~30 | Logical tree traversal |
-| `TreeValidatorTests.cs` | ~20 | Tree structure validation |
-| `TreeComparerTests.cs` | ~20 | Tree comparison utilities |
-| `TemplateComparerTests.cs` | ~15 | Template comparison |
-| `InputRecordingTests.cs` | ~30 | Input event recording |
-| ZoomBorder Feature Tests | ~500+ | ZoomBorder-specific tests |
-
-### ZoomBorder Feature Test Files
-
-| Test File | Description |
-|-----------|-------------|
-| `ZoomBorderTests.cs` | Core ZoomBorder functionality |
-| `ZoomBorderAnimationTests.cs` | Animation and transitions |
-| `ZoomBorderCommandsTests.cs` | ICommand implementations |
-| `ZoomBorderConstraintTests.cs` | Min/max zoom constraints |
-| `ZoomBorderPinchGestureTests.cs` | Pinch gesture handling |
-| `ZoomBorderScrollGestureTests.cs` | Scroll gesture handling |
-| `ZoomBorderPointerPanTests.cs` | Pointer-based panning |
-| `ZoomBorderPointerWheelTests.cs` | Mouse wheel zoom |
-| `ZoomBorderKeyboardNavigationTests.cs` | Keyboard shortcuts |
-| `ZoomBorderMultiTouchTests.cs` | Multi-touch interactions |
-| `ZoomBorderRecordingTests.cs` | Recording integration |
-| `ZoomBorderGestureRecognizerTests.cs` | Gesture recognizer |
-| `ZoomBorderGestureToggleTests.cs` | Enable/disable gestures |
-| `ZoomBorderTouchSimulatorTests.cs` | Touch simulation |
-| `ZoomBorderTouchGestureComprehensiveTests.cs` | Comprehensive touch tests |
-| `ZoomBorderInteractionScenarioTests.cs` | Real-world scenarios |
-| `ZoomBorderEdgeCasesTests.cs` | Edge cases and boundaries |
-| `ZoomBorderStateSerializationTests.cs` | State save/restore |
-| `ZoomBorderViewHistoryTests.cs` | View history navigation |
-| `ZoomBorderSavedViewsTests.cs` | Named saved views |
-| `ZoomBorderCenterOnAndCoordinateTests.cs` | CenterOn functionality |
-| `ZoomBorderZoomToRectangleTests.cs` | ZoomToRectangle |
-| `ZoomBorderContentBoundsTests.cs` | Content bounds handling |
-| `ZoomBorderRotationTests.cs` | Rotation support |
-| `ZoomBorderGridAndSnapTests.cs` | Grid and snap features |
-| `ZoomBorderDiscreteZoomLevelsTests.cs` | Discrete zoom levels |
-| `ZoomBorderDynamicZoomLimitsTests.cs` | Dynamic zoom limits |
-| `ZoomBorderResizeBehaviorTests.cs` | Window resize behavior |
-| `ZoomBorderWheelBehaviorTests.cs` | Wheel scroll behavior |
-| `ZoomBorderDoubleClickZoomTests.cs` | Double-click zoom |
-| `ZoomBorderAccessibilityTests.cs` | Accessibility features |
-| `ZoomBorderScaleIndicatorTests.cs` | Scale indicator UI |
-| `ZoomBorderViewportCullingTests.cs` | Viewport culling |
-| `ZoomBorderVisualTreeLifecycleTests.cs` | Visual tree lifecycle |
-| `ZoomBorderILogicalScrollableTests.cs` | ILogicalScrollable |
-| `ZoomBorderPointerCaptureTests.cs` | Pointer capture |
-
-### Running Tests
-
-```bash
-# Run all tests
-dotnet test
-
-# Run specific test file
-dotnet test --filter "FullyQualifiedName~ZoomBorderAppiumTests"
-
-# Run tests with coverage
-dotnet test --collect:"XPlat Code Coverage"
-
-# List all tests
-dotnet test --list-tests
 ```
 
 ---
