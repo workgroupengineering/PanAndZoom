@@ -121,14 +121,14 @@ public class FrameBuffer : IDisposable
             return false;
         }
 
-        if (_frames.TryDequeue(out frame))
+        lock (_lock)
         {
-            lock (_lock)
+            if (_frames.TryDequeue(out frame))
             {
                 _frameCount--;
                 Interlocked.Add(ref _totalBytesBuffered, -frame.PixelData.Length);
+                return true;
             }
-            return true;
         }
 
         return false;
