@@ -1,9 +1,9 @@
 using Avalonia;
 using Avalonia.Headless;
 
-[assembly: AvaloniaTestApplication(typeof(TouchTestingFramework.UnitTests.TestAppBuilder))]
+[assembly: AvaloniaTestApplication(typeof(HeadlessTestingFramework.UnitTests.TestAppBuilder))]
 
-namespace TouchTestingFramework.UnitTests;
+namespace HeadlessTestingFramework.UnitTests;
 
 public class TestAppBuilder
 {

@@ -13,7 +13,7 @@
   <Import Project="..\..\build\XUnit.props" />
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\TouchTestingFramework\TouchTestingFramework.csproj" />
+    <ProjectReference Include="..\..\src\HeadlessTestingFramework\HeadlessTestingFramework.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -5,13 +5,14 @@
     <OutputType>Library</OutputType>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
     <Nullable>enable</Nullable>
-    <RootNamespace>Avalonia.TouchTestingFramework</RootNamespace>
+    <RootNamespace>Avalonia.HeadlessTestingFramework</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>TouchTestingFramework</PackageId>
-    <Description>A comprehensive touch input simulator and gesture recognizer test helpers for headless testing of Avalonia controls. Enables testing touch events, multi-touch gestures, pinch/zoom, scroll gestures, and touchpad events in Avalonia.Headless.XUnit.</Description>
-    <PackageTags>Avalonia;Touch;Testing;Headless;Unit Tests;Gestures;Pinch;Zoom;Scroll;Multi-touch;Test Helpers</PackageTags>
+    <PackageId>HeadlessTestingFramework</PackageId>
+    <Description>A comprehensive touch input simulator, gesture recognizer test helpers, and headless screen recorder for testing Avalonia controls. Enables testing touch events, multi-touch gestures, pinch/zoom, scroll gestures, touchpad events, and recording visual output during headless tests in Avalonia.Headless.XUnit.</Description>
+    <PackageTags>Avalonia;Touch;Testing;Headless;Unit Tests;Gestures;Pinch;Zoom;Scroll;Multi-touch;Test Helpers;Screen Recording;Visual Testing</PackageTags>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
@@ -24,5 +25,6 @@
   <Import Project="..\..\build\SourceLink.props" />
   <Import Project="..\..\build\ReferenceAssemblies.props" />
   <Import Project="..\..\build\Avalonia.props" />
+  <Import Project="..\..\build\Avalonia.Headless.props" />
 
 </Project>

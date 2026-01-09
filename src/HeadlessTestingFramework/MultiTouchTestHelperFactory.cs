@@ -3,7 +3,7 @@
 using System;
 using Avalonia.Interactivity;
 
-namespace Avalonia.TouchTestingFramework;
+namespace Avalonia.HeadlessTestingFramework;
 
 /// <summary>
 /// Factory class for creating paired gesture recognizer test helpers for multi-touch scenarios.
@@ -42,7 +42,9 @@ public static class MultiTouchTestHelperFactory
     /// <param name="secondStart">Starting position of second finger.</param>
     /// <param name="firstEnd">Ending position of first finger.</param>
     /// <param name="secondEnd">Ending position of second finger.</param>
-    /// <param name="steps">Number of intermediate steps.</param>
+    /// <param name="steps">Number of intermediate steps (must be at least 1).</param>
+    /// <exception cref="ArgumentNullException">Thrown when target is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when steps is less than 1.</exception>
     public static void SimulatePinch(
         Interactive target,
         Point firstStart,
@@ -51,6 +53,11 @@ public static class MultiTouchTestHelperFactory
         Point secondEnd,
         int steps = 10)
     {
+        if (target == null)
+            throw new ArgumentNullException(nameof(target));
+        if (steps < 1)
+            throw new ArgumentOutOfRangeException(nameof(steps), "Steps must be at least 1.");
+            
         var (first, second) = CreatePair();
 
         // Start with both fingers down
@@ -90,7 +97,9 @@ public static class MultiTouchTestHelperFactory
     /// <param name="center">Center point of the pinch.</param>
     /// <param name="startDistance">Starting distance between fingers.</param>
     /// <param name="endDistance">Ending distance between fingers.</param>
-    /// <param name="steps">Number of intermediate steps.</param>
+    /// <param name="steps">Number of intermediate steps (must be at least 1).</param>
+    /// <exception cref="ArgumentNullException">Thrown when target is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when steps is less than 1.</exception>
     public static void SimulatePinchZoomIn(
         Interactive target,
         Point center,
@@ -98,6 +107,11 @@ public static class MultiTouchTestHelperFactory
         double endDistance,
         int steps = 10)
     {
+        if (target == null)
+            throw new ArgumentNullException(nameof(target));
+        if (steps < 1)
+            throw new ArgumentOutOfRangeException(nameof(steps), "Steps must be at least 1.");
+            
         var halfStart = startDistance / 2;
         var halfEnd = endDistance / 2;
 
@@ -117,7 +131,9 @@ public static class MultiTouchTestHelperFactory
     /// <param name="center">Center point of the pinch.</param>
     /// <param name="startDistance">Starting distance between fingers.</param>
     /// <param name="endDistance">Ending distance between fingers.</param>
-    /// <param name="steps">Number of intermediate steps.</param>
+    /// <param name="steps">Number of intermediate steps (must be at least 1).</param>
+    /// <exception cref="ArgumentNullException">Thrown when target is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when steps is less than 1.</exception>
     public static void SimulatePinchZoomOut(
         Interactive target,
         Point center,
@@ -125,6 +141,14 @@ public static class MultiTouchTestHelperFactory
         double endDistance,
         int steps = 10)
     {
+        if (target == null)
+            throw new ArgumentNullException(nameof(target));
+        if (steps < 1)
+            throw new ArgumentOutOfRangeException(nameof(steps), "Steps must be at least 1.");
+            
+        // For zoom out, fingers move together (from startDistance to endDistance)
+        // Just call SimulatePinchZoomIn with the same parameters - 
+        // it handles any direction (expanding or contracting)
         SimulatePinchZoomIn(target, center, startDistance, endDistance, steps);
     }
 

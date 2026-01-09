@@ -9,7 +9,7 @@ using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using Pointer = Avalonia.Input.Pointer;
 
-namespace Avalonia.TouchTestingFramework;
+namespace Avalonia.HeadlessTestingFramework;
 
 /// <summary>
 /// Helper class for triggering gesture recognizers in headless tests.

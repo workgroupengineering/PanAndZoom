@@ -1,7 +1,7 @@
 using Avalonia;
 using Avalonia.Markup.Xaml;
 
-namespace TouchTestingFramework.UnitTests;
+namespace HeadlessTestingFramework.UnitTests;
 
 public class App : Application
 {

@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\PanAndZoom\PanAndZoom.csproj" />
-    <ProjectReference Include="..\..\src\TouchTestingFramework\TouchTestingFramework.csproj" />
+    <ProjectReference Include="..\..\src\HeadlessTestingFramework\HeadlessTestingFramework.csproj" />
   </ItemGroup>
 
   <ItemGroup>

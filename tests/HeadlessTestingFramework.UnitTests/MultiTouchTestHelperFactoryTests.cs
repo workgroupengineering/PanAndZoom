@@ -5,10 +5,10 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
-using Avalonia.TouchTestingFramework;
+using Avalonia.HeadlessTestingFramework;
 using Xunit;
 
-namespace TouchTestingFramework.UnitTests;
+namespace HeadlessTestingFramework.UnitTests;
 
 /// <summary>
 /// Comprehensive tests for MultiTouchTestHelperFactory API.

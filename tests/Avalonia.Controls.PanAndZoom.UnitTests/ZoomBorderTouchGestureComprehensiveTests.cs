@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for details.
 using System;
 using System.Collections.Generic;
-using Avalonia.TouchTestingFramework;
+using Avalonia.HeadlessTestingFramework;
 using Avalonia.Headless.XUnit;
 using Avalonia.Input;
 using Avalonia.Media;
