@@ -868,6 +868,7 @@ public class AvaloniaDriver : IDisposable
         if (!_disposed)
         {
             _disposed = true;
+            _customPredicates.Clear();
             GC.SuppressFinalize(this);
         }
     }
