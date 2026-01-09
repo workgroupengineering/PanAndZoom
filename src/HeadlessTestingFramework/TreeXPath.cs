@@ -251,13 +251,13 @@ public class TreeXPath
             return predicate;
         }
 
-        // Attribute predicate: [@Name='value']
-        var attrMatch = Regex.Match(content, @"@(\w+)\s*=\s*['""']([^'""']*)['""']");
+        // Attribute predicate: [@Name='value'] or [@Name="value"]
+        var attrMatch = Regex.Match(content, @"@(\w+)\s*=\s*(['""])((?:(?!\2).)*)\2");
         if (attrMatch.Success)
         {
             predicate.Type = PredicateType.Attribute;
             predicate.AttributeName = attrMatch.Groups[1].Value;
-            predicate.AttributeValue = attrMatch.Groups[2].Value;
+            predicate.AttributeValue = attrMatch.Groups[3].Value;
             return predicate;
         }
 
@@ -271,52 +271,52 @@ public class TreeXPath
         }
 
         // Contains: [contains(@Name, 'value')]
-        var containsMatch = Regex.Match(content, @"contains\s*\(\s*@(\w+)\s*,\s*['""']([^'""']*)['""']\s*\)");
+        var containsMatch = Regex.Match(content, @"contains\s*\(\s*@(\w+)\s*,\s*(['""])((?:(?!\2).)*)\2\s*\)");
         if (containsMatch.Success)
         {
             predicate.Type = PredicateType.Contains;
             predicate.AttributeName = containsMatch.Groups[1].Value;
-            predicate.AttributeValue = containsMatch.Groups[2].Value;
+            predicate.AttributeValue = containsMatch.Groups[3].Value;
             return predicate;
         }
 
         // Starts-with: [starts-with(@Name, 'value')]
-        var startsWithMatch = Regex.Match(content, @"starts-with\s*\(\s*@(\w+)\s*,\s*['""']([^'""']*)['""']\s*\)");
+        var startsWithMatch = Regex.Match(content, @"starts-with\s*\(\s*@(\w+)\s*,\s*(['""])((?:(?!\2).)*)\2\s*\)");
         if (startsWithMatch.Success)
         {
             predicate.Type = PredicateType.StartsWith;
             predicate.AttributeName = startsWithMatch.Groups[1].Value;
-            predicate.AttributeValue = startsWithMatch.Groups[2].Value;
+            predicate.AttributeValue = startsWithMatch.Groups[3].Value;
             return predicate;
         }
 
         // Ends-with: [ends-with(@Name, 'value')]
-        var endsWithMatch = Regex.Match(content, @"ends-with\s*\(\s*@(\w+)\s*,\s*['""']([^'""']*)['""']\s*\)");
+        var endsWithMatch = Regex.Match(content, @"ends-with\s*\(\s*@(\w+)\s*,\s*(['""])((?:(?!\2).)*)\2\s*\)");
         if (endsWithMatch.Success)
         {
             predicate.Type = PredicateType.EndsWith;
             predicate.AttributeName = endsWithMatch.Groups[1].Value;
-            predicate.AttributeValue = endsWithMatch.Groups[2].Value;
+            predicate.AttributeValue = endsWithMatch.Groups[3].Value;
             return predicate;
         }
 
         // Matches (regex): [matches(@Name, 'pattern')]
-        var matchesMatch = Regex.Match(content, @"matches\s*\(\s*@(\w+)\s*,\s*['""']([^'""']*)['""']\s*\)");
+        var matchesMatch = Regex.Match(content, @"matches\s*\(\s*@(\w+)\s*,\s*(['""])((?:(?!\2).)*)\2\s*\)");
         if (matchesMatch.Success)
         {
             predicate.Type = PredicateType.Matches;
             predicate.AttributeName = matchesMatch.Groups[1].Value;
-            predicate.AttributeValue = matchesMatch.Groups[2].Value;
+            predicate.AttributeValue = matchesMatch.Groups[3].Value;
             return predicate;
         }
 
         // Not: [not(@Name='value')]
-        var notMatch = Regex.Match(content, @"not\s*\(\s*@(\w+)\s*=\s*['""']([^'""']*)['""']\s*\)");
+        var notMatch = Regex.Match(content, @"not\s*\(\s*@(\w+)\s*=\s*(['""])((?:(?!\2).)*)\2\s*\)");
         if (notMatch.Success)
         {
             predicate.Type = PredicateType.Not;
             predicate.AttributeName = notMatch.Groups[1].Value;
-            predicate.AttributeValue = notMatch.Groups[2].Value;
+            predicate.AttributeValue = notMatch.Groups[3].Value;
             return predicate;
         }
 
