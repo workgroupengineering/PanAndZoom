@@ -152,8 +152,13 @@ public class Actions
     /// <returns>This Actions instance for chaining.</returns>
     public Actions DoubleClick()
     {
-        Click();
-        Click();
+        // Add a proper double-click sequence: down, up, pause, down, up
+        // The pause between clicks should be short (typical double-click timing)
+        _currentPointerSequence.AddAction(new PointerDownAction { Button = MouseButton.Left, ClickCount = 1 });
+        _currentPointerSequence.AddAction(new PointerUpAction { Button = MouseButton.Left });
+        _currentPointerSequence.AddAction(new PauseAction { Duration = TimeSpan.FromMilliseconds(50) });
+        _currentPointerSequence.AddAction(new PointerDownAction { Button = MouseButton.Left, ClickCount = 2 });
+        _currentPointerSequence.AddAction(new PointerUpAction { Button = MouseButton.Left });
         return this;
     }
 
@@ -622,6 +627,8 @@ public class PointerDownAction : IAction
     public string Type => "pointerDown";
     /// <summary>The button to press.</summary>
     public MouseButton Button { get; set; } = MouseButton.Left;
+    /// <summary>The click count (1 for single click, 2 for double click).</summary>
+    public int ClickCount { get; set; } = 1;
 }
 
 /// <summary>
