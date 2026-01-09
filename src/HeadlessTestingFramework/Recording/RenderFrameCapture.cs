@@ -21,7 +21,6 @@ namespace Avalonia.HeadlessTestingFramework.Recording;
 public class RenderFrameCapture : IDisposable
 {
     private readonly ConcurrentQueue<CapturedFrame> _capturedFrames = new();
-    private readonly object _lock = new();
     private TopLevel? _target;
     private CompositionCustomVisual? _captureVisual;
     private RenderCaptureHandler? _captureHandler;
