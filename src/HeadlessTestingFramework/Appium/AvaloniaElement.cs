@@ -190,6 +190,7 @@ public class AvaloniaElement
 
     /// <summary>
     /// Sends text input to the element.
+    /// Uses keyboard simulator to preserve bindings and trigger proper events.
     /// </summary>
     /// <param name="text">The text to send.</param>
     /// <returns>This element for chaining.</returns>
@@ -198,19 +199,14 @@ public class AvaloniaElement
         EnsureInteractable();
         Focus();
 
-        if (_control is TextBox textBox)
-        {
-            textBox.Text = (textBox.Text ?? "") + text;
-        }
-        else
-        {
-            _driver.KeyboardSimulator.TypeText(_control, text);
-        }
+        // Always use keyboard simulator to properly trigger events and preserve bindings
+        _driver.KeyboardSimulator.TypeText(_control, text);
         return this;
     }
 
     /// <summary>
     /// Clears the text content of the element.
+    /// Uses SetCurrentValue to preserve bindings.
     /// </summary>
     /// <returns>This element for chaining.</returns>
     public AvaloniaElement Clear()
@@ -219,11 +215,13 @@ public class AvaloniaElement
 
         if (_control is TextBox textBox)
         {
-            textBox.Text = string.Empty;
+            // Use SetCurrentValue to not break bindings
+            textBox.SetCurrentValue(TextBox.TextProperty, string.Empty);
         }
         else if (_control is AutoCompleteBox autoComplete)
         {
-            autoComplete.Text = string.Empty;
+            // Use SetCurrentValue to not break bindings
+            autoComplete.SetCurrentValue(AutoCompleteBox.TextProperty, string.Empty);
         }
         return this;
     }
@@ -407,20 +405,26 @@ public class AvaloniaElement
     }
 
     /// <summary>
-    /// Sets an Avalonia property value.
+    /// Sets an Avalonia property value using SetCurrentValue to preserve bindings.
     /// </summary>
     /// <param name="propertyName">The property name.</param>
     /// <param name="value">The value to set.</param>
     /// <returns>This element for chaining.</returns>
+    /// <remarks>
+    /// Uses SetCurrentValue for Avalonia properties to preserve any data bindings.
+    /// For CLR properties, uses reflection which may break bindings.
+    /// </remarks>
     public AvaloniaElement SetProperty(string propertyName, object? value)
     {
         var prop = AvaloniaPropertyRegistry.Instance.FindRegistered(_control, propertyName);
         if (prop != null)
         {
-            _control.SetValue(prop, value);
+            // Use SetCurrentValue to not break bindings
+            _control.SetCurrentValue(prop, value);
         }
         else
         {
+            // Fallback to reflection for CLR properties (may break bindings)
             var propInfo = _control.GetType().GetProperty(propertyName);
             if (propInfo != null && propInfo.CanWrite)
             {

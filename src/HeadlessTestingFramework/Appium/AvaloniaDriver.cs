@@ -520,6 +520,7 @@ public class AvaloniaDriver : IDisposable
 
     /// <summary>
     /// Navigates to a view by setting window content (for single-page apps).
+    /// Uses SetCurrentValue to preserve any bindings on the Content property.
     /// </summary>
     /// <param name="viewType">The type of view to navigate to.</param>
     public void NavigateTo(Type viewType)
@@ -527,19 +528,22 @@ public class AvaloniaDriver : IDisposable
         var view = Activator.CreateInstance(viewType) as Control;
         if (view != null && _root is ContentControl cc)
         {
-            cc.Content = view;
+            // Use SetCurrentValue to not break bindings
+            cc.SetCurrentValue(ContentControl.ContentProperty, view);
         }
     }
 
     /// <summary>
     /// Navigates to a view by setting window content.
+    /// Uses SetCurrentValue to preserve any bindings on the Content property.
     /// </summary>
     /// <typeparam name="T">The type of view to navigate to.</typeparam>
     public void NavigateTo<T>() where T : Control, new()
     {
         if (_root is ContentControl cc)
         {
-            cc.Content = new T();
+            // Use SetCurrentValue to not break bindings
+            cc.SetCurrentValue(ContentControl.ContentProperty, new T());
         }
     }
 
