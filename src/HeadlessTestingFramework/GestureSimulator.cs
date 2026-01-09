@@ -274,11 +274,18 @@ public class GestureSimulator
     /// <param name="origin">Center point of the pinch.</param>
     /// <param name="startScale">Starting scale (typically 1.0).</param>
     /// <param name="endScale">Ending scale.</param>
-    /// <param name="steps">Number of intermediate steps.</param>
+    /// <param name="steps">Number of intermediate steps (must be greater than 0).</param>
     /// <param name="startAngle">Starting angle in radians.</param>
     /// <param name="endAngle">Ending angle in radians.</param>
+    /// <exception cref="ArgumentNullException">Thrown when target is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when steps is less than 1.</exception>
     public void PinchZoom(Interactive target, Point origin, double startScale, double endScale, int steps = 10, double startAngle = 0, double endAngle = 0)
     {
+        if (target == null)
+            throw new ArgumentNullException(nameof(target));
+        if (steps < 1)
+            throw new ArgumentOutOfRangeException(nameof(steps), "Steps must be at least 1.");
+            
         var scaleStep = (endScale - startScale) / steps;
         var angleStep = (endAngle - startAngle) / steps;
 
@@ -393,11 +400,18 @@ public class GestureSimulator
     /// </summary>
     /// <param name="target">The target control to receive the event.</param>
     /// <param name="totalDelta">Total scroll distance.</param>
-    /// <param name="steps">Number of intermediate steps.</param>
+    /// <param name="steps">Number of intermediate steps (must be greater than 0).</param>
     /// <param name="withInertia">Whether to include inertia at the end.</param>
     /// <param name="inertiaVelocity">Velocity for inertia (if enabled).</param>
+    /// <exception cref="ArgumentNullException">Thrown when target is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when steps is less than 1.</exception>
     public void ScrollSequence(Interactive target, Vector totalDelta, int steps = 10, bool withInertia = false, Vector? inertiaVelocity = null)
     {
+        if (target == null)
+            throw new ArgumentNullException(nameof(target));
+        if (steps < 1)
+            throw new ArgumentOutOfRangeException(nameof(steps), "Steps must be at least 1.");
+            
         var gestureId = GetNextGestureId();
         var deltaPerStep = new Vector(totalDelta.X / steps, totalDelta.Y / steps);
 
@@ -462,9 +476,16 @@ public class GestureSimulator
     /// <param name="target">The target control to receive the event.</param>
     /// <param name="direction">Pull direction.</param>
     /// <param name="distance">Total pull distance.</param>
-    /// <param name="steps">Number of intermediate steps.</param>
+    /// <param name="steps">Number of intermediate steps (must be greater than 0).</param>
+    /// <exception cref="ArgumentNullException">Thrown when target is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when steps is less than 1.</exception>
     public void PullToRefresh(Interactive target, PullDirection direction, double distance = 100, int steps = 10)
     {
+        if (target == null)
+            throw new ArgumentNullException(nameof(target));
+        if (steps < 1)
+            throw new ArgumentOutOfRangeException(nameof(steps), "Steps must be at least 1.");
+            
         var gestureId = GetNextGestureId();
         var delta = direction switch
         {
@@ -533,10 +554,17 @@ public class GestureSimulator
     /// <param name="target">The target control to receive the event.</param>
     /// <param name="position">Position of the gesture.</param>
     /// <param name="totalMagnification">Total magnification amount (positive = zoom in, negative = zoom out).</param>
-    /// <param name="steps">Number of intermediate steps.</param>
+    /// <param name="steps">Number of intermediate steps (must be greater than 0).</param>
     /// <param name="modifiers">Key modifiers.</param>
+    /// <exception cref="ArgumentNullException">Thrown when target is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when steps is less than 1.</exception>
     public void TouchpadMagnifySequence(Interactive target, Point position, double totalMagnification, int steps = 10, KeyModifiers modifiers = KeyModifiers.None)
     {
+        if (target == null)
+            throw new ArgumentNullException(nameof(target));
+        if (steps < 1)
+            throw new ArgumentOutOfRangeException(nameof(steps), "Steps must be at least 1.");
+            
         var deltaPerStep = totalMagnification / steps;
         
         for (int i = 0; i < steps; i++)
@@ -552,10 +580,17 @@ public class GestureSimulator
     /// <param name="target">The target control to receive the event.</param>
     /// <param name="position">Position of the gesture.</param>
     /// <param name="totalAngle">Total rotation angle in degrees.</param>
-    /// <param name="steps">Number of intermediate steps.</param>
+    /// <param name="steps">Number of intermediate steps (must be greater than 0).</param>
     /// <param name="modifiers">Key modifiers.</param>
+    /// <exception cref="ArgumentNullException">Thrown when target is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when steps is less than 1.</exception>
     public void TouchpadRotateSequence(Interactive target, Point position, double totalAngle, int steps = 10, KeyModifiers modifiers = KeyModifiers.None)
     {
+        if (target == null)
+            throw new ArgumentNullException(nameof(target));
+        if (steps < 1)
+            throw new ArgumentOutOfRangeException(nameof(steps), "Steps must be at least 1.");
+            
         var deltaPerStep = totalAngle / steps;
         
         for (int i = 0; i < steps; i++)
@@ -574,8 +609,15 @@ public class GestureSimulator
     /// <param name="distance">Swipe distance.</param>
     /// <param name="steps">Number of intermediate steps.</param>
     /// <param name="modifiers">Key modifiers.</param>
+    /// <exception cref="ArgumentNullException">Thrown when target is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">Thrown when steps is less than 1.</exception>
     public void TouchpadSwipeSequence(Interactive target, Point position, SwipeDirection direction, double distance = 100, int steps = 10, KeyModifiers modifiers = KeyModifiers.None)
     {
+        if (target == null)
+            throw new ArgumentNullException(nameof(target));
+        if (steps < 1)
+            throw new ArgumentOutOfRangeException(nameof(steps), "Steps must be at least 1.");
+            
         var delta = direction switch
         {
             SwipeDirection.Left => new Vector(-distance / steps, 0),
