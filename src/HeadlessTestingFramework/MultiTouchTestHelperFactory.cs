@@ -146,8 +146,10 @@ public static class MultiTouchTestHelperFactory
         if (steps < 1)
             throw new ArgumentOutOfRangeException(nameof(steps), "Steps must be at least 1.");
             
-        // For zoom out, swap distances so fingers move together
-        SimulatePinchZoomIn(target, center, endDistance, startDistance, steps);
+        // For zoom out, fingers move together (from startDistance to endDistance)
+        // Just call SimulatePinchZoomIn with the same parameters - 
+        // it handles any direction (expanding or contracting)
+        SimulatePinchZoomIn(target, center, startDistance, endDistance, steps);
     }
 
     /// <summary>
