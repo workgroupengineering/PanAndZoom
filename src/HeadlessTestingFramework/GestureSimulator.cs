@@ -72,14 +72,14 @@ public class GestureSimulator
     #region Tap Gestures
 
     /// <summary>
-    /// Simulates a Tapped gesture event.
+    /// Simulates a Tap gesture event.
     /// Uses RoutedEventArgs approach since TappedEventArgs requires internal PointerEventArgs.
     /// </summary>
     /// <param name="target">The target control to receive the event.</param>
     /// <param name="position">Position of the tap.</param>
     /// <param name="pointerType">Type of pointer (Touch, Mouse, Pen).</param>
     /// <param name="modifiers">Key modifiers held during the tap.</param>
-    public void Tapped(Interactive target, Point position, PointerType pointerType = PointerType.Touch, KeyModifiers modifiers = KeyModifiers.None)
+    public void Tap(Interactive target, Point position, PointerType pointerType = PointerType.Touch, KeyModifiers modifiers = KeyModifiers.None)
     {
         // TappedEventArgs requires (RoutedEvent, PointerEventArgs) where PointerEventArgs needs internal construction
         // We create a proper PointerEventArgs and wrap it
@@ -105,13 +105,13 @@ public class GestureSimulator
     }
 
     /// <summary>
-    /// Simulates a DoubleTapped gesture event.
+    /// Simulates a DoubleTap gesture event.
     /// </summary>
     /// <param name="target">The target control to receive the event.</param>
     /// <param name="position">Position of the double tap.</param>
     /// <param name="pointerType">Type of pointer (Touch, Mouse, Pen).</param>
     /// <param name="modifiers">Key modifiers held during the tap.</param>
-    public void DoubleTapped(Interactive target, Point position, PointerType pointerType = PointerType.Touch, KeyModifiers modifiers = KeyModifiers.None)
+    public void DoubleTap(Interactive target, Point position, PointerType pointerType = PointerType.Touch, KeyModifiers modifiers = KeyModifiers.None)
     {
         var pointer = CreatePointer(pointerType);
         var properties = new PointerPointProperties(RawInputModifiers.None, PointerUpdateKind.LeftButtonReleased);
@@ -133,13 +133,13 @@ public class GestureSimulator
     }
 
     /// <summary>
-    /// Simulates a RightTapped gesture event (context menu trigger).
+    /// Simulates a RightTap gesture event (context menu trigger).
     /// </summary>
     /// <param name="target">The target control to receive the event.</param>
     /// <param name="position">Position of the right tap.</param>
     /// <param name="pointerType">Type of pointer (Touch, Mouse, Pen).</param>
     /// <param name="modifiers">Key modifiers held during the tap.</param>
-    public void RightTapped(Interactive target, Point position, PointerType pointerType = PointerType.Touch, KeyModifiers modifiers = KeyModifiers.None)
+    public void RightTap(Interactive target, Point position, PointerType pointerType = PointerType.Touch, KeyModifiers modifiers = KeyModifiers.None)
     {
         var pointer = CreatePointer(pointerType);
         var properties = new PointerPointProperties(RawInputModifiers.RightMouseButton, PointerUpdateKind.RightButtonReleased);
@@ -275,10 +275,14 @@ public class GestureSimulator
     /// <param name="startScale">Starting scale (typically 1.0).</param>
     /// <param name="endScale">Ending scale.</param>
     /// <param name="steps">Number of intermediate steps (must be greater than 0).</param>
-    /// <param name="startAngle">Starting angle in radians.</param>
-    /// <param name="endAngle">Ending angle in radians.</param>
+    /// <param name="startAngle">Starting angle in radians. For degrees, use <see cref="PinchRotate"/> instead.</param>
+    /// <param name="endAngle">Ending angle in radians. For degrees, use <see cref="PinchRotate"/> instead.</param>
     /// <exception cref="ArgumentNullException">Thrown when target is null.</exception>
     /// <exception cref="ArgumentOutOfRangeException">Thrown when steps is less than 1.</exception>
+    /// <remarks>
+    /// Note: Angle parameters are in radians (e.g., Math.PI for 180°). 
+    /// For degrees, use <see cref="PinchRotate"/> which accepts degrees.
+    /// </remarks>
     public void PinchZoom(Interactive target, Point origin, double startScale, double endScale, int steps = 10, double startAngle = 0, double endAngle = 0)
     {
         if (target == null)
@@ -647,7 +651,7 @@ public class GestureSimulator
     /// <param name="pointerType">Type of pointer.</param>
     public void TapAndHold(Interactive target, Point position, int holdDuration = 500, PointerType pointerType = PointerType.Touch)
     {
-        Tapped(target, position, pointerType);
+        Tap(target, position, pointerType);
         AdvanceTime(100);
         Hold(target, position, holdDuration, pointerType);
     }
@@ -661,7 +665,7 @@ public class GestureSimulator
     /// <param name="steps">Animation steps.</param>
     public void DoubleTapZoom(Interactive target, Point position, double zoomScale = 2.0, int steps = 10)
     {
-        DoubleTapped(target, position);
+        DoubleTap(target, position);
         AdvanceTime(50);
         PinchZoom(target, position, 1.0, zoomScale, steps);
     }

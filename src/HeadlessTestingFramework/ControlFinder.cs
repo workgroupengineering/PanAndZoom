@@ -707,7 +707,9 @@ public class ControlFinder
     /// <exception cref="InvalidOperationException">Thrown when no matching control is found.</exception>
     public object GetFirst()
     {
-        return FindFirst() ?? throw new InvalidOperationException("No matching control found.");
+        return FindFirst() ?? throw new InvalidOperationException(
+            $"No matching control found. Root: {_root.GetType().Name}, Filters applied: {_filters.Count}. " +
+            "Check that the control exists in the tree and matches all filter criteria.");
     }
 
     /// <summary>
@@ -718,7 +720,9 @@ public class ControlFinder
     /// <exception cref="InvalidOperationException">Thrown when no matching control is found.</exception>
     public T GetFirst<T>() where T : class
     {
-        return FindFirst<T>() ?? throw new InvalidOperationException($"No matching control of type {typeof(T).Name} found.");
+        return FindFirst<T>() ?? throw new InvalidOperationException(
+            $"No matching control of type {typeof(T).Name} found. Root: {_root.GetType().Name}, Filters applied: {_filters.Count}. " +
+            "Check that the control exists in the tree and matches all filter criteria.");
     }
 
     /// <summary>

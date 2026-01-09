@@ -37,7 +37,7 @@ public class GestureSimulatorSamples
         button.Click += (s, e) => wasClicked = true;
 
         // Act - Tap the button
-        simulator.Tapped(button, new Point(50, 25));
+        simulator.Tap(button, new Point(50, 25));
 
         // Note: Tapped events don't automatically trigger Click
         // For click simulation, use mouse simulator
@@ -73,7 +73,7 @@ public class GestureSimulatorSamples
         var simulator = new GestureSimulator();
 
         // Act - Double tap at center
-        simulator.DoubleTapped(zoomBorder, new Point(200, 150));
+        simulator.DoubleTap(zoomBorder, new Point(200, 150));
 
         // Assert
         Assert.Equal(1, doubleTapCount);
@@ -108,7 +108,7 @@ public class GestureSimulatorSamples
         var simulator = new GestureSimulator();
 
         // Act - Right tap to trigger context menu
-        simulator.RightTapped(target, new Point(100, 100));
+        simulator.RightTap(target, new Point(100, 100));
 
         // Assert - Event was raised (context menu would appear here)
         // In real usage, you'd show a ContextMenu
@@ -540,7 +540,7 @@ public class GestureSimulatorSamples
         simulator.PinchEnded(control);
         
         // Step 2: Double-tap to toggle zoom level
-        simulator.DoubleTapped(control, new Point(200, 150));
+        simulator.DoubleTap(control, new Point(200, 150));
 
         // Step 3: Scroll/pan the content
         simulator.ScrollSequence(control, new Vector(50, 50), steps: 5);

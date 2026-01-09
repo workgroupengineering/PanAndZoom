@@ -154,9 +154,16 @@ public class By
     /// </summary>
     /// <param name="cssSelector">The CSS selector (class name in Avalonia).</param>
     /// <returns>A By locator for CSS class matching.</returns>
+    /// <remarks>
+    /// NOTE: Only class selectors (.className) are supported. Complex CSS selectors
+    /// like "div > button" or "input[type='text']" are not supported.
+    /// For complex queries, use <see cref="XPath"/> instead.
+    /// </remarks>
     /// <example>
     /// <code>
     /// var element = driver.FindElement(By.CssSelector(".primary"));
+    /// // Also works without the dot:
+    /// var element2 = driver.FindElement(By.CssSelector("primary"));
     /// </code>
     /// </example>
     public static By CssSelector(string cssSelector)

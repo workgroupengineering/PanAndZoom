@@ -167,7 +167,9 @@ public class AvaloniaDriver : IDisposable
                 }
             }
 
-            throw new NoSuchElementException($"Unable to locate element: {by}", by);
+            throw new NoSuchElementException(
+                $"Unable to locate element using {by.Strategy}: '{by.Value}'. " +
+                $"Root: {root.GetType().Name}. Verify the element exists and is in the visual tree.", by);
         }
 
         return new AvaloniaElement(elements[0], this);

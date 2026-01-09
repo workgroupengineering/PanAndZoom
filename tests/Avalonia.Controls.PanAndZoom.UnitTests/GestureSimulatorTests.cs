@@ -42,7 +42,7 @@ public class GestureSimulatorTests
         });
 
         // Act
-        simulator.Tapped(target, new Point(50, 50));
+        simulator.Tap(target, new Point(50, 50));
 
         // Assert
         Assert.True(eventRaised, "Tapped event should be raised");
@@ -65,7 +65,7 @@ public class GestureSimulatorTests
         });
 
         // Act
-        simulator.DoubleTapped(target, new Point(50, 50));
+        simulator.DoubleTap(target, new Point(50, 50));
 
         // Assert
         Assert.True(eventRaised, "DoubleTapped event should be raised");
@@ -88,7 +88,7 @@ public class GestureSimulatorTests
         });
 
         // Act
-        simulator.RightTapped(target, new Point(50, 50));
+        simulator.RightTap(target, new Point(50, 50));
 
         // Assert
         Assert.True(eventRaised, "RightTapped event should be raised");
@@ -114,9 +114,9 @@ public class GestureSimulatorTests
         });
 
         // Act
-        simulator.Tapped(target, new Point(50, 50), PointerType.Touch);
-        simulator.Tapped(target, new Point(50, 50), PointerType.Mouse);
-        simulator.Tapped(target, new Point(50, 50), PointerType.Pen);
+        simulator.Tap(target, new Point(50, 50), PointerType.Touch);
+        simulator.Tap(target, new Point(50, 50), PointerType.Mouse);
+        simulator.Tap(target, new Point(50, 50), PointerType.Pen);
 
         // Assert
         Assert.Equal(3, pointerTypes.Count);

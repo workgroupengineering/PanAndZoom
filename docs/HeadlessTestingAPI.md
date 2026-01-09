@@ -4,20 +4,39 @@
 
 The `HeadlessTestingFramework` provides a comprehensive API for headless testing of Avalonia controls with touch input simulation, gesture recognition, screen recording, and video export capabilities. This framework enables automated visual testing of UI interactions including pinch-to-zoom, pan, rotation, scroll, and swipe gestures.
 
+> ⚠️ **Important**: When testing gesture events (Pinch, Scroll, etc.), handlers must be registered **BEFORE** calling `window.Show()`. See [Gesture Handler Registration](#gesture-handler-registration) for details.
+
+## Which API Should I Use?
+
+| Scenario | Recommended API | Why |
+|----------|-----------------|-----|
+| Simple button click/tap | `TouchInputSimulator.Tap()` | Quickest way to simulate taps |
+| Pinch-to-zoom with gesture handlers | `MultiTouchTestHelperFactory` | Triggers actual gesture recognizers |
+| Selenium/Appium-style testing | `AvaloniaDriver` | Familiar API for web/mobile testers |
+| Complex keyboard shortcuts | `KeyboardInputSimulator` | Full keyboard simulation |
+| Mouse drag and drop | `MouseInputSimulator` | Complete mouse event support |
+| High-level gesture events | `GestureSimulator` | Raises gesture events directly |
+| Find controls by type/name | `ControlFinder` | Fluent, type-safe queries |
+| XPath-like queries | `TreeXPath` | Flexible path expressions |
+| Assert tree structure | `TreeValidator` | Chainable validation rules |
+| Compare visual trees | `TreeComparer` | Diff two tree structures |
+| Record test interactions | `RecordedTouchSimulator` | Capture frames during tests |
+
 ## Table of Contents
 
 1. [Installation](#installation)
-2. [Core Components](#core-components)
-3. [TouchInputSimulator](#touchinputsimulator)
-4. [KeyboardInputSimulator](#keyboardinputsimulator)
-5. [MouseInputSimulator](#mouseinputsimulator)
-6. [GestureSimulator](#gesturesimulator)
-7. [GestureRecognizerTestHelper](#gesturerecognizertesthelper)
-8. [MultiTouchTestHelperFactory](#multitouchtesthelperfactory)
-9. [HeadlessScreenRecorder](#headlessscreenrecorder)
-10. [RecordedTouchSimulator](#recordedtouchsimulator)
-11. [VideoConverter](#videoconverter)
-12. [Tree Helpers](#tree-helpers)
+2. [Quick Start](#quick-start)
+3. [Core Components](#core-components)
+4. [TouchInputSimulator](#touchinputsimulator)
+5. [KeyboardInputSimulator](#keyboardinputsimulator)
+6. [MouseInputSimulator](#mouseinputsimulator)
+7. [GestureSimulator](#gesturesimulator)
+8. [GestureRecognizerTestHelper](#gesturerecognizertesthelper)
+9. [MultiTouchTestHelperFactory](#multitouchtesthelperfactory)
+10. [HeadlessScreenRecorder](#headlessscreenrecorder)
+11. [RecordedTouchSimulator](#recordedtouchsimulator)
+12. [VideoConverter](#videoconverter)
+13. [Tree Helpers](#tree-helpers)
     - [VisualTreeTestHelper](#visualtreetesthelper)
     - [LogicalTreeTestHelper](#logicaltreetesthelper)
     - [ControlFinder](#controlfinder)
@@ -25,14 +44,15 @@ The `HeadlessTestingFramework` provides a comprehensive API for headless testing
     - [TreeValidator](#treevalidator)
     - [TreeComparer](#treecomparer)
     - [TemplateComparer](#templatecomparer)
-13. [Appium-like API](#appium-like-api)
-14. [Appium API Extensions](#appium-api-extensions)
+14. [Appium-like API](#appium-like-api)
+15. [Appium API Extensions](#appium-api-extensions)
     - [Actions API](#actions-api)
     - [Element Attributes](#element-attributes)
     - [Driver Session](#driver-session)
     - [Wait Helper](#wait-helper)
-15. [API Compatibility Matrix](#api-compatibility-matrix)
-16. [Complete Examples](#complete-examples)
+16. [API Compatibility Matrix](#api-compatibility-matrix)
+17. [Complete Examples](#complete-examples)
+18. [Gesture Handler Registration](#gesture-handler-registration)
 
 ---
 
@@ -44,11 +64,88 @@ Add a reference to the `HeadlessTestingFramework` project:
 <ProjectReference Include="..\src\HeadlessTestingFramework\HeadlessTestingFramework.csproj" />
 ```
 
+Or install via NuGet:
+
+```bash
+dotnet add package HeadlessTestingFramework
+```
+
 Required namespaces:
 
 ```csharp
 using Avalonia.HeadlessTestingFramework;
 using Avalonia.HeadlessTestingFramework.Recording;
+```
+
+---
+
+## Quick Start
+
+### Simple Tap Test
+
+```csharp
+[AvaloniaFact]
+public void Button_Click_Test()
+{
+    var window = new Window { Content = new Button { Name = "MyButton" } };
+    window.Show();
+    
+    var button = window.FindFirst<Button>();
+    var simulator = new TouchInputSimulator();
+    
+    bool clicked = false;
+    button.Click += (s, e) => clicked = true;
+    
+    simulator.Tap(button, new Point(10, 10));
+    
+    Assert.True(clicked);
+}
+```
+
+### Pinch-to-Zoom Test
+
+```csharp
+[AvaloniaFact]
+public void PinchZoom_Test()
+{
+    var zoomBorder = new ZoomBorder();
+    double capturedScale = 1.0;
+    
+    // ⚠️ Register handlers BEFORE Show()
+    Gestures.AddPinchHandler(zoomBorder, (s, e) => capturedScale = e.Scale);
+    
+    var window = new Window { Content = zoomBorder };
+    window.Show();
+    
+    // Simulate pinch zoom in
+    MultiTouchTestHelperFactory.SimulatePinchZoomIn(
+        zoomBorder, 
+        center: new Point(200, 200), 
+        startDistance: 50, 
+        endDistance: 150);
+    
+    Assert.True(capturedScale > 1.0);
+}
+```
+
+### Appium-Style Test
+
+```csharp
+[AvaloniaFact]
+public void Appium_Style_Test()
+{
+    var window = new Window { Content = CreateLoginForm() };
+    window.Show();
+    
+    using var driver = new AvaloniaDriver(window);
+    
+    driver.FindElement(By.Name("Username")).SendKeys("admin");
+    driver.FindElement(By.Name("Password")).SendKeys("password");
+    driver.FindElement(By.Name("LoginButton")).Click();
+    
+    var welcome = driver.Wait.Until(d => d.FindElement(By.Name("WelcomeText")));
+    Assert.Equal("Welcome, admin!", welcome.Text);
+}
 ```
 
 ---
@@ -447,33 +544,33 @@ The `GestureSimulator` class provides high-level gesture event simulation for al
 var simulator = new GestureSimulator();
 
 // Simulate a tap gesture
-simulator.Tapped(control, new Point(100, 100));
+simulator.Tap(control, new Point(100, 100));
 
 // Simulate a double tap
-simulator.DoubleTapped(control, new Point(100, 100));
+simulator.DoubleTap(control, new Point(100, 100));
 
 // Simulate a right tap (context menu)
-simulator.RightTapped(control, new Point(100, 100));
+simulator.RightTap(control, new Point(100, 100));
 ```
 
 ### Tap Gestures
 
 ```csharp
 // Standard tap with touch pointer
-simulator.Tapped(control, new Point(100, 100));
+simulator.Tap(control, new Point(100, 100));
 
 // Tap with specific pointer type
-simulator.Tapped(control, new Point(100, 100), PointerType.Mouse);
-simulator.Tapped(control, new Point(100, 100), PointerType.Pen);
+simulator.Tap(control, new Point(100, 100), PointerType.Mouse);
+simulator.Tap(control, new Point(100, 100), PointerType.Pen);
 
 // Tap with key modifiers (Ctrl, Shift, Alt)
-simulator.Tapped(control, new Point(100, 100), PointerType.Touch, KeyModifiers.Control);
+simulator.Tap(control, new Point(100, 100), PointerType.Touch, KeyModifiers.Control);
 
 // Double tap
-simulator.DoubleTapped(control, new Point(100, 100));
+simulator.DoubleTap(control, new Point(100, 100));
 
 // Right tap (triggers context menu)
-simulator.RightTapped(control, new Point(100, 100));
+simulator.RightTap(control, new Point(100, 100));
 ```
 
 ### Holding Gesture (Press and Hold)
@@ -3005,6 +3102,66 @@ driver.CreateTouchAction()
     .Release()
     .Perform();
 ```
+
+---
+
+## Gesture Handler Registration
+
+> ⚠️ **This is the most common source of bugs when testing gestures.**
+
+When using `GestureRecognizerTestHelper` or `MultiTouchTestHelperFactory` to test gesture events like Pinch, Scroll, or Pull-to-Refresh, **handlers must be registered BEFORE the window is shown**.
+
+### ❌ Wrong Pattern (Events Won't Fire)
+
+```csharp
+var control = new MyControl();
+var window = new Window { Content = control };
+window.Show();  // ❌ Show FIRST
+
+// Too late! Gesture recognizers are already initialized
+Gestures.AddPinchHandler(control, (s, e) => { /* never called */ });
+```
+
+### ✅ Correct Pattern
+
+```csharp
+var control = new MyControl();
+
+// ✅ Register handlers BEFORE Show()
+Gestures.AddPinchHandler(control, (s, e) => { 
+    Console.WriteLine($"Pinch: Scale={e.Scale}"); 
+});
+
+var window = new Window { Content = control };
+window.Show();  // ✅ Show AFTER
+
+// Now gestures will work
+var (first, second) = MultiTouchTestHelperFactory.CreatePair();
+first.Down(control, new Point(100, 150));
+second.Down(control, new Point(200, 150));
+// ... gesture events will fire correctly
+```
+
+### Why Does This Happen?
+
+Avalonia's gesture recognizers are attached to controls when they enter the visual tree (during `Show()`). If handlers aren't registered at that point, the gesture recognizer doesn't know to track those events.
+
+### Which APIs Are Affected?
+
+| API | Affected? | Notes |
+|-----|-----------|-------|
+| `GestureRecognizerTestHelper` | ✅ Yes | Uses actual gesture recognizers |
+| `MultiTouchTestHelperFactory` | ✅ Yes | Wraps GestureRecognizerTestHelper |
+| `TouchInputSimulator.PinchGesture()` | ❌ No | Raises events directly via RaiseEvent |
+| `GestureSimulator.Pinch()` | ❌ No | Raises events directly via RaiseEvent |
+| `AvaloniaDriver` touch actions | ✅ Yes | Uses gesture recognizer path |
+
+### Debugging Tip
+
+If your gesture handlers aren't being called:
+1. Check that handlers are registered before `window.Show()`
+2. Verify the control is actually in the visual tree
+3. Use `GestureSimulator` if you just need to raise events without actual recognizers
 
 ---
 
