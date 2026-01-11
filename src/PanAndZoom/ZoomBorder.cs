@@ -1554,6 +1554,38 @@ public partial class ZoomBorder : Border
     }
 
     /// <summary>
+    /// Gets the effective zoom limits considering both manual settings and auto-calculated values.
+    /// </summary>
+    /// <param name="minZoomX">The effective minimum zoom for X axis.</param>
+    /// <param name="maxZoomX">The effective maximum zoom for X axis.</param>
+    /// <param name="minZoomY">The effective minimum zoom for Y axis.</param>
+    /// <param name="maxZoomY">The effective maximum zoom for Y axis.</param>
+    protected void GetEffectiveZoomLimits(out double minZoomX, out double maxZoomX, out double minZoomY, out double maxZoomY)
+    {
+        minZoomX = MinZoomX;
+        maxZoomX = MaxZoomX;
+        minZoomY = MinZoomY;
+        maxZoomY = MaxZoomY;
+
+        if (AutoCalculateMinZoom || AutoCalculateMaxZoom)
+        {
+            var (autoMinZoom, autoMaxZoom) = CalculateAutoZoomLimits();
+
+            if (AutoCalculateMinZoom && !double.IsNegativeInfinity(autoMinZoom))
+            {
+                minZoomX = Math.Max(minZoomX, autoMinZoom);
+                minZoomY = Math.Max(minZoomY, autoMinZoom);
+            }
+
+            if (AutoCalculateMaxZoom && !double.IsPositiveInfinity(autoMaxZoom))
+            {
+                maxZoomX = Math.Min(maxZoomX, autoMaxZoom);
+                maxZoomY = Math.Min(maxZoomY, autoMaxZoom);
+            }
+        }
+    }
+
+    /// <summary>
     /// Gets the zoom indicator text based on the current zoom level.
     /// </summary>
     /// <returns>The formatted zoom indicator text.</returns>
@@ -1778,27 +1810,7 @@ public partial class ZoomBorder : Border
     private void Constrain()
     {
         // Get effective zoom limits (considering auto-calculation)
-        var effectiveMinZoomX = MinZoomX;
-        var effectiveMaxZoomX = MaxZoomX;
-        var effectiveMinZoomY = MinZoomY;
-        var effectiveMaxZoomY = MaxZoomY;
-
-        if (AutoCalculateMinZoom || AutoCalculateMaxZoom)
-        {
-            var (autoMinZoom, autoMaxZoom) = CalculateAutoZoomLimits();
-
-            if (AutoCalculateMinZoom && !double.IsNegativeInfinity(autoMinZoom))
-            {
-                effectiveMinZoomX = Math.Max(effectiveMinZoomX, autoMinZoom);
-                effectiveMinZoomY = Math.Max(effectiveMinZoomY, autoMinZoom);
-            }
-
-            if (AutoCalculateMaxZoom && !double.IsPositiveInfinity(autoMaxZoom))
-            {
-                effectiveMaxZoomX = Math.Min(effectiveMaxZoomX, autoMaxZoom);
-                effectiveMaxZoomY = Math.Min(effectiveMaxZoomY, autoMaxZoom);
-            }
-        }
+        GetEffectiveZoomLimits(out var effectiveMinZoomX, out var effectiveMaxZoomX, out var effectiveMinZoomY, out var effectiveMaxZoomY);
 
         var zoomX = ClampValue(_matrix.M11, effectiveMinZoomX, effectiveMaxZoomX);
         var zoomY = ClampValue(_matrix.M22, effectiveMinZoomY, effectiveMaxZoomY);
@@ -2216,7 +2228,11 @@ public partial class ZoomBorder : Border
             return;
         }
 
-        if ((ZoomX >= MaxZoomX && ZoomY >= MaxZoomY && ratio > 1) || (ZoomX <= MinZoomX && ZoomY <= MinZoomY && ratio < 1))
+        // Use effective zoom limits that consider auto-calculated bounds
+        GetEffectiveZoomLimits(out var effectiveMinZoomX, out var effectiveMaxZoomX, out var effectiveMinZoomY, out var effectiveMaxZoomY);
+        
+        if ((ZoomX >= effectiveMaxZoomX && ZoomY >= effectiveMaxZoomY && ratio > 1) || 
+            (ZoomX <= effectiveMinZoomX && ZoomY <= effectiveMinZoomY && ratio < 1))
         {
             return;
         }
