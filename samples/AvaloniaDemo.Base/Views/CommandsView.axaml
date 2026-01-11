@@ -1,0 +1,176 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:paz="using:Avalonia.Controls.PanAndZoom"
+             x:Class="AvaloniaDemo.Views.CommandsView">
+
+  <Grid ColumnDefinitions="280,*">
+    <!-- Controls -->
+    <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+      <StackPanel Margin="12" Spacing="8">
+        <TextBlock Text="Commands Demo" FontWeight="Bold" FontSize="16" />
+        <TextBlock Text="Demonstrates all ZoomBorder commands with MVVM binding" TextWrapping="Wrap" />
+
+        <Separator Margin="0,8" />
+
+        <TextBlock Text="Zoom Commands:" FontWeight="SemiBold" />
+        <StackPanel Orientation="Horizontal" Spacing="4">
+          <Button Content="Zoom In" 
+                  Command="{Binding #ZoomBorder.ZoomInCommand}" 
+                  Width="100" />
+          <Button Content="Zoom Out" 
+                  Command="{Binding #ZoomBorder.ZoomOutCommand}" 
+                  Width="100" />
+        </StackPanel>
+
+        <Separator Margin="0,8" />
+
+        <TextBlock Text="View Commands:" FontWeight="SemiBold" />
+        <Button Content="Reset View" 
+                Command="{Binding #ZoomBorder.ResetCommand}" />
+        <Button Content="Fit to View" 
+                Command="{Binding #ZoomBorder.FitCommand}" />
+        <Button Content="Fill View" 
+                Command="{Binding #ZoomBorder.FillCommand}" />
+
+        <Separator Margin="0,8" />
+
+        <TextBlock Text="Stretch Commands:" FontWeight="SemiBold" />
+        <Button Content="Uniform Stretch" 
+                Command="{Binding #ZoomBorder.UniformCommand}" />
+        <Button Content="Uniform To Fill" 
+                Command="{Binding #ZoomBorder.UniformToFillCommand}" />
+        <Button Content="Toggle Stretch Mode" 
+                Command="{Binding #ZoomBorder.ToggleStretchCommand}" />
+
+        <Separator Margin="0,8" />
+
+        <TextBlock Text="Navigation Commands:" FontWeight="SemiBold" />
+        <StackPanel Orientation="Horizontal" Spacing="4">
+          <Button Content="← Back" 
+                  Command="{Binding #ZoomBorder.NavigateBackCommand}" 
+                  Width="100" />
+          <Button Content="Forward →" 
+                  Command="{Binding #ZoomBorder.NavigateForwardCommand}" 
+                  Width="100" />
+        </StackPanel>
+
+        <Separator Margin="0,8" />
+
+        <TextBlock Text="Current State:" FontWeight="SemiBold" />
+        <StackPanel x:DataType="paz:ZoomBorder" DataContext="{Binding #ZoomBorder}" Spacing="4">
+          <TextBlock>
+            <Run Text="Zoom X: " />
+            <Run Text="{Binding ZoomX, StringFormat=F3}" FontWeight="SemiBold" />
+          </TextBlock>
+          <TextBlock>
+            <Run Text="Zoom Y: " />
+            <Run Text="{Binding ZoomY, StringFormat=F3}" FontWeight="SemiBold" />
+          </TextBlock>
+          <TextBlock>
+            <Run Text="Offset X: " />
+            <Run Text="{Binding OffsetX, StringFormat=F1}" FontWeight="SemiBold" />
+          </TextBlock>
+          <TextBlock>
+            <Run Text="Offset Y: " />
+            <Run Text="{Binding OffsetY, StringFormat=F1}" FontWeight="SemiBold" />
+          </TextBlock>
+          <TextBlock>
+            <Run Text="Stretch: " />
+            <Run Text="{Binding Stretch}" FontWeight="SemiBold" />
+          </TextBlock>
+        </StackPanel>
+
+        <Separator Margin="0,8" />
+
+        <TextBlock Text="Settings:" FontWeight="SemiBold" />
+        <StackPanel x:DataType="paz:ZoomBorder" DataContext="{Binding #ZoomBorder}" Spacing="4">
+          <CheckBox Content="Enable Pan" IsChecked="{Binding EnablePan}" />
+          <CheckBox Content="Enable Zoom" IsChecked="{Binding EnableZoom}" />
+          <CheckBox Content="Enable View History" IsChecked="{Binding EnableViewHistory}" />
+          <CheckBox Content="Enable Animations" IsChecked="{Binding EnableAnimations}" />
+        </StackPanel>
+
+        <Separator Margin="0,8" />
+
+        <TextBlock Text="Instructions:" FontWeight="SemiBold" />
+        <TextBlock TextWrapping="Wrap" FontSize="11">
+          All buttons above are bound to ZoomBorder commands using MVVM pattern: 
+          Command="{Binding #ZoomBorder.CommandName}".
+          The buttons will be automatically enabled/disabled based on the command's CanExecute state.
+        </TextBlock>
+        <TextBlock TextWrapping="Wrap" FontSize="11" Margin="0,4,0,0">
+          Try the navigation commands - they require view history to be enabled and will only work after you've made some zoom/pan changes.
+        </TextBlock>
+      </StackPanel>
+    </ScrollViewer>
+
+    <!-- ZoomBorder -->
+    <Border Grid.Column="1" Margin="12" BorderBrush="Gray" BorderThickness="1">
+      <paz:ZoomBorder x:Name="ZoomBorder"
+                      Stretch="None"
+                      ZoomSpeed="1.2"
+                      Background="SlateBlue"
+                      ClipToBounds="True"
+                      Focusable="True"
+                      EnableViewHistory="True"
+                      EnableAnimations="True">
+        <Canvas Width="600" Height="400" Background="LightGray">
+          <TextBlock Canvas.Left="20" Canvas.Top="20" 
+                     Text="ZoomBorder Commands Demo" 
+                     FontSize="24" FontWeight="Bold" />
+
+          <TextBlock Canvas.Left="20" Canvas.Top="60" 
+                     Text="Use the command buttons on the left to control this view" 
+                     FontSize="14" />
+
+          <!-- Sample content to zoom/pan -->
+          <Rectangle Canvas.Left="50" Canvas.Top="120" 
+                     Width="100" Height="100" 
+                     Fill="Red" />
+          <TextBlock Canvas.Left="70" Canvas.Top="230" Text="Red" />
+          
+          <Rectangle Canvas.Left="180" Canvas.Top="120" 
+                     Width="100" Height="100" 
+                     Fill="Green" />
+          <TextBlock Canvas.Left="195" Canvas.Top="230" Text="Green" />
+          
+          <Rectangle Canvas.Left="310" Canvas.Top="120" 
+                     Width="100" Height="100" 
+                     Fill="Blue" />
+          <TextBlock Canvas.Left="330" Canvas.Top="230" Text="Blue" />
+          
+          <Rectangle Canvas.Left="440" Canvas.Top="120" 
+                     Width="100" Height="100" 
+                     Fill="Orange" />
+          <TextBlock Canvas.Left="455" Canvas.Top="230" Text="Orange" />
+
+          <!-- Additional shapes -->
+          <Ellipse Canvas.Left="50" Canvas.Top="280" 
+                   Width="80" Height="80" 
+                   Fill="Purple" />
+          <Ellipse Canvas.Left="170" Canvas.Top="280" 
+                   Width="80" Height="80" 
+                   Fill="Cyan" />
+          <Ellipse Canvas.Left="290" Canvas.Top="280" 
+                   Width="80" Height="80" 
+                   Fill="Magenta" />
+          <Ellipse Canvas.Left="410" Canvas.Top="280" 
+                   Width="80" Height="80" 
+                   Fill="Yellow" />
+
+          <Border Canvas.Left="510" Canvas.Top="280" 
+                  Width="60" Height="80" 
+                  Background="Black">
+            <TextBlock Text="Pan &amp; Zoom!" 
+                       Foreground="White" 
+                       FontSize="10"
+                       TextWrapping="Wrap"
+                       TextAlignment="Center"
+                       VerticalAlignment="Center" />
+          </Border>
+        </Canvas>
+      </paz:ZoomBorder>
+    </Border>
+  </Grid>
+
+</UserControl>

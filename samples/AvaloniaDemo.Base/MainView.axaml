@@ -9,6 +9,11 @@
              FontFamily="avares://Avalonia.Fonts.Inter/Assets#Inter">
 
   <TabControl>
+    <!-- Commands Demo - MVVM Command Binding -->
+    <TabItem Header="Commands">
+      <views:CommandsView />
+    </TabItem>
+
     <!-- Phase 1: Coordinate Conversion -->
     <TabItem Header="Coordinate Conversion">
       <views:CoordinateConversionView />
@@ -209,19 +214,16 @@
                     <TextBlock Text="Text2" Width="100" Background="Red" Foreground="WhiteSmoke" />
                   </StackPanel>
                   <Button Content="Reset Zoom"
-                          Command="{Binding ResetMatrix}"
-                          x:DataType="paz:ZoomBorder" x:CompileBindings="False"
+                          Command="{Binding #ZoomBorder1.ResetMatrix}"
                           Width="120" Canvas.Left="100" Canvas.Top="250" />
                   <ListBox Width="120"
                            Canvas.Left="10" Canvas.Top="10"
-                           x:DataType="paz:ZoomBorder"
                            ItemsSource="{x:Static paz:ZoomBorder.StretchModes}"
-                           SelectedItem="{Binding Stretch, Mode=TwoWay}" />
+                           SelectedItem="{Binding #ZoomBorder1.Stretch, Mode=TwoWay}" />
                   <ListBox Width="120"
                            Canvas.Left="160" Canvas.Top="10"
-                           x:DataType="paz:ZoomBorder"
                            ItemsSource="{x:Static paz:ZoomBorder.ButtonNames}"
-                           SelectedItem="{Binding PanButton, Mode=TwoWay}" />
+                           SelectedItem="{Binding #ZoomBorder1.PanButton, Mode=TwoWay}" />
                 </Canvas>
               </Border>
             </paz:ZoomBorder>
