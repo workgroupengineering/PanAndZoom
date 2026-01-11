@@ -354,6 +354,86 @@ public partial class ZoomBorder
             o => o.IsZoomIndicatorVisible);
 
     /// <summary>
+    /// Identifies the <seealso cref="ZoomInCommand"/> avalonia property.
+    /// </summary>
+    public static readonly DirectProperty<ZoomBorder, ICommand> ZoomInCommandProperty =
+        AvaloniaProperty.RegisterDirect<ZoomBorder, ICommand>(
+            nameof(ZoomInCommand),
+            o => o.ZoomInCommand);
+
+    /// <summary>
+    /// Identifies the <seealso cref="ZoomOutCommand"/> avalonia property.
+    /// </summary>
+    public static readonly DirectProperty<ZoomBorder, ICommand> ZoomOutCommandProperty =
+        AvaloniaProperty.RegisterDirect<ZoomBorder, ICommand>(
+            nameof(ZoomOutCommand),
+            o => o.ZoomOutCommand);
+
+    /// <summary>
+    /// Identifies the <seealso cref="ResetCommand"/> avalonia property.
+    /// </summary>
+    public static readonly DirectProperty<ZoomBorder, ICommand> ResetCommandProperty =
+        AvaloniaProperty.RegisterDirect<ZoomBorder, ICommand>(
+            nameof(ResetCommand),
+            o => o.ResetCommand);
+
+    /// <summary>
+    /// Identifies the <seealso cref="FitCommand"/> avalonia property.
+    /// </summary>
+    public static readonly DirectProperty<ZoomBorder, ICommand> FitCommandProperty =
+        AvaloniaProperty.RegisterDirect<ZoomBorder, ICommand>(
+            nameof(FitCommand),
+            o => o.FitCommand);
+
+    /// <summary>
+    /// Identifies the <seealso cref="FillCommand"/> avalonia property.
+    /// </summary>
+    public static readonly DirectProperty<ZoomBorder, ICommand> FillCommandProperty =
+        AvaloniaProperty.RegisterDirect<ZoomBorder, ICommand>(
+            nameof(FillCommand),
+            o => o.FillCommand);
+
+    /// <summary>
+    /// Identifies the <seealso cref="UniformCommand"/> avalonia property.
+    /// </summary>
+    public static readonly DirectProperty<ZoomBorder, ICommand> UniformCommandProperty =
+        AvaloniaProperty.RegisterDirect<ZoomBorder, ICommand>(
+            nameof(UniformCommand),
+            o => o.UniformCommand);
+
+    /// <summary>
+    /// Identifies the <seealso cref="UniformToFillCommand"/> avalonia property.
+    /// </summary>
+    public static readonly DirectProperty<ZoomBorder, ICommand> UniformToFillCommandProperty =
+        AvaloniaProperty.RegisterDirect<ZoomBorder, ICommand>(
+            nameof(UniformToFillCommand),
+            o => o.UniformToFillCommand);
+
+    /// <summary>
+    /// Identifies the <seealso cref="NavigateBackCommand"/> avalonia property.
+    /// </summary>
+    public static readonly DirectProperty<ZoomBorder, ICommand> NavigateBackCommandProperty =
+        AvaloniaProperty.RegisterDirect<ZoomBorder, ICommand>(
+            nameof(NavigateBackCommand),
+            o => o.NavigateBackCommand);
+
+    /// <summary>
+    /// Identifies the <seealso cref="NavigateForwardCommand"/> avalonia property.
+    /// </summary>
+    public static readonly DirectProperty<ZoomBorder, ICommand> NavigateForwardCommandProperty =
+        AvaloniaProperty.RegisterDirect<ZoomBorder, ICommand>(
+            nameof(NavigateForwardCommand),
+            o => o.NavigateForwardCommand);
+
+    /// <summary>
+    /// Identifies the <seealso cref="ToggleStretchCommand"/> avalonia property.
+    /// </summary>
+    public static readonly DirectProperty<ZoomBorder, ICommand> ToggleStretchCommandProperty =
+        AvaloniaProperty.RegisterDirect<ZoomBorder, ICommand>(
+            nameof(ToggleStretchCommand),
+            o => o.ToggleStretchCommand);
+
+    /// <summary>
     /// Identifies the <seealso cref="ShowGrid"/> avalonia property.
     /// </summary>
     public static readonly StyledProperty<bool> ShowGridProperty =
@@ -526,16 +606,16 @@ public partial class ZoomBorder
     private Dictionary<string, SavedView> _savedViews = new Dictionary<string, SavedView>();
 
     // Commands
-    private ICommand? _zoomInCommand;
-    private ICommand? _zoomOutCommand;
-    private ICommand? _resetCommand;
-    private ICommand? _fitCommand;
-    private ICommand? _fillCommand;
-    private ICommand? _uniformCommand;
-    private ICommand? _uniformToFillCommand;
-    private ICommand? _navigateBackCommand;
-    private ICommand? _navigateForwardCommand;
-    private ICommand? _toggleStretchCommand;
+    private ZoomBorderCommand? _zoomInCommand;
+    private ZoomBorderCommand? _zoomOutCommand;
+    private ZoomBorderCommand? _resetCommand;
+    private ZoomBorderCommand? _fitCommand;
+    private ZoomBorderCommand? _fillCommand;
+    private ZoomBorderCommand? _uniformCommand;
+    private ZoomBorderCommand? _uniformToFillCommand;
+    private ZoomBorderCommand? _navigateBackCommand;
+    private ZoomBorderCommand? _navigateForwardCommand;
+    private ZoomBorderCommand? _toggleStretchCommand;
 
     /// <summary>
     /// Zoom changed event.
@@ -1328,6 +1408,32 @@ public partial class ZoomBorder
     /// Gets the command to toggle stretch mode.
     /// </summary>
     public ICommand ToggleStretchCommand => _toggleStretchCommand ??= new ZoomBorderCommand(ToggleStretchMode);
+
+    /// <summary>
+    /// Raises CanExecuteChanged on all commands to refresh their enabled state.
+    /// </summary>
+    internal void RaiseCommandsCanExecuteChanged()
+    {
+        _zoomInCommand?.RaiseCanExecuteChanged();
+        _zoomOutCommand?.RaiseCanExecuteChanged();
+        _resetCommand?.RaiseCanExecuteChanged();
+        _fitCommand?.RaiseCanExecuteChanged();
+        _fillCommand?.RaiseCanExecuteChanged();
+        _uniformCommand?.RaiseCanExecuteChanged();
+        _uniformToFillCommand?.RaiseCanExecuteChanged();
+        _navigateBackCommand?.RaiseCanExecuteChanged();
+        _navigateForwardCommand?.RaiseCanExecuteChanged();
+        _toggleStretchCommand?.RaiseCanExecuteChanged();
+    }
+
+    /// <summary>
+    /// Raises CanExecuteChanged on navigation commands to refresh their enabled state.
+    /// </summary>
+    internal void RaiseNavigationCommandsCanExecuteChanged()
+    {
+        _navigateBackCommand?.RaiseCanExecuteChanged();
+        _navigateForwardCommand?.RaiseCanExecuteChanged();
+    }
 }
 
 /// <summary>
