@@ -368,7 +368,8 @@ public class ZoomBorderCommandsTests
             Width = 400,
             Height = 300,
             EnableViewHistory = true,
-            EnableZoom = true
+            EnableZoom = true,
+            Stretch = StretchMode.None
         };
 
         var childElement = new Border

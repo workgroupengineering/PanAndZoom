@@ -1,5 +1,6 @@
 // Copyright (c) Wiesław Šoltés. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for details.
+using System;
 using Avalonia.Controls;
 using Avalonia.Headless.XUnit;
 using Avalonia.Media;
@@ -71,5 +72,61 @@ public class ZoomBorderZoomToRectangleTests
 
         // Assert
         Assert.True(zoomBorder.ZoomX > 1.0);
+    }
+
+    [AvaloniaFact]
+    public void ZoomToRectangle_CentersRectangleInViewport()
+    {
+        // Arrange
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 600,
+            Height = 400,
+            Stretch = StretchMode.None
+        };
+
+        var childElement = new Canvas
+        {
+            Width = 800,
+            Height = 600,
+            Background = Brushes.LightGray
+        };
+
+        zoomBorder.Child = childElement;
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+
+        // Red region coordinates
+        var rect = new Rect(50, 100, 200, 150);
+        
+        // Expected calculations:
+        // zoom = min(600/200, 400/150) = min(3, 2.667) = 2.667
+        // rectCenterX = 50 + 100 = 150
+        // rectCenterY = 100 + 75 = 175
+        // viewportCenterX = 300
+        // viewportCenterY = 200
+        // offsetX = 300 - 150 * 2.667 = 300 - 400 = -100
+        // offsetY = 200 - 175 * 2.667 = 200 - 466.67 = -266.67
+
+        // Act
+        zoomBorder.ZoomToRectangle(rect);
+
+        // Assert - verify the rectangle center maps to viewport center
+        var expectedZoom = Math.Min(600.0 / 200.0, 400.0 / 150.0);
+        var rectCenterX = rect.X + rect.Width / 2.0;
+        var rectCenterY = rect.Y + rect.Height / 2.0;
+        var expectedOffsetX = 300.0 - rectCenterX * expectedZoom;
+        var expectedOffsetY = 200.0 - rectCenterY * expectedZoom;
+
+        Assert.Equal(expectedZoom, zoomBorder.ZoomX, 2);
+        Assert.Equal(expectedOffsetX, zoomBorder.OffsetX, 2);
+        Assert.Equal(expectedOffsetY, zoomBorder.OffsetY, 2);
+        
+        // Verify that the rectangle center point transforms to viewport center
+        var transformedCenterX = rectCenterX * zoomBorder.ZoomX + zoomBorder.OffsetX;
+        var transformedCenterY = rectCenterY * zoomBorder.ZoomY + zoomBorder.OffsetY;
+        
+        Assert.Equal(300.0, transformedCenterX, 1);
+        Assert.Equal(200.0, transformedCenterY, 1);
     }
 }

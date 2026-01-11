@@ -1,3 +1,4 @@
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 
@@ -15,7 +16,8 @@ public partial class ProgrammaticPanView : UserControl
     {
         if (double.TryParse(PanToX.Text, out var x) && double.TryParse(PanToY.Text, out var y))
         {
-            ZoomBorder.Pan(x, y);
+            // Use CenterOn to center the viewport on the content point
+            ZoomBorder.CenterOn(new Point(x, y));
         }
     }
 

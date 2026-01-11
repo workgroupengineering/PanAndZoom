@@ -365,6 +365,9 @@ public partial class ZoomBorder : Border
         );
         RaiseGestureEnded(gestureArgs);
         
+        // Add to view history after pinch gesture completes
+        AddToViewHistory();
+        
         e.Handled = true;
     }
 
@@ -430,6 +433,9 @@ public partial class ZoomBorder : Border
             _matrix
         );
         RaiseGestureEnded(gestureArgs);
+        
+        // Add to view history after scroll gesture completes
+        AddToViewHistory();
         
         e.Handled = true;
     }
@@ -758,7 +764,7 @@ public partial class ZoomBorder : Border
     {
         Log($"[ChildChanged] {element}");
 
-        if (element != null && element != _element && _element != null)
+        if (element != _element && _element != null)
         {
             DetachElement();
         }
@@ -778,7 +784,9 @@ public partial class ZoomBorder : Border
 
         _element = element;
         _element.PropertyChanged += Element_PropertyChanged;
-
+        
+        // Notify commands that element is now available
+        RaiseCommandsCanExecuteChanged();
     }
 
     private void DetachElement()
@@ -791,6 +799,9 @@ public partial class ZoomBorder : Border
         _element.PropertyChanged -= Element_PropertyChanged;
         _element.RenderTransform = null;
         _element = null;
+        
+        // Notify commands that element is no longer available
+        RaiseCommandsCanExecuteChanged();
     }
 
     private void Wheel(PointerWheelEventArgs e, double sensitivity = 1.0)
@@ -856,6 +867,9 @@ public partial class ZoomBorder : Border
         );
         RaisePanEnded(args);
         
+        // Add to view history after pan gesture completes
+        AddToViewHistory();
+        
         _captured = false;
         _isPanning = false;
         ((IPseudoClasses)Classes).Set(":isPanning", _isPanning);
@@ -919,6 +933,7 @@ public partial class ZoomBorder : Border
         }
 
         ViewHistoryChanged?.Invoke(this, EventArgs.Empty);
+        RaiseNavigationCommandsCanExecuteChanged();
     }
 
     /// <summary>
@@ -938,6 +953,7 @@ public partial class ZoomBorder : Border
         _isNavigating = false;
 
         ViewHistoryChanged?.Invoke(this, EventArgs.Empty);
+        RaiseNavigationCommandsCanExecuteChanged();
     }
 
     /// <summary>
@@ -957,6 +973,7 @@ public partial class ZoomBorder : Border
         _isNavigating = false;
 
         ViewHistoryChanged?.Invoke(this, EventArgs.Empty);
+        RaiseNavigationCommandsCanExecuteChanged();
     }
 
     /// <summary>
@@ -967,6 +984,7 @@ public partial class ZoomBorder : Border
         _viewHistory.Clear();
         _viewHistoryIndex = -1;
         ViewHistoryChanged?.Invoke(this, EventArgs.Empty);
+        RaiseNavigationCommandsCanExecuteChanged();
     }
 
     /// <summary>
@@ -1195,13 +1213,20 @@ public partial class ZoomBorder : Border
     {
         if (_element == null || rect.Width == 0 || rect.Height == 0)
             return;
+            
+        if (_updating)
+            return;
+        _updating = true;
 
         var pad = padding ?? new Thickness(0);
         var viewportWidth = Bounds.Width - pad.Left - pad.Right;
         var viewportHeight = Bounds.Height - pad.Top - pad.Bottom;
 
         if (viewportWidth <= 0 || viewportHeight <= 0)
+        {
+            _updating = false;
             return;
+        }
 
         var zoomX = viewportWidth / rect.Width;
         var zoomY = viewportHeight / rect.Height;
@@ -1213,17 +1238,27 @@ public partial class ZoomBorder : Border
             zoom = GetNearestDiscreteZoomLevel(zoom);
         }
 
-        var centerX = rect.X + rect.Width / 2.0;
-        var centerY = rect.Y + rect.Height / 2.0;
+        // Calculate center of the target rectangle in content coordinates
+        var rectCenterX = rect.X + rect.Width / 2.0;
+        var rectCenterY = rect.Y + rect.Height / 2.0;
 
-        var viewportCenterX = (Bounds.Width - pad.Left - pad.Right) / 2.0 + pad.Left;
-        var viewportCenterY = (Bounds.Height - pad.Top - pad.Bottom) / 2.0 + pad.Top;
+        // Calculate the viewport center (accounting for padding)
+        var viewportCenterX = pad.Left + viewportWidth / 2.0;
+        var viewportCenterY = pad.Top + viewportHeight / 2.0;
 
-        var offsetX = viewportCenterX - centerX * zoom;
-        var offsetY = viewportCenterY - centerY * zoom;
+        // For a point (x,y) transformed by matrix (zoom, 0, 0, zoom, offsetX, offsetY):
+        // transformed_x = zoom * x + offsetX
+        // We want rectCenter to appear at viewportCenter:
+        // viewportCenterX = zoom * rectCenterX + offsetX
+        // Therefore: offsetX = viewportCenterX - zoom * rectCenterX
+        var offsetX = viewportCenterX - zoom * rectCenterX;
+        var offsetY = viewportCenterY - zoom * rectCenterY;
 
-        _matrix = MatrixHelper.ScaleAndTranslate(zoom, zoom, offsetX, offsetY);
+        _matrix = new Matrix(zoom, 0, 0, zoom, offsetX, offsetY);
         Invalidate(!animate);
+        
+        _updating = false;
+        AddToViewHistory();
     }
 
     /// <summary>
@@ -1236,6 +1271,10 @@ public partial class ZoomBorder : Border
     {
         if (_element == null || rect.Width == 0 || rect.Height == 0)
             return;
+            
+        if (_updating)
+            return;
+        _updating = true;
 
         var zoomX = viewportRect.Width / rect.Width;
         var zoomY = viewportRect.Height / rect.Height;
@@ -1246,17 +1285,32 @@ public partial class ZoomBorder : Border
             zoom = GetNearestDiscreteZoomLevel(zoom);
         }
 
-        var centerX = rect.X + rect.Width / 2.0;
-        var centerY = rect.Y + rect.Height / 2.0;
+        // Calculate center of the target rectangle in content coordinates
+        var rectCenterX = rect.X + rect.Width / 2.0;
+        var rectCenterY = rect.Y + rect.Height / 2.0;
 
+        // Calculate the center of the target viewport rect
         var viewportCenterX = viewportRect.X + viewportRect.Width / 2.0;
         var viewportCenterY = viewportRect.Y + viewportRect.Height / 2.0;
 
-        var offsetX = viewportCenterX - centerX * zoom;
-        var offsetY = viewportCenterY - centerY * zoom;
+        // For a point (x,y) transformed by matrix (zoom, 0, 0, zoom, offsetX, offsetY):
+        // transformed_x = zoom * x + offsetX
+        // We want rectCenter to appear at viewportCenter:
+        // viewportCenterX = zoom * rectCenterX + offsetX
+        // Therefore: offsetX = viewportCenterX - zoom * rectCenterX
+        var offsetX = viewportCenterX - zoom * rectCenterX;
+        var offsetY = viewportCenterY - zoom * rectCenterY;
 
-        _matrix = MatrixHelper.ScaleAndTranslate(zoom, zoom, offsetX, offsetY);
+        // Temporarily disable constraints
+        var previousEnableConstrains = EnableConstrains;
+        EnableConstrains = false;
+        
+        _matrix = new Matrix(zoom, 0, 0, zoom, offsetX, offsetY);
         Invalidate(!animate);
+        
+        EnableConstrains = previousEnableConstrains;
+        _updating = false;
+        AddToViewHistory();
     }
 
     /// <summary>
@@ -1500,6 +1554,38 @@ public partial class ZoomBorder : Border
     }
 
     /// <summary>
+    /// Gets the effective zoom limits considering both manual settings and auto-calculated values.
+    /// </summary>
+    /// <param name="minZoomX">The effective minimum zoom for X axis.</param>
+    /// <param name="maxZoomX">The effective maximum zoom for X axis.</param>
+    /// <param name="minZoomY">The effective minimum zoom for Y axis.</param>
+    /// <param name="maxZoomY">The effective maximum zoom for Y axis.</param>
+    protected void GetEffectiveZoomLimits(out double minZoomX, out double maxZoomX, out double minZoomY, out double maxZoomY)
+    {
+        minZoomX = MinZoomX;
+        maxZoomX = MaxZoomX;
+        minZoomY = MinZoomY;
+        maxZoomY = MaxZoomY;
+
+        if (AutoCalculateMinZoom || AutoCalculateMaxZoom)
+        {
+            var (autoMinZoom, autoMaxZoom) = CalculateAutoZoomLimits();
+
+            if (AutoCalculateMinZoom && !double.IsNegativeInfinity(autoMinZoom))
+            {
+                minZoomX = Math.Max(minZoomX, autoMinZoom);
+                minZoomY = Math.Max(minZoomY, autoMinZoom);
+            }
+
+            if (AutoCalculateMaxZoom && !double.IsPositiveInfinity(autoMaxZoom))
+            {
+                maxZoomX = Math.Min(maxZoomX, autoMaxZoom);
+                maxZoomY = Math.Min(maxZoomY, autoMaxZoom);
+            }
+        }
+    }
+
+    /// <summary>
     /// Gets the zoom indicator text based on the current zoom level.
     /// </summary>
     /// <returns>The formatted zoom indicator text.</returns>
@@ -1724,27 +1810,7 @@ public partial class ZoomBorder : Border
     private void Constrain()
     {
         // Get effective zoom limits (considering auto-calculation)
-        var effectiveMinZoomX = MinZoomX;
-        var effectiveMaxZoomX = MaxZoomX;
-        var effectiveMinZoomY = MinZoomY;
-        var effectiveMaxZoomY = MaxZoomY;
-
-        if (AutoCalculateMinZoom || AutoCalculateMaxZoom)
-        {
-            var (autoMinZoom, autoMaxZoom) = CalculateAutoZoomLimits();
-
-            if (AutoCalculateMinZoom && !double.IsNegativeInfinity(autoMinZoom))
-            {
-                effectiveMinZoomX = Math.Max(effectiveMinZoomX, autoMinZoom);
-                effectiveMinZoomY = Math.Max(effectiveMinZoomY, autoMinZoom);
-            }
-
-            if (AutoCalculateMaxZoom && !double.IsPositiveInfinity(autoMaxZoom))
-            {
-                effectiveMaxZoomX = Math.Min(effectiveMaxZoomX, autoMaxZoom);
-                effectiveMaxZoomY = Math.Min(effectiveMaxZoomY, autoMaxZoom);
-            }
-        }
+        GetEffectiveZoomLimits(out var effectiveMinZoomX, out var effectiveMaxZoomX, out var effectiveMinZoomY, out var effectiveMaxZoomY);
 
         var zoomX = ClampValue(_matrix.M11, effectiveMinZoomX, effectiveMaxZoomX);
         var zoomY = ClampValue(_matrix.M22, effectiveMinZoomY, effectiveMaxZoomY);
@@ -1915,9 +1981,6 @@ public partial class ZoomBorder : Border
         InvalidateScrollable();
         InvalidateElement(skipTransitions);
         RaiseZoomChanged();
-
-        // Add to view history after all updates
-        AddToViewHistory();
         
         // Show zoom indicator if enabled
         ShowZoomIndicatorTemporarily();
@@ -2104,6 +2167,9 @@ public partial class ZoomBorder : Border
             "ResetMatrix"
         );
         RaiseMatrixReset(args);
+        
+        // Add to view history after reset completes
+        AddToViewHistory();
     }
 
     /// <summary>
@@ -2162,7 +2228,11 @@ public partial class ZoomBorder : Border
             return;
         }
 
-        if ((ZoomX >= MaxZoomX && ZoomY >= MaxZoomY && ratio > 1) || (ZoomX <= MinZoomX && ZoomY <= MinZoomY && ratio < 1))
+        // Use effective zoom limits that consider auto-calculated bounds
+        GetEffectiveZoomLimits(out var effectiveMinZoomX, out var effectiveMaxZoomX, out var effectiveMinZoomY, out var effectiveMaxZoomY);
+        
+        if ((ZoomX >= effectiveMaxZoomX && ZoomY >= effectiveMaxZoomY && ratio > 1) || 
+            (ZoomX <= effectiveMinZoomX && ZoomY <= effectiveMinZoomY && ratio < 1))
         {
             return;
         }
@@ -2192,6 +2262,9 @@ public partial class ZoomBorder : Border
             previousMatrix
         );
         RaiseZoomDeltaChanged(args);
+        
+        // Add to view history after zoom operation completes
+        AddToViewHistory();
 
         _updating = false;
     }
@@ -2322,10 +2395,10 @@ public partial class ZoomBorder : Border
     }
 
     /// <summary>
-    /// Pan control to provided target point.
+    /// Pan control to set the viewport offset to the specified values.
     /// </summary>
-    /// <param name="x">The target point x axis coordinate.</param>
-    /// <param name="y">The target point y axis coordinate.</param>
+    /// <param name="x">The target offset x value.</param>
+    /// <param name="y">The target offset y value.</param>
     /// <param name="skipTransitions">The flag indicating whether transitions on the child element should be temporarily disabled.</param>
     public void Pan(double x, double y, bool skipTransitions = false)
     {
@@ -2357,6 +2430,7 @@ public partial class ZoomBorder : Border
             previousMatrix
         );
         RaisePanContinued(args);
+        AddToViewHistory();
 
         _updating = false;
     }
@@ -2644,6 +2718,9 @@ public partial class ZoomBorder : Border
             _element.Bounds.Height
         );
         RaiseStretchModeChanged(args);
+        
+        // Add to view history after fill completes
+        AddToViewHistory();
     }
 
     /// <summary>
@@ -2677,6 +2754,9 @@ public partial class ZoomBorder : Border
             _element.Bounds.Height
         );
         RaiseStretchModeChanged(args);
+        
+        // Add to view history after uniform completes
+        AddToViewHistory();
     }
 
     /// <summary>
@@ -2710,6 +2790,9 @@ public partial class ZoomBorder : Border
             _element.Bounds.Height
         );
         RaiseStretchModeChanged(args);
+        
+        // Add to view history after uniform to fill completes
+        AddToViewHistory();
     }
 
     /// <summary>
@@ -2742,6 +2825,9 @@ public partial class ZoomBorder : Border
             _element.Bounds.Height
         );
         RaiseAutoFitApplied(args);
+        
+        // Add to view history after auto fit completes
+        AddToViewHistory();
     }
 
     /// <summary>

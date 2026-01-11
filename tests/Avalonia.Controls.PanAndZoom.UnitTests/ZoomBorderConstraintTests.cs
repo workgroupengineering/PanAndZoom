@@ -510,4 +510,131 @@ public class ZoomBorderConstraintTests
                 $"OffsetX constraint violated at iteration {i}: {zoomBorder.OffsetX}");
         }
     }
+    
+    [AvaloniaFact]
+    public void AutoCalculateMaxZoom_DoesNotCauseOffsetDrift()
+    {
+        // Arrange - Issue #124: MaxZoom and AutoCalculateMaxZoom unexpected behavior
+        // When zoom reaches the upper bound, offset should not drift
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 400,
+            Height = 300,
+            EnableZoom = true,
+            AutoCalculateMaxZoom = true,
+            MaxZoomPixelSize = 2.0 // Max zoom is 2x
+        };
+        
+        var childElement = new Border
+        {
+            Width = 200,
+            Height = 150,
+            Background = Brushes.Red
+        };
+        
+        zoomBorder.Child = childElement;
+        
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+        
+        // Zoom to max first
+        for (int i = 0; i < 10; i++)
+        {
+            zoomBorder.ZoomIn();
+        }
+        
+        // Record initial offset at max zoom
+        var initialOffsetX = zoomBorder.OffsetX;
+        var initialOffsetY = zoomBorder.OffsetY;
+        var initialZoomX = zoomBorder.ZoomX;
+        var initialZoomY = zoomBorder.ZoomY;
+        
+        // Act - Try to zoom further beyond max multiple times
+        for (int i = 0; i < 20; i++)
+        {
+            var wheelEventArgs = new PointerWheelEventArgs(
+                zoomBorder,
+                new Pointer(1, PointerType.Mouse, true),
+                zoomBorder,
+                new Point(200, 150),
+                0,
+                new PointerPointProperties(),
+                KeyModifiers.None,
+                new Vector(0, 5))
+            {
+                RoutedEvent = InputElement.PointerWheelChangedEvent
+            };
+            
+            zoomBorder.RaiseEvent(wheelEventArgs);
+        }
+        
+        // Assert - Offset should not have drifted when already at max zoom
+        Assert.Equal(initialZoomX, zoomBorder.ZoomX, 4); // Zoom should stay at max
+        Assert.Equal(initialZoomY, zoomBorder.ZoomY, 4);
+        Assert.Equal(initialOffsetX, zoomBorder.OffsetX, 4); // Offset should not drift
+        Assert.Equal(initialOffsetY, zoomBorder.OffsetY, 4);
+    }
+    
+    [AvaloniaFact]
+    public void ManualMaxZoom_DoesNotCauseOffsetDrift()
+    {
+        // Arrange - When zoom reaches the manual upper bound, offset should not drift
+        var zoomBorder = new ZoomBorder
+        {
+            Width = 400,
+            Height = 300,
+            EnableZoom = true,
+            MaxZoomX = 2.0,
+            MaxZoomY = 2.0
+        };
+        
+        var childElement = new Border
+        {
+            Width = 200,
+            Height = 150,
+            Background = Brushes.Red
+        };
+        
+        zoomBorder.Child = childElement;
+        
+        var window = new Window { Content = zoomBorder };
+        window.Show();
+        
+        // Zoom to max first
+        for (int i = 0; i < 10; i++)
+        {
+            zoomBorder.ZoomIn();
+        }
+        
+        // Record initial offset at max zoom
+        var initialOffsetX = zoomBorder.OffsetX;
+        var initialOffsetY = zoomBorder.OffsetY;
+        var initialZoomX = zoomBorder.ZoomX;
+        var initialZoomY = zoomBorder.ZoomY;
+        
+        // Act - Try to zoom further beyond max multiple times
+        for (int i = 0; i < 20; i++)
+        {
+            var wheelEventArgs = new PointerWheelEventArgs(
+                zoomBorder,
+                new Pointer(1, PointerType.Mouse, true),
+                zoomBorder,
+                new Point(200, 150),
+                0,
+                new PointerPointProperties(),
+                KeyModifiers.None,
+                new Vector(0, 5))
+            {
+                RoutedEvent = InputElement.PointerWheelChangedEvent
+            };
+            
+            zoomBorder.RaiseEvent(wheelEventArgs);
+        }
+        
+        // Assert - Offset should not have drifted when already at max zoom
+        Assert.Equal(initialZoomX, zoomBorder.ZoomX, 4); // Zoom should stay at max
+        Assert.Equal(initialZoomY, zoomBorder.ZoomY, 4);
+        Assert.Equal(initialOffsetX, zoomBorder.OffsetX, 4); // Offset should not drift
+        Assert.Equal(initialOffsetY, zoomBorder.OffsetY, 4);
+    }
 }
