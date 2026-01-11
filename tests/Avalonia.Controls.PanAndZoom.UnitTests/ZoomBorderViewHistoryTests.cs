@@ -102,7 +102,8 @@ public class ZoomBorderViewHistoryTests
             Width = 400,
             Height = 300,
             EnableViewHistory = true,
-            EnableZoom = true
+            EnableZoom = true,
+            Stretch = StretchMode.None
         };
 
         var childElement = new Border
@@ -142,7 +143,8 @@ public class ZoomBorderViewHistoryTests
             Width = 400,
             Height = 300,
             EnableViewHistory = true,
-            EnableZoom = true
+            EnableZoom = true,
+            Stretch = StretchMode.None
         };
 
         var childElement = new Border
@@ -181,7 +183,8 @@ public class ZoomBorderViewHistoryTests
             Height = 300,
             EnableViewHistory = true,
             EnableZoom = true,
-            EnablePan = true
+            EnablePan = true,
+            Stretch = StretchMode.None
         };
 
         var childElement = new Border
@@ -209,8 +212,8 @@ public class ZoomBorderViewHistoryTests
         zoomBorder.NavigateBack();
         Assert.Equal(state1Zoom, zoomBorder.ZoomX, 2);
 
-        // Note: We can still navigate back once more to the initial state added when attached to visual tree
-        Assert.True(zoomBorder.CanNavigateBack, "Should be able to navigate back to initial state");
+        // At the initial state (state1Zoom), cannot navigate back further
+        Assert.False(zoomBorder.CanNavigateBack, "Should not be able to navigate back past initial state");
         Assert.True(zoomBorder.CanNavigateForward, "Should be able to navigate forward");
 
         // Navigate forward twice
@@ -233,7 +236,8 @@ public class ZoomBorderViewHistoryTests
             Width = 400,
             Height = 300,
             EnableViewHistory = true,
-            EnableZoom = true
+            EnableZoom = true,
+            Stretch = StretchMode.None
         };
 
         var childElement = new Border
@@ -270,7 +274,8 @@ public class ZoomBorderViewHistoryTests
             Height = 300,
             EnableViewHistory = true,
             EnableZoom = true,
-            EnablePan = true
+            EnablePan = true,
+            Stretch = StretchMode.None
         };
 
         var childElement = new Border
