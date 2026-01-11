@@ -11,12 +11,12 @@
 
       <Separator Margin="0,8" />
 
-      <TextBlock Text="Pan To Absolute Position:" FontWeight="SemiBold" />
+      <TextBlock Text="Center On Content Point:" FontWeight="SemiBold" />
       <TextBlock Text="X:" FontSize="11" />
-      <TextBox x:Name="PanToX" Text="100" />
+      <TextBox x:Name="PanToX" Text="1000" />
       <TextBlock Text="Y:" FontSize="11" />
-      <TextBox x:Name="PanToY" Text="100" />
-      <Button Content="Pan To Position" Click="PanTo_Click" />
+      <TextBox x:Name="PanToY" Text="750" />
+      <Button Content="Center On Point" Click="PanTo_Click" />
 
       <Separator Margin="0,8" />
 
@@ -51,32 +51,33 @@
                       ZoomSpeed="1.2"
                       Background="SlateBlue"
                       ClipToBounds="True">
-        <Canvas Width="800" Height="600" Background="LightGray">
-          <TextBlock Canvas.Left="20" Canvas.Top="20" Text="Programmatic Pan Demo" FontSize="24" FontWeight="Bold" />
+        <Canvas Width="2000" Height="1500" Background="LightGray">
+          <TextBlock Canvas.Left="20" Canvas.Top="20" Text="Programmatic Pan Demo (2000x1500 canvas)" FontSize="24" FontWeight="Bold" />
 
           <!-- Grid with coordinates -->
-          <Rectangle Stroke="Gray" StrokeThickness="1" Width="800" Height="600" Canvas.Left="0" Canvas.Top="0" Fill="Transparent" />
+          <Rectangle Stroke="Gray" StrokeThickness="1" Width="2000" Height="1500" Canvas.Left="0" Canvas.Top="0" Fill="Transparent" />
 
-          <Line StartPoint="0,300" EndPoint="800,300" Stroke="Red" StrokeThickness="1" StrokeDashArray="5,3" />
-          <Line StartPoint="400,0" EndPoint="400,600" Stroke="Red" StrokeThickness="1" StrokeDashArray="5,3" />
+          <Line StartPoint="0,750" EndPoint="2000,750" Stroke="Red" StrokeThickness="2" StrokeDashArray="5,3" />
+          <Line StartPoint="1000,0" EndPoint="1000,1500" Stroke="Red" StrokeThickness="2" StrokeDashArray="5,3" />
 
           <TextBlock Canvas.Left="10" Canvas.Top="10" Text="(0, 0)" FontSize="12" />
-          <TextBlock Canvas.Left="770" Canvas.Top="10" Text="(800, 0)" FontSize="12" />
-          <TextBlock Canvas.Left="10" Canvas.Top="570" Text="(0, 600)" FontSize="12" />
-          <TextBlock Canvas.Left="750" Canvas.Top="570" Text="(800, 600)" FontSize="12" />
+          <TextBlock Canvas.Left="1950" Canvas.Top="10" Text="(2000, 0)" FontSize="12" />
+          <TextBlock Canvas.Left="10" Canvas.Top="1470" Text="(0, 1500)" FontSize="12" />
+          <TextBlock Canvas.Left="1920" Canvas.Top="1470" Text="(2000, 1500)" FontSize="12" />
+          <TextBlock Canvas.Left="1010" Canvas.Top="755" Text="Center (1000, 750)" FontSize="14" FontWeight="Bold" Foreground="Red" />
 
-          <Border Canvas.Left="250" Canvas.Top="200" Width="300" Height="200"
+          <Border Canvas.Left="800" Canvas.Top="600" Width="400" Height="300"
                   Background="Orange" BorderBrush="DarkOrange" BorderThickness="2" Padding="15">
             <StackPanel Spacing="8">
               <TextBlock Text="Pan Methods" FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" />
               <TextBlock TextWrapping="Wrap" FontSize="12" HorizontalAlignment="Center">
-                • Pan(x, y) - Move to absolute position
+                • CenterOn(point) - Center content point in viewport
               </TextBlock>
               <TextBlock TextWrapping="Wrap" FontSize="12" HorizontalAlignment="Center">
                 • PanDelta(dx, dy) - Move by offset
               </TextBlock>
               <TextBlock TextWrapping="Wrap" FontSize="12" HorizontalAlignment="Center">
-                • BeginPanTo() / ContinuePanTo() - Incremental pan
+                Try CenterOn(1000, 750) to center the crosshair!
               </TextBlock>
             </StackPanel>
           </Border>

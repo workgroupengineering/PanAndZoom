@@ -2379,10 +2379,10 @@ public partial class ZoomBorder : Border
     }
 
     /// <summary>
-    /// Pan control to provided target point.
+    /// Pan control to set the viewport offset to the specified values.
     /// </summary>
-    /// <param name="x">The target point x axis coordinate.</param>
-    /// <param name="y">The target point y axis coordinate.</param>
+    /// <param name="x">The target offset x value.</param>
+    /// <param name="y">The target offset y value.</param>
     /// <param name="skipTransitions">The flag indicating whether transitions on the child element should be temporarily disabled.</param>
     public void Pan(double x, double y, bool skipTransitions = false)
     {
