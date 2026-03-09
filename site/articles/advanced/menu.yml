@@ -1,0 +1,5 @@
+advanced:
+  - {path: readme.md, title: "Advanced"}
+  - {path: custom-bounds-resize-and-rotation.md, title: "Custom Bounds, Resize, and Rotation"}
+  - {path: scrollviewer-and-logical-scroll.md, title: "ScrollViewer and Logical Scroll"}
+  - {path: diagnostics-and-testing.md, title: "Diagnostics and Testing"}

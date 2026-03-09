@@ -1,0 +1,12 @@
+articles:
+  - {path: readme.md, title: "Articles"}
+  - {path: intro.md, title: "Introduction"}
+  - {path: getting-started/readme.md, title: "Getting Started", folder: true}
+  - {path: concepts/readme.md, title: "Concepts", folder: true}
+  - {path: guides/readme.md, title: "Guides", folder: true}
+  - {path: headless-testing/readme.md, title: "Headless Testing", folder: true}
+  - {path: advanced/readme.md, title: "Advanced", folder: true}
+  - {path: reference/readme.md, title: "Reference", folder: true}
+  - {path: samples.md, title: "Samples"}
+  - {path: build-and-package.md, title: "Build and Package"}
+  - {path: license.md, title: "License"}
