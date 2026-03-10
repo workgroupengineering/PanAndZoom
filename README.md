@@ -33,6 +33,9 @@ You can install the package for `Avalonia` based projects like this:
 ## Resources
 
 * [GitHub source code repository.](https://github.com/wieslawsoltes/PanAndZoom)
+* [Documentation site.](https://wieslawsoltes.github.io/PanAndZoom)
+* [Articles home.](site/articles/readme.md)
+* [Headless testing docs.](site/articles/headless-testing/readme.md)
 
 ## Using PanAndZoom
 
@@ -698,6 +701,33 @@ zoomBorder.ImportState(restoredState);
 - Persist user preferences
 - Implement undo/redo functionality
 - Session state management
+
+## Documentation
+
+The repository now includes a Lunet-based documentation site, modeled after the TreeDataGrid docs pipeline and tailored to `PanAndZoom` and `HeadlessTestingFramework`.
+
+Key entry points:
+
+- [Docs home](site/readme.md)
+- [Getting Started](site/articles/getting-started/readme.md)
+- [Headless Testing](site/articles/headless-testing/readme.md)
+- [Reference](site/articles/reference/readme.md)
+
+Build docs locally:
+
+```bash
+./build-docs.sh
+./serve-docs.sh
+```
+
+PowerShell:
+
+```powershell
+./build-docs.ps1
+./serve-docs.ps1
+```
+
+Generated output is written to `site/.lunet/build/www`.
 
 ## License
 

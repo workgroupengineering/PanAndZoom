@@ -1,0 +1,7 @@
+guides:
+  - {path: readme.md, title: "Guides"}
+  - {path: commands-and-keyboard.md, title: "Commands and Keyboard"}
+  - {path: centering-and-zoom-to-rectangle.md, title: "Centering and Zoom to Rectangle"}
+  - {path: bounds-wheel-and-resize.md, title: "Bounds, Wheel, and Resize"}
+  - {path: rotation-grid-and-visibility.md, title: "Rotation, Grid, and Visibility"}
+  - {path: troubleshooting.md, title: "Troubleshooting"}
